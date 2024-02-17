@@ -1,0 +1,460 @@
+﻿@model AMS.Models.Department
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="breadcrumb">
+            <ul>
+                <li><a href="/Department/Index">Department</a></li>
+            </ul>
+        </div>
+        <div class="separator-breadcrumb border-top"></div>
+    </div>
+
+    <p>
+        <a class="btn btn-primary m-1" data-bs-toggle="modal" data-target="#addDepartment" data-whatever="mdo">Add Department</a>
+    </p>
+    <div class="col-md-12 mb-3">
+
+
+        <div class="card text-start">
+
+            <div class="card-header">
+                <h4 class="text-25 text-muted">Department List</h4>
+            </div>
+            <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
+                <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
+                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert" style="display:none">
+                <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
+                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped" id="deptTable">
+                        <thead class="bg-gray-300">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Department Name</th>
+                                <th scope="col">Is Active</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*Modal for Add Department*@
+    <div class="modal fade" id="addDepartment" tabindex="-1" role="dialog" aria-labelledby="verifyModalContent" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="verifyModalContent_title">New Department</h5>
+                    <button class="btn btn-close" type="button" data-bs-dismiss="modal" id="modal-close" aria-label="Close"></button>
+                </div>
+                @using (Ajax.BeginForm("DepartmentDetails", "Department", new AjaxOptions
+                {
+                    HttpMethod = "POST",
+                    OnSuccess = "handleSuccessforAdd",
+                    OnFailure = "handleFailureforAdd",
+                }, new { id = "addDepartmentForm" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="modal-body">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.deptName, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.deptName, new { @class = "form-control", @id = "addDept", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.deptName, "", new { @class = "text-danger" })
+                                    <div id="duplicateNameforAdd" class="text-danger"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6" style="padding-left:6%">
+                                <div class="form-check">
+                                    <br />
+                                    <br />
+                                    @Html.CheckBoxFor(model => model.isActive, new { @class = "form-check-input" })
+                                    @Html.LabelFor(model => model.isActive, new { @class = "form-check-label" })
+                                    @Html.ValidationMessageFor(model => model.isActive, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" type="button" id="cancel" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="submitForm">Add</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+
+    @*Modal for Update Department*@
+    <div class="modal fade" id="updateDepartment" tabindex="-1" role="dialog" aria-labelledby="verifyModalContent" aria-hidden="true">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="verifyModalContent_title">Update Department</h5>
+                    <button class="btn btn-close" type="button" data-bs-dismiss="modal" id="modal-close" aria-label="Close"></button>
+                </div>
+                @using (Ajax.BeginForm("DepartmentDetails", "Department", new AjaxOptions
+                {
+                    HttpMethod = "POST",
+                    OnSuccess = "handleSuccessforUpdate",
+                    OnFailure = "handleFailureforUpdate",
+                }, new { id = "updateDepartmentForm" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.deptName, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.deptName, new { @class = "form-control", @id = "editDeptName", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.deptName, "", new { @class = "text-danger" })
+                                    <div id="duplicateNameforUpdate" class="text-danger"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6" style="padding-left:6%">
+                                <br />
+                                <br />
+                                <div class="form-check">
+                                    @Html.CheckBoxFor(model => model.isActive, new { @class = "form-check-input", @id = "editIsActive" })
+                                    @Html.LabelFor(model => model.isActive, new { @class = "form-check-label" })
+                                    @Html.ValidationMessageFor(model => model.isActive, "", new { @class = "text-danger" })
+                                </div>
+                                @Html.HiddenFor(d => d.Id, new { @id = "hiddenId" })
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal" id="updateCancel">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="updateForm">Update</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+@section scripts
+{
+    <script>
+
+        $(document).ready(function () {
+
+
+            //checks for duplicate department name
+            $('#addDept, #editDeptName').on('input', function () {
+                var departmentName = $(this).val();
+                var isUpdateForm = $(this).attr('id') === 'editDeptName';
+                var departmentId = isUpdateForm ? $('#hiddenId').val() : null;
+
+                if (departmentName !== '') {
+                    $.ajax({
+                        type: 'POST',
+                        url: '/Department/IsNameAvailable',
+                        data: {
+                            name: departmentName,
+                            id: departmentId,
+                            isUpdate: isUpdateForm
+                        },
+                        success: function (data) {
+                            var duplicateNameMessageElement = isUpdateForm ? '#duplicateNameforUpdate' : '#duplicateNameforAdd';
+
+                            if (!data) {
+                                $(duplicateNameMessageElement).html('Department name already exists.');
+                                $('#submitForm,#updateForm').prop('disabled', true);
+                            } else {
+                                $(duplicateNameMessageElement).html('');
+                                $('#submitForm,#updateForm').prop('disabled', false);
+                            }
+                        }
+                    });
+                }
+            });
+
+            //read (Fetch records from database and show in table)
+            $("#deptTable").DataTable({
+                ajax: {
+                    url: "/Department/GetDepartmentData",
+                    dataSrc: ""
+                },
+                columns: [
+                    {
+                        data: "Id",
+                        orderable: true, // Enable sorting for the first column
+                        searchable: true
+                    },
+                    {
+                        data: "deptName",
+                        orderable: true, // Enable sorting for the second column
+                        searchable: true
+                    },
+                    {
+                        data: "isActive",
+                        render: function (data) {
+                            return data ? 'Yes' : 'No';
+                        },
+                        orderable: false, // Disable sorting for this column
+                        searchable: false // Disable searching for this column
+                    },
+                    {
+                        data: "Id", // Use the "Id" property for the action buttons
+                        render: function (data) {
+                            return "<a class='text-success me-2 btn btn-primary m-1 edit-btn' href='#' data-bs-toggle='modal' data-target='#updateDepartment' data-whatever='mdo' data-id='" + data + "'><i class='fa fa-edit'></i></a>" +
+                                "<a class='text-danger me-2 btn btn-warning delete-btn' id='del' href='#' data-id='" + data + "'><i class='fa fa-trash'></i></a>";
+                        },
+                        orderable: false, // Disable sorting for this column
+                        searchable: false // Disable searching for this column
+                    },
+                ],
+                pagingType: 'full_numbers',
+                language: {
+                    paginate: {
+                        first: 'First',
+                        previous: '&lsaquo;',
+                        next: '&rsaquo;',
+                        last: 'Last'
+                    },
+                    searchPlaceholder: 'Min 3 Characters'
+                },
+                autoWidth: false, // Disable auto width calculation
+                columnDefs: [
+                    { width: '100px', targets: '_all' } // Set a fixed width for all columns, adjust as needed
+                ],
+                drawCallback: function () {
+                    // Override DataTables styles with Bootstrap styles after each draw
+                    $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
+                    $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
+                    $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
+                    $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+                }
+            });
+
+            //populateupdatemodal
+            $('#deptTable').on('click', '.edit-btn', function () {
+                var id = $(this).data('id');
+                $.ajax({
+                    url: '/Department/GetDeptById/' + id,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (department) {
+                        $('#editDeptName').val(department.deptName);
+                        $('#editIsActive').prop('checked', department.isActive);
+                        $('#hiddenId').val(department.Id);
+                        $('#updateDepartment').modal('show');
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error(
+                            response.message,
+                            "Error",
+                            {
+                                "class": "btn w-100 btn-outline-danger mb-2",
+                                "id": "toast-danger",
+                                timeOut: 2000,
+                                progressBar: true,
+                                closeButton: true
+                            }
+                        );
+                    }
+                });
+            });
+            //when cancel button is clicked in update modal
+            $("#updateCancel").click(function () {
+                // Reset the form
+                $('#updateDepartmentForm')[0].reset();
+
+                // Clear validation messages
+                $('#duplicateNameforUpdate').html('');
+                $('.text-danger.validation-summary-errors').html('');
+
+                toastr.warning(
+                    "Updation Cancelled",
+                    {
+                        "class": "btn w-100 btn-outline-danger mb-2",
+                        "id": "toast-danger",
+                        progressBar: true,
+                        closeButton: true,
+                        timeOut: 1000
+                    }
+                );
+            });
+
+            //delete
+            $('#deptTable').on('click', '#del', function () {
+                var id = $(this).data('id');
+
+                bootbox.confirm({
+                    message: "Are you sure you want to delete?",
+                    buttons: {
+                        confirm: {
+                            label: 'Confirm',
+                            className: 'btn-primary'
+                        },
+                        cancel: {
+                            label: 'Cancel',
+                            className: 'btn-secondary'
+                        }
+                    },
+                    callback: function (result) {
+                        if (result) {
+                            // If user confirms, proceed with deletion
+                            $.ajax({
+                                url: '/Department/Delete/' + id,
+                                type: 'POST',
+                                dataType: 'json',
+                                success: function (response) {
+                                    if (response.success) {
+                                        // Show success alert
+                                        $('#successMessage').text(response.message);
+                                        $('#successAlert').fadeIn();
+
+                                        // Optional: Hide error alert if it's still visible
+                                        $('#errorAlert').hide();
+
+                                        // Optionally, you can update the DataTable after successful deletion
+                                        $('#deptTable').DataTable().ajax.reload();
+
+                                        // Hide alerts after a delay
+                                        setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                                    } else {
+                                        // Show error alert
+                                        $('#errorMessage').text(response.message);
+                                        $('#errorAlert').fadeIn();
+
+                                        // Optional: Hide success alert if it's still visible
+                                        $('#successAlert').hide();
+
+                                        // Hide alerts after a delay
+                                        setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    // Show error alert for AJAX failure
+                                    $('#errorMessage').text("An Error Occurred While Deleting Department");
+                                    $('#errorAlert').fadeIn();
+
+                                    // Optional: Hide success alert if it's still visible
+                                    $('#successAlert').hide();
+
+                                    // Hide alerts after a delay
+                                    setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+
+        });
+
+        //this function is used when adding department is successfull, it will only trigger when adding a department is successfull
+        function handleSuccessforAdd(response) {
+            if (response.success) {
+                $('#successMessage').text(response.message);
+                $('#successAlert').fadeIn();
+
+                // Optional: Hide error alert if it's still visible
+                $('#errorAlert').hide();
+                event.preventDefault();
+
+                // Reset the form
+                $('#addDepartmentForm')[0].reset();
+
+                // Reset validation messages
+                $('#duplicateNameforAdd').html('');
+                $('.text-danger.validation-summary-errors').html('');
+
+                $('#deptTable').DataTable().ajax.reload();
+                $("#addDepartment").modal('hide');
+                setTimeout(hideAlerts, 2000);
+            } else {
+                // Show error alert
+                $('#errorMessage').text(response.message);
+                $('#errorAlert').fadeIn();
+
+                // Optional: Hide success alert if it's still visible
+                $('#successAlert').hide();
+                setTimeout(hideAlerts, 2000);
+            }
+        }
+        //this function is used when adding department is failed, it will only trigger when adding a department is failed
+        function handleFailureforAdd() {
+            // Show error alert for AJAX failure
+            $('#errorMessage').text("An Error Occurred While Adding Department");
+            $('#errorAlert').show();
+
+            // Optional: Hide success alert if it's still visible
+            $('#successAlert').fadeIn();
+            setTimeout(hideAlerts, 2000);
+        }
+        //this function is used when updating department is successful, it will only trigger when updating a department is successful
+        function handleSuccessforUpdate(response) {
+            if (response.success) {
+                // Show success alert
+                $('#successMessage').text(response.message);
+                $('#successAlert').fadeIn();
+
+                // Optional: Hide error alert if it's still visible
+                $('#errorAlert').hide();
+
+                // Other actions (reload data, hide modal, etc.)
+                event.preventDefault();
+                $('#deptTable').DataTable().ajax.reload();
+                $("#updateDepartment").modal('hide');
+                setTimeout(hideAlerts, 2000);
+            } else {
+                // Show error alert
+                $('#errorMessage').text(response.message);
+                $('#errorAlert').fadeIn();
+
+                // Optional: Hide success alert if it's still visible
+                $('#successAlert').hide();
+                setTimeout(hideAlerts, 2000);
+            }
+        }
+
+        //this function is used when updating department is failed, it will only trigger when updating a department is failed
+        function handleFailureforUpdate() {
+            // Show error alert for AJAX failure
+            $('#errorMessage').text("An Error Occurred While Updating Department");
+            $('#errorAlert').fadeIn();
+
+            // Optional: Hide success alert if it's still visible
+            $('#successAlert').hide();
+            setTimeout(hideAlerts, 2000);
+        }
+        //reset form when modal is closed
+        $('#addDepartment').on('hidden.bs.modal', function () {
+            $('#addDepartmentForm')[0].reset();
+            $('#duplicateNameforAdd').html('');
+            $('.text-danger.validation-summary-errors').html('');
+            $('#submitForm,').prop('disabled', false);
+
+        });
+    </script>
+}
+
