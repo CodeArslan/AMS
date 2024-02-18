@@ -49,6 +49,17 @@ namespace AMS.Controllers
             {
                 if (shift.Id == 0)
                 {
+                    // Check if a shift with same client name, shift type, and location already exists
+                    var existingShift = _dbContext.Shifts.FirstOrDefault(s =>
+                        s.clientName == shift.clientName &&
+                        s.shiftType == shift.shiftType &&
+                        s.location == shift.location);
+
+                    if (existingShift != null)
+                    {
+                        return Json(new { success = false, message = "A shift with same Client Name, Shift Type, and Location already exists." });
+                    }
+
                     // Adding a new shift
                     _dbContext.Shifts.Add(shift);
                     _dbContext.SaveChanges();
@@ -61,6 +72,18 @@ namespace AMS.Controllers
 
                     if (shiftInDb != null)
                     {
+                        // Check if any shift with same client name, shift type, and location exists
+                        var existingShift = _dbContext.Shifts.FirstOrDefault(s =>
+                            s.clientName == shift.clientName &&
+                            s.shiftType == shift.shiftType &&
+                            s.location == shift.location &&
+                            s.Id != shift.Id); // Exclude current shift from check
+
+                        if (existingShift != null)
+                        {
+                            return Json(new { success = false, message = "A shift with same Client Name, Shift Type, and Location already exists." });
+                        }
+
                         shiftInDb.shiftType = shift.shiftType;
                         shiftInDb.startTime = shift.startTime;
                         shiftInDb.endTime = shift.endTime;

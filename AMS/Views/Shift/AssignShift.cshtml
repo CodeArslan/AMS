@@ -2,12 +2,12 @@
 @{
     ViewBag.Title = "AssignShift";
     Layout = "~/Views/Shared/_Layout.cshtml";
-        var shiftSelectList = new SelectList(Model.Shifts.Select(s => new
-        {
-            Id = s.Id,
-            ConcatenatedName = $"{s.clientName} - {s.location} - {s.shiftType}"
-        }), "Id", "ConcatenatedName");
-    
+    var shiftSelectList = new SelectList(Model.Shifts.Select(s => new
+    {
+        Id = s.Id,
+        ConcatenatedName = $"{s.clientName} - {s.location} - {s.shiftType}"
+    }), "Id", "ConcatenatedName");
+
 }
 
 
@@ -43,7 +43,7 @@
                     <div class="card-header">
                         <h4 class="text-primary">Available Labours</h4>
                     </div>
-                    <div class="card-body" id="labourContainer">
+                    <div class="card-body" id="labourContainer" style="height: 300px; overflow-y: auto;">
                         <!-- Labour cards will be dynamically added here -->
                     </div>
                 </div>
@@ -55,7 +55,7 @@
                     <div class="card-header">
                         <h4 class="text-primary">Shift Details</h4>
                     </div>
-                    <div class="card-body" id="shiftDetails">
+                    <div class="card-body" id="shiftDetails" style="height: 240px; overflow-y: auto;">
                         <div class="row inputs">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -85,7 +85,7 @@
 
                     </div>
                     <div class="card-footer">
-                        <div class="col-md-4" style="margin-top: 10px;">
+                        <div class="col-md-4" style="margin-top: 4px; margin-left:88%">
                             <a class="btn btn-primary" id="assign">Assign</a>
                         </div>
                     </div>
@@ -107,7 +107,7 @@
                     <strong class="text-capitalize">Error!</strong> <span id="errorMessageforUpdateShift"></span>
                     <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-                
+
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
@@ -121,7 +121,7 @@
                                 </div>
                             </div>
                         </div>
-                      
+
                         <div class="table-responsive">
                             <table class="table table-hover table-bordered table-striped" id="activeShiftTable">
                                 <thead class="bg-gray-300">
@@ -156,7 +156,7 @@
                 var labourName = labourCard.find('.labour-name').text();
                 var labourId = labourCard.data('labour-id'); // Get the labour ID from data attribute
                 // Create a new card for assigned labour
-                var assignedLabourCard = $('<div class="assigned-labour col-md-4 assigned-labour-card" data-labour-id="' + labourId + '">').text(labourName); // Added assigned-labour-card class here
+                var assignedLabourCard = $('<div class="assigned-labour col-md-4 assigned-labour-card" style="width:270px" data-labour-id="' + labourId + '">').text(labourName); // Added assigned-labour-card class here
                 var removeIcon = $('<a class="btn btn-danger btn-sm remove-labour"><i class="fas fa-minus-circle"></i></a>');
                 assignedLabourCard.append(removeIcon);
                 // Append the assigned labour card to shiftDetails
@@ -257,7 +257,7 @@
 
                     }
                 });
-            });            GetLabourList();
+            }); GetLabourList();
             //to populate time in and out
             $('#shiftDropdown').change(function () {
                 var selectedShiftId = $(this).val();
@@ -291,7 +291,7 @@
                 });
             });
 
-         
+
 
             $("#assign").on("click", function () {
                 // Call function to assign shift to labours
@@ -362,7 +362,7 @@
                         $('#shiftDropdown').val($('#shiftDropdown option:first').val());
                         $('#timeIn').val(timeIn);
                         $('#timeOut').val(timeOut);
-                        
+
                         // Clear the content of assignedLabourRow, excluding separator-breadcrumb
                         $('#assignedLabourRow').children().not('.separator-breadcrumb').remove();
                         GetLabourList();
