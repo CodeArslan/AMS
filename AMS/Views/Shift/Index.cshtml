@@ -120,7 +120,13 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     @Html.LabelFor(model => model.location, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.location, new { @class = "form-control", @id = "addDepartmentLocation", placeholder = "E.g., Office Building, Room Number" })
+                                    @Html.DropDownListFor(model => model.location, new SelectList(new[]
+                                    {
+                                        new SelectListItem { Text = "Abu Dhabi", Value = "Abu Dhabi" },
+                                        new SelectListItem { Text = "Dubai", Value = "Dubai" },
+                                        new SelectListItem { Text = "Sharjah", Value = "Sharjah" },
+                                        new SelectListItem { Text = "Musaffah", Value = "Musaffah" }
+                                    }, "Value", "Text"), "Select Location", new { @class = "form-control", @id = "addDepartmentLocation" })
                                     @Html.ValidationMessageFor(model => model.location, "", new { @class = "text-danger" })
                                 </div>
                             </div>
@@ -222,10 +228,17 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     @Html.LabelFor(model => model.location, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.location, new { @class = "form-control", @id = "updateShiftLocation", placeholder = "E.g., Office Building, Room Number" })
+                                    @Html.DropDownListFor(model => model.location, new SelectList(new[]
+                                    {
+                                        new SelectListItem { Text = "Abu Dhabi", Value = "Abu Dhabi" },
+                                        new SelectListItem { Text = "Dubai", Value = "Dubai" },
+                                        new SelectListItem { Text = "Sharjah", Value = "Sharjah" },
+                                        new SelectListItem { Text = "Musaffah", Value = "Musaffah" }
+                                    }, "Value", "Text"), "Select Location", new { @class = "form-control", @id = "updateShiftLocation" })
                                     @Html.ValidationMessageFor(model => model.location, "", new { @class = "text-danger" })
                                 </div>
                             </div>
+
                             <div class="col-md-4">
                                 <div class="form-group">
                                     @Html.LabelFor(model => model.clientName, new { @class = "col-form-label" })
