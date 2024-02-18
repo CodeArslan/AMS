@@ -17,3 +17,37 @@
 .bootbox-close-button {
     display: none !important;
 }
+/* Add custom styles here */
+.labour-card {
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .labour-card.disabled {
+        opacity: 0.5;
+    }
+
+    .labour-card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        transition: box-shadow 0.3s ease;
+    }
+
+.assigned-labour {
+    width: 277px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    margin-left: 5px;
+}

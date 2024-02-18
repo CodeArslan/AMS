@@ -1,9 +1,8 @@
-﻿@model AMS.Models.Shift 
+﻿@model AMS.ViewModels.LabourViewModel
 @{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -17,21 +16,21 @@
     <div class="main-content">
         <div class="breadcrumb">
             <ul>
-                <li><a href="#">Shift</a></li>
+                <li><a href="#">Labour</a></li>
             </ul>
         </div>
         <div class="separator-breadcrumb border-top"></div>
     </div>
 
     <p\>
-        <a class="btn btn-primary m-1" data-bs-toggle="modal" data-target="#addShift" data-whatever="mdo">Add Shift</a>
+        <a class="btn btn-primary m-1" data-bs-toggle="modal" data-target="#addLabour" data-whatever="mdo">Add Labour</a>
     </p\>
-    <br/>
-    <br/>
+    <br />
+    <br />
     <div class="col-md-12 mb-3">
         <div class="card text-start">
             <div class="card-header">
-                <h4 class="text-25">Shift List</h4>
+                <h4 class="text-25">Labour List</h4>
             </div>
             <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
                 <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
@@ -43,19 +42,18 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Shift Details</h5>
+                    <h5 class="card-title">Labour Details</h5>
                     <div class="table-responsive">
-                        <table class="table table-hover table-bordered table-striped" id="shiftTable">
+                        <table class="table table-hover table-bordered table-striped" id="labourTable">
                             <thead class="bg-gray-300">
                                 <tr>
                                     <th scope="col">#</th>
-                                    <th scope="col">Shift Type</th>
-                                    <th scope="col">Start Time</th>
-                                    <th scope="col">End Time</th>
-                                    <th scope="col">Duration</th>
-                                    <th scope="col">Location</th>
-                                    <th scope="col">Client</th>
-                                    <th scope="col">isActive</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">CNIC</th>
+                                    <th scope="col">Per Hour Wage</th>
+                                    <th scope="col">Total Pay</th>
+                                    <th scope="col">Department</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
@@ -68,7 +66,7 @@
     </div>
     @*Modal for Add Shift*@
 
-    <div class="modal fade" id="addShift" tabindex="-1" role="dialog" aria-labelledby="verifyModalContent" aria-hidden="true">
+    <div class="modal fade" id="addLabour" tabindex="-1" role="dialog" aria-labelledby="verifyModalContent" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -76,12 +74,12 @@
                     <button class="btn btn-close" type="button" data-bs-dismiss="modal" id="modal-close" aria-label="Close"></button>
                 </div>
 
-                @using (Ajax.BeginForm("ShiftDetails", "Shift", new AjaxOptions
+                @using (Ajax.BeginForm("LabourDetails", "Labour", new AjaxOptions
                 {
                     HttpMethod = "POST",
                     OnSuccess = "handleSuccessforAdd",
                     OnFailure = "handleFailureforAdd",
-                }, new { id = "addShiftForm" }))
+                }, new { id = "addLabourForm" }))
                 {
                     @Html.AntiForgeryToken()
 
@@ -89,29 +87,23 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.shiftType, new { @class = "col-form-label" })
-                                    @Html.DropDownListFor(model => model.shiftType, new SelectList(
-                                        new List<SelectListItem>
-                                        {
-                                            new SelectListItem { Text = "Morning", Value = "Morning" },
-                                            new SelectListItem { Text = "Evening", Value = "Evening" },
-                                            new SelectListItem { Text = "Night", Value = "Night" }
-                                        }, "Value", "Text"), "--Select--", new { @class = "form-control", @id = "addShiftType" })
-                                    @Html.ValidationMessageFor(model => model.shiftType, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.Labour.FirstName, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.Labour.FirstName, new { @class = "form-control", @id = "addFirstName", placeholder = "Enter First Name" })
+                                    @Html.ValidationMessageFor(model => model.Labour.FirstName, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.startTime, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.startTime, "{0:HH:mm}", new { @class = "form-control", @id = "addStartTime", type = "time" })
-                                    @Html.ValidationMessageFor(model => model.startTime, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.Labour.LastName, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.Labour.LastName, new { @class = "form-control", @id = "addLastName", placeholder = "Enter Last Name" })
+                                    @Html.ValidationMessageFor(model => model.Labour.LastName, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.endTime, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.endTime, "{0:HH:ii}", new { @class = "form-control", @id = "addEndTime", type = "time" })
-                                    @Html.ValidationMessageFor(model => model.endTime, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.Labour.Email, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.Labour.Email, new { @class = "form-control", @id = "addEmail", placeholder = "Enter Email" })
+                                    @Html.ValidationMessageFor(model => model.Labour.Email, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                         </div>
@@ -119,41 +111,33 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.location, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.location, new { @class = "form-control", @id = "addDepartmentLocation", placeholder = "E.g., Office Building, Room Number" })
-                                    @Html.ValidationMessageFor(model => model.location, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.Labour.CNIC, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.Labour.CNIC, new { @class = "form-control", @id = "addCNIC", placeholder = "Enter CNIC" })
+                                    @Html.ValidationMessageFor(model => model.Labour.CNIC, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.clientName, new { @class = "col-form-label" })
-                                    @Html.DropDownListFor(model => model.clientName, new SelectList(
-                                        new List<SelectListItem>
-                                        {
-                                            new SelectListItem { Text = "Adnoc", Value = "Adnoc" },
-                                            new SelectListItem { Text = "ExxonMobil", Value = "ExxonMobil" },
-                                            new SelectListItem { Text = "Royal Dutch Shell", Value = "Royal Dutch Shell" },
-                                            new SelectListItem { Text = "Chevron Corporation", Value = "Chevron Corporation" },
-                                            new SelectListItem { Text = "BP (British Petroleum)", Value = "BP (British Petroleum)" },
-                                            new SelectListItem { Text = "Saudi Aramco", Value = "Saudi Aramco" },
-                                            new SelectListItem { Text = "Other", Value = "Other" }
-                                        }, "Value", "Text"), "--Select--", new { @class = "form-control", @id = "addClientName" })
-                                    @Html.ValidationMessageFor(model => model.clientName, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.Labour.perHour, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.Labour.perHour, new { @class = "form-control", @id = "addPerHour", placeholder = "Enter Per Hour Wage" })
+                                    @Html.ValidationMessageFor(model => model.Labour.perHour, "", new { @class = "text-danger" })
                                 </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.duration, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.duration, new { @class = "form-control", disabled = "disabled", @id = "addDuration" })
+                                    @Html.LabelFor(model => model.Labour.totalPay, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.Labour.totalPay, new { @class = "form-control", @id = "addTotalPay", placeholder = "Enter Total Pay" })
+                                    @Html.ValidationMessageFor(model => model.Labour.totalPay, "", new { @class = "text-danger" })
                                 </div>
                             </div>
-                            <div class="col-md-2">
-                                <div class="form-check">
-                                    <br />
-                                    <br />
-                                    @Html.CheckBoxFor(model => model.isActive, new { @class = "form-check-input" })
-                                    @Html.LabelFor(model => model.isActive, new { @class = "form-check-label" })
-                                    @Html.ValidationMessageFor(model => model.isActive, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Labour.departmentId, new { @class = "col-form-label" })
+                                    @Html.DropDownListFor(model => model.Labour.departmentId, new SelectList(Model.Department, "Id", "deptName"), " --Select--", new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Labour.departmentId, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                         </div>
@@ -170,20 +154,20 @@
 
 
     @*Modal for Update Shift*@
-    <div class="modal fade" id="updateShift" tabindex="-1" role="dialog" aria-labelledby="verifyModalContent" aria-hidden="true">
+    <div class="modal fade" id="updateLabour" tabindex="-1" role="dialog" aria-labelledby="verifyModalContent" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="verifyModalContent_title">Update Shift</h5>
+                    <h5 class="modal-title" id="verifyModalContent_title">Update Labour</h5>
                     <button class="btn btn-close" type="button" data-bs-dismiss="modal" id="modal-close" aria-label="Close"></button>
                 </div>
 
-                @using (Ajax.BeginForm("ShiftDetails", "Shift", new AjaxOptions
+                @using (Ajax.BeginForm("LabourDetails", "Labour", new AjaxOptions
                 {
                     HttpMethod = "POST",
                     OnSuccess = "handleSuccessforUpdate",
                     OnFailure = "handleFailureforUpdate",
-                }, new { id = "updateShiftForm" }))
+                }, new { id = "updateLabourForm" }))
                 {
                     @Html.AntiForgeryToken()
 
@@ -191,29 +175,23 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.shiftType, new { @class = "col-form-label" })
-                                    @Html.DropDownListFor(model => model.shiftType, new SelectList(
-                                        new List<SelectListItem>
-                                        {
-                                            new SelectListItem { Text = "Morning", Value = "Morning" },
-                                            new SelectListItem { Text = "Evening", Value = "Evening" },
-                                            new SelectListItem { Text = "Night", Value = "Night" }
-                                        }, "Value", "Text"), "--Select--", new { @class = "form-control", @id = "updateShiftType" })
-                                    @Html.ValidationMessageFor(model => model.shiftType, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.Labour.FirstName, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.Labour.FirstName, new { @class = "form-control", placeholder = "First Name", id = "updateLabourFirstName" })
+                                    @Html.ValidationMessageFor(model => model.Labour.FirstName, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.startTime, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.startTime, "{0:HH:mm}", new { @class = "form-control", @id = "updateStartTime", type = "time" })
-                                    @Html.ValidationMessageFor(model => model.startTime, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.Labour.LastName, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.Labour.LastName, new { @class = "form-control", placeholder = "Last Name", id = "updateLabourLastName" })
+                                    @Html.ValidationMessageFor(model => model.Labour.LastName, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.endTime, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.endTime, "{0:HH:ii}", new { @class = "form-control", @id = "updateEndTime", type = "time" })
-                                    @Html.ValidationMessageFor(model => model.endTime, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.Labour.Email, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.Labour.Email, new { @class = "form-control", placeholder = "Email", id = "updateLabourEmail" })
+                                    @Html.ValidationMessageFor(model => model.Labour.Email, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                         </div>
@@ -221,46 +199,39 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.location, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.location, new { @class = "form-control", @id = "updateShiftLocation", placeholder = "E.g., Office Building, Room Number" })
-                                    @Html.ValidationMessageFor(model => model.location, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.Labour.CNIC, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.Labour.CNIC, new { @class = "form-control", placeholder = "CNIC", id = "updateLabourCNIC" })
+                                    @Html.ValidationMessageFor(model => model.Labour.CNIC, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.clientName, new { @class = "col-form-label" })
-                                    @Html.DropDownListFor(model => model.clientName, new SelectList(
-                                        new List<SelectListItem>
-                                        {
-                                            new SelectListItem { Text = "Adnoc", Value = "Adnoc" },
-                                            new SelectListItem { Text = "ExxonMobil", Value = "ExxonMobil" },
-                                            new SelectListItem { Text = "Royal Dutch Shell", Value = "Royal Dutch Shell" },
-                                            new SelectListItem { Text = "Chevron Corporation", Value = "Chevron Corporation" },
-                                            new SelectListItem { Text = "BP (British Petroleum)", Value = "BP (British Petroleum)" },
-                                            new SelectListItem { Text = "Saudi Aramco", Value = "Saudi Aramco" }
-                                        }, "Value", "Text"), "--Select--", new { @class = "form-control", @id = "updateClientName" })
-                                    <input type="text" id="updateCustomClientName" style="display: none;" placeholder="Enter Custom Client Name" />
-                                    @Html.ValidationMessageFor(model => model.clientName, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.Labour.perHour, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.Labour.perHour, new { @class = "form-control", placeholder = "Per Hour Wage", id = "updateLabourPerHour" })
+                                    @Html.ValidationMessageFor(model => model.Labour.perHour, "", new { @class = "text-danger" })
                                 </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.duration, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.duration, new { @class = "form-control", disabled = "disabled", @id = "updateDuration" })
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-check">
-                                    <br />
-                                    <br />
-                                    @Html.CheckBoxFor(model => model.isActive, new { @class = "form-check-input", @id = "updateIsActive" })
-                                    @Html.LabelFor(model => model.isActive, new { @class = "form-check-label" })
-                                    @Html.ValidationMessageFor(model => model.isActive, "", new { @class = "text-danger" })
-                                    @Html.HiddenFor(model => model.Id, new { @id = "hiddenShiftId" })
+                                    @Html.LabelFor(model => model.Labour.totalPay, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.Labour.totalPay, new { @class = "form-control", placeholder = "Total Pay", id = "updateLabourTotalPay" })
+                                    @Html.ValidationMessageFor(model => model.Labour.totalPay, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Labour.departmentId, new { @class = "col-form-label" })
+                                    @Html.DropDownListFor(model => model.Labour.departmentId, new SelectList(Model.Department, "Id", "deptName"), " --Select--", new { @class = "form-control", id = "updateLabourDepartmentId" })
+                                    @Html.ValidationMessageFor(model => model.Labour.departmentId, "", new { @class = "text-danger" })
+                                    @Html.HiddenFor(model => model.Labour.Id, new { @id = "updateLabourId" });
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
+
 
                     <div class="modal-footer">
                         <button class="btn btn-secondary" type="button" id="updateCancel" data-bs-dismiss="modal">Cancel</button>
@@ -279,9 +250,9 @@
         $(document).ready(function () {
 
 
-            $("#shiftTable").DataTable({
+            $("#labourTable").DataTable({
                 ajax: {
-                    url: "/Shift/GetShiftData", // Replace with your actual API endpoint to fetch Shift data
+                    url: "/Labour/GetLabourData", // Replace with your actual API endpoint to fetch Labour data
                     dataSrc: ""
                 },
                 columns: [
@@ -290,47 +261,36 @@
                         width: '11px'
                     },
                     {
-                        data: "shiftType",
-                    },
-                    {
-                        data: "startTime",
-                        render: function (data) {
-                            return moment(data, 'HH:mm:ss').format('h:mm A');
+                        data: null,
+                        render: function (data, type, row) {
+                            // Concatenate first and last names
+                            var fullName = row.FirstName + " " + row.LastName;
+                            return fullName;
                         }
                     },
                     {
-                        data: "endTime",
+                        data: "Email",
+                    },
+                    {
+                        data: "CNIC",
+                    },
+                    {
+                        data: "perHour",
+                    },
+                    {
+                        data: "totalPay",
+                    },
+                    {
+                        data: "Department.deptName", // Assuming Department is an object with a property you want to display
                         render: function (data) {
-                            return moment(data, 'HH:mm:ss').format('h:mm A');
-                        }
-                    },
-                    {
-                        data: "duration",
-                        render: function (data) {
-                            // Assuming data is in "HH:mm:ss" format
-                            var duration = moment.duration(data);
-                            var hours = Math.floor(duration.asHours());
-                            var minutes = Math.floor(duration.asMinutes()) % 60;
-                            var formattedDuration = hours + " Hours " + minutes + " Minutes";
-                            return formattedDuration.trim(); // Trim to remove leading/trailing whitespaces
-                        }
-                    },
-                    {
-                        data: "location",
-                    },
-                    {
-                        data: "clientName",
-                    },
-                    {
-                        data: "isActive",
-                        render: function (data) {
-                            return data ? 'Yes' : 'No';
-                        }
+                            // Assuming Department has a property called departmentName
+                            return data;
+                        },
                     },
                     {
                         data: "Id", // Use the "Id" property for the action buttons
                         render: function (data) {
-                            return "<a class='text-success me-2 btn btn-primary m-1 edit-btn' href='#' data-bs-toggle='modal' data-target='#updateShift' data-whatever='mdo' data-id='" + data + "'><i class='fa fa-edit'></i></a>" +
+                            return "<a class='text-success me-2 btn btn-primary m-1 edit-btn' href='#' data-bs-toggle='modal' data-target='#updateLabour' data-whatever='mdo' data-id='" + data + "'><i class='fa fa-edit'></i></a>" +
                                 "<a class='text-danger me-2 btn btn-warning delete-btn' id='del' href='#' data-id='" + data + "'><i class='fa fa-trash'></i></a>";
                         }
                     },
@@ -343,7 +303,7 @@
                         next: '&rsaquo;',
                         last: 'Last'
                     },
-                     searchPlaceholder: 'Min 3 Characters'
+                    searchPlaceholder: 'Min 3 Characters'
                 },
                 autoWidth: false,
                 columnDefs: [
@@ -358,26 +318,22 @@
                 }
             });
 
-            $('#shiftTable').on('click', '.edit-btn', function () {
+            $('#labourTable').on('click', '.edit-btn', function () {
                 var id = $(this).data('id');
                 $.ajax({
-                    url: '/Shift/GetShiftById/' + id,
+                    url: '/Labour/GetLabourById/' + id,
                     type: 'GET',
                     dataType: 'json',
-                    success: function (shift) {
-                        var startTime = convertTicksToTime(shift.startTime.Ticks);
-                        var endTime = convertTicksToTime(shift.endTime.Ticks);
-
-                        $('#updateStartTime').val(startTime);
-                        $('#updateEndTime').val(endTime);
-                        calculateDuration('updateStartTime', 'updateEndTime', 'updateDuration');
-                        $('#hiddenShiftId').val(shift.Id);
-                        $('#updateShiftType').val(shift.shiftType);
-                        $('#updateShiftLocation').val(shift.location);
-                        $('#updateClientName').val(shift.clientName);
-                        $('#updateCustomClientName').val(shift.customClientName);
-                        $('#updateIsActive').prop('checked', shift.isActive);
-                        $('#updateShift').modal('show');
+                    success: function (labour) {
+                        $('#updateLabourFirstName').val(labour.FirstName);
+                        $('#updateLabourLastName').val(labour.LastName);
+                        $('#updateLabourEmail').val(labour.Email);
+                        $('#updateLabourCNIC').val(labour.CNIC);
+                        $('#updateLabourPerHour').val(labour.perHour);
+                        $('#updateLabourTotalPay').val(labour.totalPay);
+                        $('#updateLabourDepartmentId').val(labour.departmentId);
+                        $('#updateLabourId').val(labour.Id);
+                        $('#updateLabour').modal('show');
                     },
                     error: function (xhr, status, error) {
                         toastr.error(
@@ -395,7 +351,7 @@
                 });
             });
             //delete
-            $('#shiftTable').on('click', '#del', function () {
+            $('#labourTable').on('click', '#del', function () {
                 var id = $(this).data('id');
 
                 bootbox.confirm({
@@ -414,7 +370,7 @@
                         if (result) {
                             // If user confirms, proceed with deletion
                             $.ajax({
-                                url: '/Shift/Delete/' + id,
+                                url: '/Labour/Delete/' + id,
                                 type: 'POST',
                                 dataType: 'json',
                                 success: function (response) {
@@ -427,7 +383,7 @@
                                         $('#errorAlert').hide();
 
                                         // Optionally, you can update the DataTable after successful deletion
-                                        $('#shiftTable').DataTable().ajax.reload();
+                                        $('#labourTable').DataTable().ajax.reload();
 
                                         // Hide alerts after a delay
                                         setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
@@ -445,7 +401,7 @@
                                 },
                                 error: function (xhr, status, error) {
                                     // Show error alert for AJAX failure
-                                    $('#errorMessage').text("An Error Occurred While Deleting Department");
+                                    $('#errorMessage').text("An Error Occurred While Deleting Labour");
                                     $('#errorAlert').fadeIn();
 
                                     // Optional: Hide success alert if it's still visible
@@ -473,25 +429,9 @@
             });
 
         });
-        // Bind calculateDuration function to change event of start and end time inputs for add form
-        $('#addEndTime').on('change', function () {
-            calculateDuration('addStartTime', 'addEndTime', 'addDuration');
-        });
-
-        // Bind calculateDuration function to change event of start and end time inputs for update form
-        $('#updateEndTime').on('change', function () {
-            calculateDuration('updateStartTime', 'updateEndTime', 'updateDuration');
-        });
-        // Function to convert ticks to time format (HH:mm)
-        function convertTicksToTime(ticks) {
-            var date = new Date(ticks / 10000 - 62135596800000); // Converting .NET ticks to JavaScript ticks
-            var hours = date.getUTCHours().toString().padStart(2, '0');
-            var minutes = date.getUTCMinutes().toString().padStart(2, '0');
-            return hours + ':' + minutes;
-        }
         // This function is used when adding a shift is successful, it will only trigger when adding a shift is successful
         function handleSuccessforAdd(response) {
-            $("#addShift").modal('hide');
+            $("#addLabour").modal('hide');
             if (response.success) {
                 $('#successMessage').text(response.message);
                 $('#successAlert').show();
@@ -501,12 +441,12 @@
                 event.preventDefault();
 
                 // Reset the form
-                $('#addShiftForm')[0].reset();
+                $('#addLabourForm')[0].reset();
 
                 // Reset validation messages
                 $('.text-danger.validation-summary-errors').html('');
 
-                 $('#shiftTable').DataTable().ajax.reload();
+                 $('#labourTable').DataTable().ajax.reload();
 
                 // Hide modal after a delay
                 setTimeout(function () {
@@ -516,7 +456,7 @@
                 // Hide alerts after a delay
                 setTimeout(hideAlerts, 1000);
             } else {
-                $("#addShift").modal('hide');
+                $("#addLabour").modal('hide');
                 // Show error alert
                 $('#errorMessage').text(response.message);
                 $('#errorAlert').show();
@@ -531,7 +471,7 @@
 
         // This function is used when adding a shift is failed, it will only trigger when adding a shift is failed
         function handleFailureforAdd() {
-            $("#addShift").modal('hide');
+            $("#addLabour").modal('hide');
             // Show error alert for AJAX failure
             $('#errorMessage').text("An Error Occurred While Adding Shift");
             $('#errorAlert').show();
@@ -554,8 +494,8 @@
 
                 // Other actions (reload data, hide modal, etc.)
                 event.preventDefault();
-                $('#shiftTable').DataTable().ajax.reload();
-                $("#updateShift").modal('hide');
+                $('#labourTable').DataTable().ajax.reload();
+                $("#updateLabour").modal('hide');
                 setTimeout(hideAlerts, 2000);
             } else {
                 // Show error alert
@@ -563,7 +503,7 @@
                 $('#errorAlert').fadeIn();
 
                 // Optional: Hide success alert if it's still visible
-                $('#successAler').hide();
+                $('#successAlert').hide();
                 setTimeout(hideAlerts, 2000);
             }
         }
@@ -609,5 +549,3 @@
 
     </script>
 }
-
-
