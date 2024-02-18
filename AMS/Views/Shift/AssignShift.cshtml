@@ -1,0 +1,422 @@
+﻿@model AMS.ViewModels.LabourShiftViewModel
+@{
+    ViewBag.Title = "AssignShift";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+        var shiftSelectList = new SelectList(Model.Shifts.Select(s => new
+        {
+            Id = s.Id,
+            ConcatenatedName = $"{s.clientName} - {s.location} - {s.shiftType}"
+        }), "Id", "ConcatenatedName");
+    
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="main-content">
+        <div class="breadcrumb">
+            <ul>
+                <li>Shift</li>
+                <li><a href="/Shift/AssignShift">Assign Shift</a></li>
+            </ul>
+        </div>
+        <div class="separator-breadcrumb border-top"></div>
+    </div>
+    <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
+        <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
+        <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert" style="display:none">
+        <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
+        <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Col-md-4 Card -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="text-primary">Available Labours</h4>
+                    </div>
+                    <div class="card-body" id="labourContainer">
+                        <!-- Labour cards will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Col-md-8 Card -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="text-primary">Shift Details</h4>
+                    </div>
+                    <div class="card-body" id="shiftDetails">
+                        <div class="row inputs">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Labours.shiftId, new { @class = "col-form-label" })
+                                    @Html.DropDownListFor(model => model.Labours.shiftId, shiftSelectList, "--Select--", new { @class = "form-control", id = "shiftDropdown" })
+                                    @Html.ValidationMessageFor(model => model.Labours.shiftId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="timeIn" class="col-form-label">Time In:</label>
+                                    <input type="time" class="form-control" id="timeIn" name="timeIn" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="timeOut" class="col-form-label">Time Out:</label>
+                                    <input type="time" class="form-control" id="timeOut" name="timeOut" disabled>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row" id="assignedLabourRow">
+                            <div class="separator-breadcrumb border-top"></div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer">
+                        <div class="col-md-4" style="margin-top: 10px;">
+                            <a class="btn btn-primary" id="assign">Assign</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-4">
+        <div class="col-md-12 mb-3">
+            <div class="card text-start">
+                <div class="card-header">
+                    <h4 class="text-25">Assigned Shift List</h4>
+                </div>
+                <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlertforUpdateShift" style="display:none">
+                    <strong class="text-capitalize">Success!</strong> <span id="successMessageforUpdateShift"></span>
+                    <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlertforUpdateShift" style="display:none">
+                    <strong class="text-capitalize">Error!</strong> <span id="errorMessageforUpdateShift"></span>
+                    <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h5 class="card-title">Assigned Shifts</h5>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    Filter By Shift:@Html.DropDownListFor(model => model.Labours.shiftId, shiftSelectList, "--Select--", new { @class = "form-control", id = "shiftDropdownforUpdate" })
+                                    @Html.ValidationMessageFor(model => model.Labours.shiftId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                      
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered table-striped" id="activeShiftTable">
+                                <thead class="bg-gray-300">
+                                    <tr>
+                                        <th scope="col">Labour Name</th>
+                                        <th scope="col">Client Name</th>
+                                        <th scope="col">Location</th>
+                                        <th scope="col">Type</th>
+                                        <th scope="col">Withdraw</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+@section scripts
+{
+    <script>
+        function assignShift(cardId) {
+            var labourCard = $("#" + cardId);
+            // Check if the labour card is not already disabled
+            if (!labourCard.hasClass('disabled')) {
+                // Add the 'disabled' class to the labour card
+                labourCard.addClass('disabled');
+                // Get the labour name and labour ID
+                var labourName = labourCard.find('.labour-name').text();
+                var labourId = labourCard.data('labour-id'); // Get the labour ID from data attribute
+                // Create a new card for assigned labour
+                var assignedLabourCard = $('<div class="assigned-labour col-md-4 assigned-labour-card" data-labour-id="' + labourId + '">').text(labourName); // Added assigned-labour-card class here
+                var removeIcon = $('<a class="btn btn-danger btn-sm remove-labour"><i class="fas fa-minus-circle"></i></a>');
+                assignedLabourCard.append(removeIcon);
+                // Append the assigned labour card to shiftDetails
+                $('#assignedLabourRow').append(assignedLabourCard);
+                // Add click event for removing the assigned labour
+                removeIcon.click(function () {
+                    assignedLabourCard.remove();
+                    // Remove the 'disabled' class when removing the assigned labour
+                    labourCard.removeClass('disabled');
+                });
+            }
+        }
+
+
+        $(document).ready(function () {
+            // Initialize the DataTable
+            var activeShiftTable = $('#activeShiftTable').DataTable({
+                destroy: true,
+                ajax: {
+                    url: '/Shift/GetAssignedShiftData', // Replace with your backend route
+                    dataSrc: ''
+                },
+                columns: [
+                    { data: 'LabourName' },
+                    { data: 'ShiftName' },
+                    { data: 'Location' },
+                    { data: 'shiftType' },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            return '<button class="btn btn-danger withdraw-btn" data-id="' + row.id + '">Withdraw</button>';
+                        }
+                    }
+                ],
+                pagingType: 'full_numbers',
+                language: {
+                    paginate: {
+                        first: 'First',
+                        previous: '&lsaquo;',
+                        next: '&rsaquo;',
+                        last: 'Last'
+                    },
+                    searchPlaceholder: 'Min 3 Characters'
+                },
+                autoWidth: false,
+                columnDefs: [
+                    { width: '100px', targets: '_all' }
+                ],
+                drawCallback: function () {
+                    // Override DataTables styles with Bootstrap styles after each draw
+                    $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
+                    $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
+                    $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
+                    $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+                }
+            });
+
+            // Dropdown change event handler
+            $('#shiftDropdownforUpdate').change(function () {
+                var selectedShiftId = $(this).val();
+
+                // Reload the DataTable with updated data based on the selected shift ID
+                activeShiftTable.ajax.url('/Shift/GetAssignedShiftData?shiftId=' + selectedShiftId).load();
+            });
+
+            // Withdraw button click event handler
+            $('#activeShiftTable').on('click', '.withdraw-btn', function () {
+                var id = $(this).data('id');
+                $.ajax({
+                    url: '/Shift/withdrawLabourFromShift',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (response) {
+                        if (response.success) {
+                            GetLabourList();
+                            // If withdraw operation is successful, show success message
+                            $('#successMessageforUpdateShift').text('Labour withdrawn successfully.');
+                            $('#successAlertforUpdateShift').show();
+                            $('#errorAlertforUpdateShift').hide();
+                            setTimeout(hideAlertsForWithdraw, 2000);
+                            // Reload the DataTable
+                            activeShiftTable.ajax.reload();
+                        } else {
+                            // If withdraw operation failed, show error message
+                            $('#errorMessageforUpdateShift').text('Failed to withdraw labour.');
+                            $('#errorAlertforUpdateShift').show();
+                            $('#successAlertforUpdateShift').hide();
+                            setTimeout(hideAlertsForWithdraw, 2000);
+
+                        }
+                    },
+                    error: function () {
+                        // If AJAX call encounters an error, show error message
+                        $('#errorMessageforUpdateShift').text('Error occurred while withdrawing.');
+                        $('#errorAlertforUpdateShift').show();
+                        $('#successAlertforUpdateShift').hide();
+                        setTimeout(hideAlertsForWithdraw, 2000);
+
+                    }
+                });
+            });            GetLabourList();
+            //to populate time in and out
+            $('#shiftDropdown').change(function () {
+                var selectedShiftId = $(this).val();
+
+                // Check if the selected value is empty or null
+                if (!selectedShiftId) {
+                    // Clear the start and end time inputs
+                    $('#timeIn').val('');
+                    $('#timeOut').val('');
+                    return; // Exit the function early since no AJAX request is needed
+                }
+
+                // Make AJAX request to the controller
+                $.ajax({
+                    url: '/Shift/GetTimeValues', // Replace 'Controller' with your actual controller name
+                    type: 'GET',
+                    data: { shiftId: selectedShiftId },
+                    success: function (data) {
+                        // Convert ticks to time format
+                        var timeIn = convertTicksToTime(data.timeIn.Ticks);
+                        var timeOut = convertTicksToTime(data.timeOut.Ticks);
+
+                        // Update time inputs with the received values
+                        $('#timeIn').val(timeIn);
+                        $('#timeOut').val(timeOut);
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error
+                        console.error(error);
+                    }
+                });
+            });
+
+         
+
+            $("#assign").on("click", function () {
+                // Call function to assign shift to labours
+                assignShiftToLabours();
+            });
+
+        });
+        function GetLabourList() {
+            $('#labourContainer').empty();
+            // Fetch labours from the controller
+            $.ajax({
+                url: '/Shift/GetLabourList',
+                type: 'GET',
+                success: function (data) {
+                    // Loop through the data and create labour cards
+                    data.forEach(function (labour, index) {
+                        // Create the HTML for a single labour card
+                        var labourCardHTML = '<div class="labour-card" id="labour' + (index + 1) + '" data-labour-id="' + labour.Id + '">' +
+                            '<span class="labour-name">' + labour.FullName + '</span>' +
+                            '<a class="btn btn-primary btn-sm add-labour" onclick="assignShift(\'labour' + (index + 1) + '\')"><i class="fas fa-plus-circle"></i></a>' +
+                            '</div>';
+
+
+                        // Append the HTML to the labour container
+                        $('#labourContainer').append(labourCardHTML);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    // Handle error
+                    console.error(error);
+                }
+            });
+        }
+
+        function assignShiftToLabours() {
+            var assignedLabourIds = [];
+            // Iterate over assigned labour cards
+            $('.assigned-labour-card').each(function () {
+                // Get the assigned labour card's id or any other identifier
+                var labourId = $(this).attr('data-labour-id'); // Assuming you have assigned a unique id to each labour card
+                assignedLabourIds.push(labourId);
+            });
+
+            var selectedShiftId = $('#shiftDropdown').val(); // Get the selected shift ID
+            if (!selectedShiftId) {
+                $('#shiftDropdown').closest('.form-group').find('.text-danger').text('Please select a value for the shift.');
+                return false;
+            } else {
+                // Hide the error message
+                $('#shiftDropdown').closest('.form-group').find('.text-danger').text('');
+                $('#errorAlert').hide();
+            }
+
+            if (assignedLabourIds.length === 0) {
+                $('#errorAlert').text('Please select at least one employee.').fadeIn();
+                return false;
+            } else {
+                // Hide the error message
+                $('#errorAlert').hide();
+            }
+            // Make AJAX request to assign shift to labours
+            $.ajax({
+                url: '/Shift/AssignShiftToLabours', // Endpoint to assign shift to labours
+                type: 'POST', // Use POST if you're sending data to the server
+                data: { assignedLabourIds: assignedLabourIds, shiftId: selectedShiftId }, // Send assigned labour ids and selected shift id to the server
+                success: function (response) {
+                    if (response.success) {
+                        $('#shiftDropdown').val($('#shiftDropdown option:first').val());
+                        $('#timeIn').val(timeIn);
+                        $('#timeOut').val(timeOut);
+                        
+                        // Clear the content of assignedLabourRow, excluding separator-breadcrumb
+                        $('#assignedLabourRow').children().not('.separator-breadcrumb').remove();
+                        GetLabourList();
+                        $('#activeShiftTable').DataTable().ajax.reload();
+
+                        // Show success alert
+                        $('#successMessage').text(response.message);
+                        $('#successAlert').fadeIn();
+
+                        // Optional: Hide error alert if it's still visible
+                        $('#errorAlert').hide();
+
+                        // Hide alerts after a delay
+                        setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                    } else {
+                        // Show error alert
+                        $('#errorMessage').text(response.message);
+                        $('#errorAlert').fadeIn();
+
+                        // Optional: Hide success alert if it's still visible
+                        $('#successAlert').hide();
+
+                        // Hide alerts after a delay
+                        setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Show error alert for AJAX failure
+                    $('#errorMessage').text("An Error Occurred While Assigning Shift");
+                    $('#errorAlert').fadeIn();
+
+                    // Optional: Hide success alert if it's still visible
+                    $('#successAlert').hide();
+
+                    // Hide alerts after a delay
+                    setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                }
+            });
+        }
+        function convertTicksToTime(ticks) {
+            var date = new Date(ticks / 10000 - 62135596800000); // Converting .NET ticks to JavaScript ticks
+            var hours = date.getUTCHours().toString().padStart(2, '0');
+            var minutes = date.getUTCMinutes().toString().padStart(2, '0');
+            return hours + ':' + minutes;
+        }
+        function hideAlertsForWithdraw() {
+            $('#successAlertforUpdateShift, #errorAlertforUpdateShift').fadeOut(2000, function () {
+                // Optional: Reset message and hide the alert
+                $(this).hide();
+            });
+        }
+    </script>
+}
+
+
+
+

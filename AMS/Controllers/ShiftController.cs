@@ -1,8 +1,10 @@
 ﻿using AMS.Models;
+using AMS.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -106,6 +108,122 @@ namespace AMS.Controllers
                 _dbContext.Shifts.Remove(shitInDb);
                 _dbContext.SaveChanges();
                 return Json(new { success = true, message = "Shift Successfully Deleted" });
+            }
+        }
+        public ActionResult AssignShift()
+        {
+            var shiftList = _dbContext.Shifts.ToList();
+            var viewModel=new LabourShiftViewModel { Shifts = shiftList };
+            return View(viewModel);
+        }
+        public ActionResult GetLabourList()
+        {
+            var labourList = _dbContext.Labours
+                               .Where(a => a.shiftId == null)
+                               .Select(a => new {
+                                   FullName = a.FirstName + " " + a.LastName,
+                                   Id=a.Id
+                               })
+                               .ToList();
+            return Json(labourList, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetTimeValues(int shiftId)
+        {
+            var shiftInDb = _dbContext.Shifts.Where(s => s.Id == shiftId).FirstOrDefault();
+            var timeIn = shiftInDb.startTime;
+            var timeOut = shiftInDb.endTime;
+
+           return Json(new { timeIn = timeIn, timeOut = timeOut }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult AssignShiftToLabours(List<int> assignedLabourIds, int shiftId)
+        {
+            try
+            {
+                // Find the shift from the database
+                var shiftInDb = _dbContext.Shifts.SingleOrDefault(s => s.Id == shiftId);
+
+                if (shiftInDb == null)
+                {
+                    return Json(new { success = false, message = "Shift not found" });
+                }
+
+                // Assign shift to labours
+                foreach (var labourId in assignedLabourIds)
+                {
+                    var labourInDb = _dbContext.Labours.SingleOrDefault(l => l.Id == labourId);
+
+                    if (labourInDb != null)
+                    {
+                        // Set the shift ID for the labour
+                        labourInDb.shiftId = shiftId;
+                    }
+                }
+
+                // Save changes to the database
+                _dbContext.SaveChanges();
+
+                return Json(new { success = true, message = "Shift assigned successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error occurred: " + ex.Message });
+            }
+        }
+        public async Task<ActionResult> GetAssignedShiftData(int? shiftId)
+        {
+            try
+            {
+                var assignedShiftData = await _dbContext.Labours
+                    .Where(l => !shiftId.HasValue || l.shiftId == shiftId)
+                    .Join(_dbContext.Shifts,
+                        labour => labour.shiftId,
+                        shift => shift.Id,
+                        (labour, shift) => new
+                        {
+                            LabourName = labour.FirstName + " " + labour.LastName,
+                            ShiftName = shift.clientName,
+                            Location = shift.location,
+                            shiftType = shift.shiftType,
+                            id = labour.Id
+                        })
+                    .ToListAsync();
+
+                // Return the JSON result
+                return Json(assignedShiftData, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                // logger.LogError(ex, "Error occurred while fetching assigned shift data.");
+                return Json(new { success = false, errorMessage = "An error occurred while fetching assigned shift data." });
+            }
+        }
+
+
+        public ActionResult withdrawLabourFromShift(int id)
+        {
+            try
+            {
+                var labourInDb = _dbContext.Labours.SingleOrDefault(l => l.Id == id);
+
+                if (labourInDb != null)
+                {
+                    labourInDb.shiftId = null;
+                    _dbContext.SaveChanges();
+                    return Json(new { success = true });
+                }
+                else
+                {
+                    return Json(new { success = false, errorMessage = "Labour not found." });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                // logger.LogError(ex, "Error occurred while withdrawing labour from shift.");
+                return Json(new { success = false, errorMessage = "An error occurred while withdrawing labour from shift." });
             }
         }
 
