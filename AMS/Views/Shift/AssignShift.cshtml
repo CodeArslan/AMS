@@ -124,20 +124,29 @@
 
                         <div class="table-responsive">
                             <table class="table table-hover table-bordered table-striped" id="activeShiftTable">
-                                <thead class="bg-gray-300">
+                                <thead class="bg-light">
                                     <tr>
+                                        <th scope="col">
+                                            <label class="checkbox checkbox-primary" style="margin-bottom:63%">
+                                                <input type="checkbox" class="row-checkbox-all" /><span class="checkmark"></span>
+                                            </label>
+                                        </th>
                                         <th scope="col">Labour Name</th>
                                         <th scope="col">Client Name</th>
                                         <th scope="col">Location</th>
                                         <th scope="col">Type</th>
-                                        <th scope="col">Withdraw</th>
                                     </tr>
                                 </thead>
                             </table>
                         </div>
+
+
+                    </div> 
+                    <div class="card-footer">
+                        <button class="btn btn-warning float-end" id="withdrawSelectedRows" style="margin-right:2%">WithDraw</button>
                     </div>
                 </div>
-
+               
             </div>
         </div>
     </div>
@@ -172,6 +181,23 @@
 
 
         $(document).ready(function () {
+            // Checkbox in the header row for selecting/deselecting all rows
+            $('#activeShiftTable').on('click', '.row-checkbox-all', function () {
+                // Check if the header checkbox is checked or unchecked
+                var isChecked = $(this).prop('checked');
+
+                // Iterate over each checkbox in the DataTable rows and set their checked property accordingly
+                $('.row-checkbox').prop('checked', isChecked);
+            });
+
+            // Individual row checkboxes
+            $('#activeShiftTable').on('click', '.row-checkbox', function () {
+                // Check if all individual row checkboxes are checked
+                var allChecked = $('.row-checkbox:checked').length === $('.row-checkbox').length;
+
+                // Set the header checkbox state based on whether all individual row checkboxes are checked
+                $('.row-checkbox-all').prop('checked', allChecked);
+            });
             // Initialize the DataTable
             var activeShiftTable = $('#activeShiftTable').DataTable({
                 destroy: true,
@@ -180,16 +206,19 @@
                     dataSrc: ''
                 },
                 columns: [
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            return '<label class="checkbox checkbox-primary"><input type="checkbox" class="row-checkbox" data-id="' + row.id + '" /><span class="checkmark"></span></label>';
+                        },
+                        width: "0%",
+                        sortable: false
+                    },
                     { data: 'LabourName' },
                     { data: 'ShiftName' },
                     { data: 'Location' },
                     { data: 'shiftType' },
-                    {
-                        data: null,
-                        render: function (data, type, row) {
-                            return '<button class="btn btn-danger withdraw-btn" data-id="' + row.id + '">Withdraw</button>';
-                        }
-                    }
+                   
                 ],
                 pagingType: 'full_numbers',
                 language: {
@@ -223,41 +252,65 @@
             });
 
             // Withdraw button click event handler
-            $('#activeShiftTable').on('click', '.withdraw-btn', function () {
-                var id = $(this).data('id');
-                $.ajax({
-                    url: '/Shift/withdrawLabourFromShift',
-                    type: 'POST',
-                    data: { id: id },
-                    success: function (response) {
-                        if (response.success) {
-                            GetLabourList();
-                            // If withdraw operation is successful, show success message
-                            $('#successMessageforUpdateShift').text('Labour withdrawn successfully.');
-                            $('#successAlertforUpdateShift').show();
-                            $('#errorAlertforUpdateShift').hide();
-                            setTimeout(hideAlertsForWithdraw, 2000);
-                            // Reload the DataTable
-                            activeShiftTable.ajax.reload();
-                        } else {
-                            // If withdraw operation failed, show error message
-                            $('#errorMessageforUpdateShift').text('Failed to withdraw labour.');
-                            $('#errorAlertforUpdateShift').show();
-                            $('#successAlertforUpdateShift').hide();
-                            setTimeout(hideAlertsForWithdraw, 2000);
+            // Withdraw Button Click Event
+            $('#withdrawSelectedRows').on('click', function () {
+                var selectedIds = [];
 
+                // Iterate over each checked checkbox and retrieve its data-id attribute
+                $('.row-checkbox:checked').each(function () {
+                    selectedIds.push($(this).data('id'));
+                });
+
+                // Prompt confirmation using bootbox
+                bootbox.confirm({
+                    message: "Are you sure you want to withdraw?",
+                    buttons: {
+                        confirm: {
+                            label: 'Confirm',
+                            className: 'btn-primary'
+                        },
+                        cancel: {
+                            label: 'Cancel',
+                            className: 'btn-secondary'
                         }
                     },
-                    error: function () {
-                        // If AJAX call encounters an error, show error message
-                        $('#errorMessageforUpdateShift').text('Error occurred while withdrawing.');
-                        $('#errorAlertforUpdateShift').show();
-                        $('#successAlertforUpdateShift').hide();
-                        setTimeout(hideAlertsForWithdraw, 2000);
-
+                    callback: function (result) {
+                        if (result) {
+                            // If user confirms, proceed with withdrawal
+                            $.ajax({
+                                url: '/Shift/withdrawLabourFromShift',
+                                type: 'POST',
+                                data: { ids: selectedIds }, // Pass array of selected ids
+                                success: function (response) {
+                                    if (response.success) {
+                                        // If withdraw operation is successful, show success message
+                                        $('#successMessageforUpdateShift').text('Labour withdrawn successfully.');
+                                        $('#successAlertforUpdateShift').show();
+                                        $('#errorAlertforUpdateShift').hide();
+                                        setTimeout(hideAlertsForWithdraw, 2000);
+                                        // Reload the DataTable
+                                        activeShiftTable.ajax.reload();
+                                    } else {
+                                        // If withdraw operation failed, show error message
+                                        $('#errorMessageforUpdateShift').text('Failed to withdraw labour.');
+                                        $('#errorAlertforUpdateShift').show();
+                                        $('#successAlertforUpdateShift').hide();
+                                        setTimeout(hideAlertsForWithdraw, 2000);
+                                    }
+                                },
+                                error: function () {
+                                    // If AJAX call encounters an error, show error message
+                                    $('#errorMessageforUpdateShift').text('Error occurred while withdrawing.');
+                                    $('#errorAlertforUpdateShift').show();
+                                    $('#successAlertforUpdateShift').hide();
+                                    setTimeout(hideAlertsForWithdraw, 2000);
+                                }
+                            });
+                        }
                     }
                 });
-            }); GetLabourList();
+            });
+            GetLabourList();
             //to populate time in and out
             $('#shiftDropdown').change(function () {
                 var selectedShiftId = $(this).val();

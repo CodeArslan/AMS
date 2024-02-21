@@ -225,22 +225,28 @@ namespace AMS.Controllers
         }
 
 
-        public ActionResult withdrawLabourFromShift(int id)
+        public ActionResult withdrawLabourFromShift(int[] ids)
         {
             try
             {
-                var labourInDb = _dbContext.Labours.SingleOrDefault(l => l.Id == id);
+                foreach (int id in ids)
+                {
+                    var labourInDb = _dbContext.Labours.SingleOrDefault(l => l.Id == id);
 
-                if (labourInDb != null)
-                {
-                    labourInDb.shiftId = null;
-                    _dbContext.SaveChanges();
-                    return Json(new { success = true });
+                    if (labourInDb != null)
+                    {
+                        labourInDb.shiftId = null;
+                    }
+                    else
+                    {
+                        // If a labour with the given ID is not found, continue to the next ID
+                        continue;
+                    }
                 }
-                else
-                {
-                    return Json(new { success = false, errorMessage = "Labour not found." });
-                }
+
+                _dbContext.SaveChanges();
+
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
