@@ -120,19 +120,28 @@ namespace AMS.Controllers
         }
         public ActionResult Delete(int id)
         {
-            var shitInDb = _dbContext.Shifts.SingleOrDefault(s => s.Id == id);
-            if (shitInDb == null)
+            var shiftInDb = _dbContext.Shifts.SingleOrDefault(s => s.Id == id);
+            if (shiftInDb == null)
             {
-                return Json(new { success = false, message = "Shift Record Doesnot Found" });
+                return Json(new { success = false, message = "Shift Record Does Not Exist" });
             }
 
-            else
+            // Find all Labour records associated with this Shift
+            var laboursWithShiftId = _dbContext.Labours.Where(l => l.shiftId == id);
+
+            // Remove the ShiftId association from Labour records
+            foreach (var labour in laboursWithShiftId)
             {
-                _dbContext.Shifts.Remove(shitInDb);
-                _dbContext.SaveChanges();
-                return Json(new { success = true, message = "Shift Successfully Deleted" });
+                labour.shiftId = null; // Or you can set it to any default value as per your requirement
             }
+
+            // Now remove the Shift record
+            _dbContext.Shifts.Remove(shiftInDb);
+            _dbContext.SaveChanges();
+
+            return Json(new { success = true, message = "Shift Successfully Deleted" });
         }
+
         public ActionResult AssignShift()
         {
             var shiftList = _dbContext.Shifts.ToList();

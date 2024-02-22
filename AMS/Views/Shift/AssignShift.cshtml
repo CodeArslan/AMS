@@ -165,7 +165,7 @@
                 var labourName = labourCard.find('.labour-name').text();
                 var labourId = labourCard.data('labour-id'); // Get the labour ID from data attribute
                 // Create a new card for assigned labour
-                var assignedLabourCard = $('<div class="assigned-labour col-md-4 assigned-labour-card" style="width:270px" data-labour-id="' + labourId + '">').text(labourName); // Added assigned-labour-card class here
+                var assignedLabourCard = $('<div class="assigned-labour col-md-4 assigned-labour-card" style="width:31%" data-labour-id="' + labourId + '">').text(labourName); // Added assigned-labour-card class here
                 var removeIcon = $('<a class="btn btn-danger btn-sm remove-labour"><i class="fas fa-minus-circle"></i></a>');
                 assignedLabourCard.append(removeIcon);
                 // Append the assigned labour card to shiftDetails
@@ -288,6 +288,7 @@
                                         $('#successAlertforUpdateShift').show();
                                         $('#errorAlertforUpdateShift').hide();
                                         setTimeout(hideAlertsForWithdraw, 2000);
+                                        GetLabourList();
                                         // Reload the DataTable
                                         activeShiftTable.ajax.reload();
                                     } else {
