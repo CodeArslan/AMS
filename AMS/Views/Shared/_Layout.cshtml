@@ -14,6 +14,17 @@
     <link href="~/dist-assets/css/themes/lite-purple.min.css" rel="stylesheet" />
     <link href="~/dist-assets/css/plugins/perfect-scrollbar.min.css" rel="stylesheet" />
     <link href="~/Content/CustomCSS.css" rel="stylesheet" />
+    <style>
+        .childNav {
+            display: none; /* Initially hide all submenu */
+        }
+
+        /* Show submenu for only those li elements which have data-parent or data-item attribute */
+        .nav-item[data-parent] .childNav,
+        .nav-item[data-item] .childNav {
+            display: block;
+        }
+    </style>
 </head>
 <body class="text-start">
     <div class="spinner-container" style="display:none;">
@@ -44,11 +55,10 @@
                  data-perfect-scrollbar=""
                  data-suppress-scroll-x="true">
                 <ul class="navigation-left">
-                    <li class="nav-item" data-item="">
+                    <li class="nav-item no-open" data-item="">
                         <a class="nav-item-hold" href="/Home/Dashboard">
                             <i class="fa fa-chart-bar fa-lg"></i><span class="nav-text">Dashboard</span>
                         </a>
-                        <div class="triangle"></div>
                     </li>
                     <li class="nav-item" data-item="attendance">
                         <a class="nav-item-hold" href="#">
@@ -62,36 +72,31 @@
                         </a>
                         <div class="triangle"></div>
                     </li>
-                    <li class="nav-item" data-item="">
+                    <li class="nav-item no-open" data-item="">
                         <a class="nav-item-hold" href="/Leave/Inbox">
                             <i class="fa fa-bed-alt fa-lg"></i><span class="nav-text">Leave Requests</span>
                         </a>
-                        <div class="triangle"></div>
                     </li>
-                    <li class="nav-item" data-item="">
+                    <li class="nav-item no-open" data-item="">
                         <a class="nav-item-hold" href="/Leave/ComposeEmail">
                             <i class="fas fa-mailbox fa-lg"></i><span class="nav-text">Compose Email</span>
                         </a>
-                        <div class="triangle"></div>
                     </li>
-                    <li class="nav-item" data-item="">
+                    <li class="nav-item no-open" data-item="">
                         <a class="nav-item-hold" href="/Shift/AssignShift">
                             <i class="fas fa-exchange-alt fa-lg"></i><span class="nav-text">Assign Shift</span>
                         </a>
-                        <div class="triangle"></div>
                     </li>
-                    <li class="nav-item" data-item="">
+                    <li class="nav-item no-open" data-item="">
                         <a class="nav-item-hold" href="/Reporting/Index">
                             <i class="fas fa-check-circle fa-lg"></i><span class="nav-text">Reporting</span>
                         </a>
-                        <div class="triangle"></div>
                     </li>
 
-                    <li class="nav-item" data-item="">
+                    <li class="nav-item no-open" data-item="">
                         <a class="nav-item-hold" href="/Account/Login">
                             <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
                         </a>
-                        <div class="triangle"></div>
                     </li>
                 </ul>
             </div>
@@ -195,12 +200,12 @@
             </div>
         </div>
     </div>
+
     <script src="~/dist-assets/js/plugins/jquery-3.3.1.min.js"></script>
     <script src="~/dist-assets/js/scripts/dashboard.v1.script.min.js"></script>
     <script src="~/dist-assets/js/plugins/bootstrap.bundle.min.js"></script>
-
     <script src="~/dist-assets/js/plugins/perfect-scrollbar.min.js"></script>
-    <script src="~/dist-assets/js/scripts/script.min.js"></script>
+    <script src="~/Scripts/customScript.min.js"></script>
     <script src="~/dist-assets/js/plugins/echarts.min.js"></script>
     <script src="~/dist-assets/js/scripts/echart.options.min.js"></script>
     <script src="~/dist-assets/js/scripts/customizer.script.min.js"></script>
@@ -213,11 +218,8 @@
     <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
     <script src="~/Scripts/jquery.validate.min.js"></script>
     <script src="~/Scripts/moment.js"></script>
-    <script src="~/dist-assets/js/scripts/sidebar.large.script.min.js"></script>
-
-    <script src="~/dist-assets/js/scripts/sidebar.large.script.min.js"></script>
-        <script src="~/dist-assets/js/scripts/sidebar.script.min.js"></script>
-    @*<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>*@
+    <script src="~/Scripts/custom-sidebar.large.script.js"></script>
+    <script src="~/Scripts/custom-sidebar.js"></script>
     @Scripts.Render("~/bundles/jqueryval")
     @RenderSection("scripts", required: false)
 </body>
@@ -258,4 +260,13 @@
             hideSpinner();
         }
     });
+    // JavaScript code
+    $(document).ready(function () {
+        // Jab bhi koi li element pe hover hota hai
+        $(".no-open").hover(function () {
+            // .sidebar-left-secondary element ke .open class ko remove karein
+            $(".sidebar-left-secondary").removeClass("open");
+        });
+    });
+
 </script>
