@@ -14,7 +14,7 @@
         max-height: 200px; /* Adjust max-height as needed */
         overflow-y: auto;
     }
-    #shiftDropdownButton, #shiftDropdownButtonUpdate {
+    #shiftDropdownButton, #tableDropdownButton {
         width: 270px;
         font-size: 12px;
     }
@@ -79,11 +79,11 @@
                                             --Select Shift--
                                         </button>
                                         <div class="dropdown-menu" style="width:270px" aria-labelledby="shiftDropdownButton">
-                                            <a class="dropdown-item" style="font-size:10px;" href="#" data-value="">--Select Shift--</a>
+                                            <a class="dropdown-item" style="font-size:10px;" id="dropdownitemForAssign" data-value="">--Select Shift--</a>
 
                                             @foreach (var item in shiftSelectList)
                                             {
-                                                <a class="dropdown-item" style="font-size:10px;" href="#" data-value="@item.Value">@item.Text</a>
+                                                <a class="dropdown-item" style="font-size:10px;" id="dropdownitemForAssign" data-value="@item.Value">@item.Text</a>
                                             }
                                         </div>
                                     </div>
@@ -139,12 +139,26 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
-                                <h5 class="card-title">Assigned Shifts</h5>
+                                <h5 class="card-title text-muted">Assigned Shifts</h5>
                             </div>
+                            <div class="col-md-5"></div>
                             <div class="col-md-3">
-                                <div class="form-group">
-                                    Filter By Shift:@Html.DropDownListFor(model => model.Labours.shiftId, shiftSelectList, "--Select--", new { @class = "form-control", id = "shiftDropdownforUpdate" })
-                                    @Html.ValidationMessageFor(model => model.Labours.shiftId, "", new { @class = "text-danger" })
+                                <div class="form-group" style="margin-left:17px">
+                                    @Html.Label("Filter By Shift:")
+                                    <div class="dropdownforTable">
+                                        <button class="btn btn-secondary dropdown-toggle" type="button" id="tableDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                            --Select Shift--
+                                        </button>
+                                        <div class="dropdown-menu" style="width:270px" aria-labelledby="shiftDropdownButton">
+                                            <a class="dropdown-item dropdown-item-unique" style="font-size:10px;" data-value="">--Select Shift--</a>
+
+                                            @foreach (var item in shiftSelectList)
+                                            {
+                                                <a class="dropdown-item dropdown-item-unique" style="font-size:10px;" data-value="@item.Value">@item.Text</a>
+                                            }
+                                        </div>
+                                    </div>
+                                   
                                 </div>
                             </div>
                         </div>
@@ -271,14 +285,27 @@
                     $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
                 }
             });
+            $('.dropdown-item-unique').on('click', function () {
+                
+                $('.dropdown-item').removeClass('active');
+                // Add active class to the clicked dropdown item
+                $(this).addClass('active');
 
-            // Dropdown change event handler
-            $('#shiftDropdownforUpdate').change(function () {
-                var selectedShiftId = $(this).val();
+                // Get the text of selected item
+                var selectedText = $(this).text();
+                // Update the text of dropdown button
+                $('#tableDropdownButton').text(selectedText);
+                var selectedShiftId = $(this).data('value');
 
-                // Reload the DataTable with updated data based on the selected shift ID
                 activeShiftTable.ajax.url('/Shift/GetAssignedShiftData?shiftId=' + selectedShiftId).load();
             });
+            // Dropdown change event handler
+            //$('#shiftDropdownforUpdate').change(function () {
+            //    var selectedShiftId = $(this).val();
+
+            //    // Reload the DataTable with updated data based on the selected shift ID
+            //    activeShiftTable.ajax.url('/Shift/GetAssignedShiftData?shiftId=' + selectedShiftId).load();
+            //});
 
             // Withdraw button click event handler
             // Withdraw Button Click Event
@@ -342,7 +369,7 @@
             });
             GetLabourList();
             //to populate time in and out
-            $('.dropdown-menu').on('click', '.dropdown-item', function () {
+            $('.dropdown-menu').on('click', '#dropdownitemForAssign', function () {
                 $('.dropdown-item').removeClass('active');
                 // Add active class to the clicked dropdown item
                 $(this).addClass('active');
@@ -391,38 +418,6 @@
                     }
                 });
             });
-
-            //$('#shiftDropdown').change(function () {
-            //    var selectedShiftId = $(this).val();
-
-            //    // Check if the selected value is empty or null
-            //    if (!selectedShiftId) {
-            //        // Clear the start and end time inputs
-            //        $('#timeIn').val('');
-            //        $('#timeOut').val('');
-            //        return; // Exit the function early since no AJAX request is needed
-            //    }
-
-            //    // Make AJAX request to the controller
-            //    $.ajax({
-            //        url: '/Shift/GetTimeValues', // Replace 'Controller' with your actual controller name
-            //        type: 'GET',
-            //        data: { shiftId: selectedShiftId },
-            //        success: function (data) {
-            //            // Convert ticks to time format
-            //            var timeIn = convertTicksToTime(data.timeIn.Ticks);
-            //            var timeOut = convertTicksToTime(data.timeOut.Ticks);
-
-            //            // Update time inputs with the received values
-            //            $('#timeIn').val(timeIn);
-            //            $('#timeOut').val(timeOut);
-            //        },
-            //        error: function (xhr, status, error) {
-            //            // Handle error
-            //            console.error(error);
-            //        }
-            //    });
-            //});
 
 
 
@@ -492,10 +487,6 @@
                 data: { assignedLabourIds: assignedLabourIds, shiftId: selectedShiftId }, // Send assigned labour ids and selected shift id to the server
                 success: function (response) {
                     if (response.success) {
-                        $('#shiftDropdown').val($('#shiftDropdown option:first').val());
-                        $('#timeIn').val(timeIn);
-                        $('#timeOut').val(timeOut);
-
                         // Clear the content of assignedLabourRow, excluding separator-breadcrumb
                         $('#assignedLabourRow').children().not('.separator-breadcrumb').remove();
                         GetLabourList();

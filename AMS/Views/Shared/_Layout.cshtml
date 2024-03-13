@@ -220,6 +220,7 @@
     <script src="~/Scripts/moment.js"></script>
     <script src="~/Scripts/custom-sidebar.large.script.js"></script>
     <script src="~/Scripts/custom-sidebar.js"></script>
+    <script src="~/Scripts/inputmask/jquery.inputmask.min.js"></script>
     @Scripts.Render("~/bundles/jqueryval")
     @RenderSection("scripts", required: false)
 </body>
@@ -243,7 +244,7 @@
         $('.spinner-container').fadeOut();
     }
     //add urls here in which you dont want to show loader/spinner
-    var excludedUrls = ['/department/isnameavailable'];
+    var excludedUrls = ['/department/isnameavailable','/shift/gettimevalues'];
 
     $.ajaxSetup({
         beforeSend: function (xhr, settings) {
