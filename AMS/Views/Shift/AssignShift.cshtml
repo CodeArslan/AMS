@@ -9,6 +9,20 @@
     }), "Id", "ConcatenatedName");
 
 }
+<style>
+    .dropdown-menu {
+        max-height: 200px; /* Adjust max-height as needed */
+        overflow-y: auto;
+    }
+    #shiftDropdownButton, #shiftDropdownButtonUpdate {
+        width: 270px;
+        font-size: 12px;
+    }
+    #selectedShiftId{
+        opacity:0;
+        pointer-events:none;
+    }
+</style>
 
 
 <!DOCTYPE html>
@@ -60,8 +74,21 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     @Html.LabelFor(model => model.Labours.shiftId, new { @class = "col-form-label" })
-                                    @Html.DropDownListFor(model => model.Labours.shiftId, shiftSelectList, "--Select--", new { @class = "form-control", id = "shiftDropdown" })
-                                    @Html.ValidationMessageFor(model => model.Labours.shiftId, "", new { @class = "text-danger" })
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary dropdown-toggle" type="button" id="shiftDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                            --Select Shift--
+                                        </button>
+                                        <div class="dropdown-menu" style="width:270px" aria-labelledby="shiftDropdownButton">
+                                            <a class="dropdown-item" style="font-size:10px;" href="#" data-value="">--Select Shift--</a>
+
+                                            @foreach (var item in shiftSelectList)
+                                            {
+                                                <a class="dropdown-item" style="font-size:10px;" href="#" data-value="@item.Value">@item.Text</a>
+                                            }
+                                        </div>
+                                    </div>
+                                    @Html.TextBoxFor(model => model.Labours.shiftId, new { @id = "selectedShiftId" })
+                                    @Html.ValidationMessageFor(model => model.Labours.shiftId, "", new { @class = "text-danger", @id = "validationForShiftDDL", style = "margin-left:-170px" })
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -155,6 +182,7 @@
 @section scripts
 {
     <script>
+       
         function assignShift(cardId) {
             var labourCard = $("#" + cardId);
             // Check if the labour card is not already disabled
@@ -181,6 +209,7 @@
 
 
         $(document).ready(function () {
+
             // Checkbox in the header row for selecting/deselecting all rows
             $('#activeShiftTable').on('click', '.row-checkbox-all', function () {
                 // Check if the header checkbox is checked or unchecked
@@ -313,16 +342,34 @@
             });
             GetLabourList();
             //to populate time in and out
-            $('#shiftDropdown').change(function () {
-                var selectedShiftId = $(this).val();
+            $('.dropdown-menu').on('click', '.dropdown-item', function () {
+                $('.dropdown-item').removeClass('active');
+                // Add active class to the clicked dropdown item
+                $(this).addClass('active');
 
+                // Get the text of selected item
+                var selectedText = $(this).text();
+                // Update the text of dropdown button
+                $('#shiftDropdownButton').text(selectedText);
+
+                // Get the data-value attribute of selected item
+                var selectedValue = $(this).data('value');
+                // Set the value of hidden field
+                $('#selectedShiftId').val(selectedValue);
+                // Get the selected shift ID from the data-value attribute of the clicked dropdown item
+                var selectedShiftId = $(this).data('value');
+                
                 // Check if the selected value is empty or null
                 if (!selectedShiftId) {
                     // Clear the start and end time inputs
                     $('#timeIn').val('');
                     $('#timeOut').val('');
                     return; // Exit the function early since no AJAX request is needed
+                } else {
+                    $('#validationForShiftDDL').text('');
+                    $('#validationForShiftDDL').hide();
                 }
+
 
                 // Make AJAX request to the controller
                 $.ajax({
@@ -344,6 +391,38 @@
                     }
                 });
             });
+
+            //$('#shiftDropdown').change(function () {
+            //    var selectedShiftId = $(this).val();
+
+            //    // Check if the selected value is empty or null
+            //    if (!selectedShiftId) {
+            //        // Clear the start and end time inputs
+            //        $('#timeIn').val('');
+            //        $('#timeOut').val('');
+            //        return; // Exit the function early since no AJAX request is needed
+            //    }
+
+            //    // Make AJAX request to the controller
+            //    $.ajax({
+            //        url: '/Shift/GetTimeValues', // Replace 'Controller' with your actual controller name
+            //        type: 'GET',
+            //        data: { shiftId: selectedShiftId },
+            //        success: function (data) {
+            //            // Convert ticks to time format
+            //            var timeIn = convertTicksToTime(data.timeIn.Ticks);
+            //            var timeOut = convertTicksToTime(data.timeOut.Ticks);
+
+            //            // Update time inputs with the received values
+            //            $('#timeIn').val(timeIn);
+            //            $('#timeOut').val(timeOut);
+            //        },
+            //        error: function (xhr, status, error) {
+            //            // Handle error
+            //            console.error(error);
+            //        }
+            //    });
+            //});
 
 
 
@@ -389,14 +468,14 @@
                 assignedLabourIds.push(labourId);
             });
 
-            var selectedShiftId = $('#shiftDropdown').val(); // Get the selected shift ID
+            var selectedShiftId = $('#selectedShiftId').val(); // Get the selected shift ID
             if (!selectedShiftId) {
-                $('#shiftDropdown').closest('.form-group').find('.text-danger').text('Please select a value for the shift.');
+                $('#validationForShiftDDL').text('Please select a value for the shift.');
+                $('#validationForShiftDDL').show();
                 return false;
             } else {
-                // Hide the error message
-                $('#shiftDropdown').closest('.form-group').find('.text-danger').text('');
-                $('#errorAlert').hide();
+                $('#validationForShiftDDL').text('');
+                $('#validationForShiftDDL').hide();
             }
 
             if (assignedLabourIds.length === 0) {
