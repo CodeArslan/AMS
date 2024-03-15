@@ -17,9 +17,10 @@ namespace AMS.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
-
+        private ApplicationDbContext _dbContext;
         public AccountController()
         {
+            _dbContext = new ApplicationDbContext();
         }
 
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
@@ -137,10 +138,33 @@ namespace AMS.Controllers
         //
         // GET: /Account/Register
         [AllowAnonymous]
-        public ActionResult Register()
+        public async Task<ActionResult> Register(string id)
         {
-            return View();
+            var viewModel = new RegisterViewModel();
+
+            viewModel.Department = _dbContext.Departments.ToList();
+
+            if (id != null)
+            {
+                var existingUser = await UserManager.FindByIdAsync(id);
+                if (existingUser != null)
+                {
+                    viewModel.Id = existingUser.Id;
+                    viewModel.CNIC = existingUser.CNIC;
+                    viewModel.FirstName = existingUser.FirstName;
+                    viewModel.LastName = existingUser.LastName;
+                    viewModel.Address = existingUser.Address;
+                    viewModel.Phone = existingUser.Phone;
+                    viewModel.perHour = existingUser.perHour;
+                    viewModel.totalPay = existingUser.totalPay;
+                    viewModel.DepartmentId = existingUser.DepartmentId;
+                    viewModel.Email = existingUser.Email;
+                }
+            }
+
+            return View(viewModel);
         }
+
 
         //
         // POST: /Account/Register
@@ -151,23 +175,61 @@ namespace AMS.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-                var result = await UserManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
+                // Check if user exists for update
+                if (model.Id != null)
                 {
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
-                    // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
-                    // Send an email with this link
-                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-
-                    return RedirectToAction("Index", "Home");
+                    var existingUser = await UserManager.FindByIdAsync(model.Id);
+                    if (existingUser != null)
+                    {
+                        // Update user properties
+                        existingUser.UserName = model.Email;
+                        existingUser.Email = model.Email;
+                        existingUser.CNIC = model.CNIC;
+                        existingUser.DepartmentId = model.DepartmentId;
+                        existingUser.perHour = model.perHour;
+                        existingUser.FirstName = model.FirstName;
+                        existingUser.LastName = model.LastName;
+                        // Update user
+                        var updateResult = await UserManager.UpdateAsync(existingUser);
+                        if (updateResult.Succeeded)
+                        {
+                            TempData["SuccessMessage"] = "Profile updated successfully.";
+                            return RedirectToAction("Register", "Account", new { id = model.Id });
+                        }
+                        AddErrors(updateResult);
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "User not found.";
+                    }
                 }
-                AddErrors(result);
+                else
+                {
+                    // New user registration logic
+                    var user = new ApplicationUser
+                    {
+                        UserName = model.Email,
+                        Email = model.Email,
+                        CNIC = model.CNIC,
+                        DepartmentId = model.DepartmentId,
+                        perHour = model.perHour,
+                        FirstName = model.FirstName,
+                        LastName = model.LastName
+                    };
+                    var result = await UserManager.CreateAsync(user, model.Password);
+                    if (result.Succeeded)
+                    {
+                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                        TempData["SuccessMessage"] = "Registration successful.";
+                        return RedirectToAction("Register", "Account");
+                    }
+                    AddErrors(result);
+                }
             }
-
+            TempData["ErrorMessage"] = "Registration Failed. Please Check Following Errors";
+            // Repopulate department list
+            var departmentList = _dbContext.Departments.ToList();
+            model.Department = departmentList;
             // If we got this far, something failed, redisplay form
             return View(model);
         }

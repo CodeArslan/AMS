@@ -1,0 +1,219 @@
+﻿@model AMS.Models.RegisterViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="breadcrumb">
+            <ul>
+                <li><a href="/Department/Index">Department</a></li>
+            </ul>
+        </div>
+        <div class="separator-breadcrumb border-top"></div>
+    </div>
+
+    <p>
+        <a class="btn btn-primary m-1" href="/Account/Register">Add Employee</a>
+    </p>
+    <div class="col-md-12 mb-3">
+
+
+        <div class="card text-start">
+
+            <div class="card-header">
+                <h4 class="text-25 text-muted">Employee List</h4>
+            </div>
+            <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
+                <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
+                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert" style="display:none">
+                <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
+                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped" id="empTable">
+                        <thead class="bg-gray-300">
+                            <tr>
+                                <th scope="col">Employee Name</th>
+                                <th scope="col">CNIC</th>
+                                <th scope="col">Address</th>
+                                <th scope="col">Phone</th>
+                                <th scope="col">Per Hour Wage</th>
+                                <th scope="col">Department</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+   
+</body>
+</html>
+@section scripts
+{
+    <script>
+      
+        $(document).ready(function () {
+
+
+            //read (Fetch records from database and show in table)
+            $("#empTable").DataTable({
+                ajax: {
+                    url: "/Employee/GetEmployeeData",
+                    dataSrc: ""
+                },
+                columns: [
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            // Concatenate first and last names
+                            var fullName = row.FirstName + " " + row.LastName;
+                            return fullName;
+                        },
+                        orderable: true, // Enable sorting for the concatenated name column
+                        searchable: true
+                    },
+                    {
+                        data: "CNIC",
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: "Address",
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: "Phone",
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: "perHour",
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: "Department.deptName", // Assuming Department is an object with a property you want to display
+                        render: function (data) {
+                            // Assuming Department has a property called departmentName
+                            return data;
+                        },
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: "Email",
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: "Id", // Use the "Id" property for the action buttons
+                        render: function (data) {
+                            return "<a class='text-success me-2 btn btn-primary m-1 edit-btn' href='/Account/Register?id=" + data + "'><i class='fa fa-edit'></i></a>" +
+                                "<a class='text-danger me-2 btn btn-warning delete-btn' id='del' href='#' data-id='" + data + "'><i class='fa fa-trash'></i></a>";
+                        },
+                        orderable: false,
+                        searchable: false
+                    }
+
+                ],
+                pagingType: 'full_numbers',
+                language: {
+                    paginate: {
+                        first: 'First',
+                        previous: '&lsaquo;',
+                        next: '&rsaquo;',
+                        last: 'Last'
+                    },
+                    searchPlaceholder: 'Min 3 Characters'
+                },
+                autoWidth: false,
+                columnDefs: [
+                    { width: '100px', targets: '_all' }
+                ],
+                drawCallback: function () {
+                    // Override DataTables styles with Bootstrap styles after each draw
+                    $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
+                    $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
+                    $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
+                    $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+                }
+            });
+
+            $('#empTable').on('click', '#del', function () {
+                var id = $(this).data('id');
+
+                bootbox.confirm({
+                    message: "Are you sure you want to delete?",
+                    buttons: {
+                        confirm: {
+                            label: 'Confirm',
+                            className: 'btn-primary'
+                        },
+                        cancel: {
+                            label: 'Cancel',
+                            className: 'btn-secondary'
+                        }
+                    },
+                    callback: function (result) {
+                        if (result) {
+                            $.ajax({
+                                url: '/Employee/Delete/' + id,
+                                type: 'POST',
+                                dataType: 'json',
+                                success: function (response) {
+                                    if (response.success) {
+                                        $('#successMessage').text(response.message);
+                                        $('#successAlert').fadeIn();
+
+                                        $('#errorAlert').hide();
+
+                                        $('#empTable').DataTable().ajax.reload();
+
+                                        setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                                    } else {
+                                        $('#errorMessage').text(response.message);
+                                        $('#errorAlert').fadeIn();
+                                        $('#successAlert').hide();
+
+                                        setTimeout(hideAlerts, 2000);
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    $('#errorMessage').text("An Error Occurred While Deleting Department");
+                                    $('#errorAlert').fadeIn();
+                                    $('#successAlert').hide();
+                                    setTimeout(hideAlerts, 2000); 
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+
+
+            
+
+        });
+
+      
+    </script>
+}
+

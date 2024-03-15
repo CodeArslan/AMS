@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AMS.Models
 {
@@ -64,6 +65,30 @@ namespace AMS.Models
 
     public class RegisterViewModel
     {
+        [NotMapped]
+        public string Id {  get; set; }
+        [Required]
+        [Display(Name = "CNIC:")]
+        public string CNIC { get; set; }
+        [Display(Name = "First Name:")]
+        public string FirstName { get; set; }
+        [Display(Name = "Last Name:")]
+        public string LastName { get; set; }
+        public string Address { get; set; }
+        public string Phone { get; set; }
+        [Required]
+        [Display(Name = "Per Hour Wage:")]
+        public int perHour { get; set; }
+        public int totalPay { get; set; }
+        public List<Department> Department { get; set; }
+        [ForeignKey("Department")]
+        [Display(Name = "Department:")]
+        public int DepartmentId { get; set; }
+
+        public List<Shift> Shift { get; set; }
+        [ForeignKey("Shift")]
+        [Display(Name = "Shift:")]
+        public int shiftId { get; set; }
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]
