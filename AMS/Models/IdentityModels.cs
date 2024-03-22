@@ -15,11 +15,18 @@ namespace AMS.Models
         [Required]
         [Display(Name ="CNIC:")]
         public string CNIC {  get; set; }
+        [Required]
         [Display(Name = "First Name:")]
         public string FirstName { get; set; }
+        [Required]
         [Display(Name = "Last Name:")]
         public string LastName { get; set; }
+        [Required]
+        [Display(Name = "Address:")]
+
         public string Address {  get; set; }
+        [Required]
+        [Display(Name = "Phone:")]
         public string Phone {  get; set; }
         [Required]
         [Display(Name = "Per Hour Wage:")]
@@ -30,7 +37,12 @@ namespace AMS.Models
         [Display(Name ="Department:")]
         public int DepartmentId {  get; set; }
 
-      
+        public Card Card { get; set; }
+        [ForeignKey("Card")]
+        [Display(Name = "Card Code:")]
+        public int CardId { get; set; }
+
+        public bool isActive { get; set; }
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
             
@@ -50,6 +62,7 @@ namespace AMS.Models
         public DbSet<Department> Departments { get; set; }
         public DbSet<Shift> Shifts { get; set; }
         public DbSet<Labour> Labours { get; set; }
+        public DbSet<Card> Cards { get; set; }
 
         public static ApplicationDbContext Create()
         {

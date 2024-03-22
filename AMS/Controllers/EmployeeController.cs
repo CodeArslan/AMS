@@ -30,8 +30,11 @@ namespace AMS.Controllers
         }
         public async Task<ActionResult> GetEmployeeData()
         {
-            var empList = await _dbContext.Users.Include(c=>c.Department).AsNoTracking().ToListAsync();
-            return Json(empList, JsonRequestBehavior.AllowGet);
+            var empList = await _dbContext.Users
+                .Include(u => u.Department)
+                .Include(u => u.Card) 
+                .AsNoTracking()
+                .ToListAsync(); return Json(empList, JsonRequestBehavior.AllowGet);
         }
         public ActionResult Delete(string id)
         {

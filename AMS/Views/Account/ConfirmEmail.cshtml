@@ -1,11 +1,52 @@
 ﻿@{
     ViewBag.Title = "Confirm Email";
+    Layout = null;
 }
+<style>
+    body, html {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    main {
+        text-align: center;
+    }
+</style>
 <main aria-labelledby="title">
     <h2 id="title">@ViewBag.Title.</h2>
     <div>
         <p>
-            Thank you for confirming your email. Please @Html.ActionLink("Click here to Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })
+            Thank you for confirming your email. You will be redirected to the login page in <span id="countdown" style="font-weight: bold;">5</span> seconds. Please wait...
         </p>
     </div>
 </main>
+
+@Html.ActionLink("Click here to Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", style = "display:none;" })
+
+<script>
+    // Function to redirect after countdown
+    function redirectAfterCountdown() {
+        var seconds = 5; // Number of seconds for countdown
+        var countdownElement = document.getElementById("countdown");
+
+        var countdownInterval = setInterval(function () {
+            seconds--;
+            countdownElement.textContent = seconds;
+
+            if (seconds <= 0) {
+                clearInterval(countdownInterval);
+                // Redirect to login page
+                window.location.href = document.getElementById("loginLink").getAttribute("href");
+            }
+        }, 1000);
+    }
+
+    // Call the function when the page is loaded
+    window.onload = function () {
+        redirectAfterCountdown();
+    };
+</script>
+

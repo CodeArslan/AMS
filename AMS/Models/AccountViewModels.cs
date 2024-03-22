@@ -68,27 +68,29 @@ namespace AMS.Models
         [NotMapped]
         public string Id {  get; set; }
         [Required]
-        [Display(Name = "CNIC:")]
+        [Display(Name = "CNIC")]
         public string CNIC { get; set; }
-        [Display(Name = "First Name:")]
+        [Required]
+        [Display(Name = "First Name")]
         public string FirstName { get; set; }
-        [Display(Name = "Last Name:")]
+        [Required]
+        [Display(Name = "Last Name")]
         public string LastName { get; set; }
+        [Required]
+        [Display(Name = "Address")]
         public string Address { get; set; }
+        [Required]
+        [Display(Name = "Phone")]
         public string Phone { get; set; }
         [Required]
-        [Display(Name = "Per Hour Wage:")]
+        [Display(Name = "Per Hour Wage")]
         public int perHour { get; set; }
         public int totalPay { get; set; }
         public List<Department> Department { get; set; }
         [ForeignKey("Department")]
-        [Display(Name = "Department:")]
+        [Display(Name = "Department")]
         public int DepartmentId { get; set; }
 
-        public List<Shift> Shift { get; set; }
-        [ForeignKey("Shift")]
-        [Display(Name = "Shift:")]
-        public int shiftId { get; set; }
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]
@@ -104,6 +106,13 @@ namespace AMS.Models
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+        public List<Card> Card { get; set; }
+        [ForeignKey("Card")]
+        [Display(Name = "Card Code:")]
+        public int CardId { get; set; }
+
+        public bool isActive { get; set; }
+
     }
 
     public class ResetPasswordViewModel

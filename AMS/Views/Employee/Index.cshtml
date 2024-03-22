@@ -10,13 +10,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        /* Ensure the table adjusts its width based on content */
+        #empTable {
+            table-layout: auto !important;
+        }
+
+        /* Make the table horizontally scrollable */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        /* Set the width of individual columns to fit their content */
+        #empTable th,
+        #empTable td {
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+    </style>
 </head>
+
 <body>
 
     <div class="main-content">
         <div class="breadcrumb">
             <ul>
-                <li><a href="/Department/Index">Department</a></li>
+                <li><a href="/Employee/Index">Employee</a></li>
             </ul>
         </div>
         <div class="separator-breadcrumb border-top"></div>
@@ -42,17 +60,19 @@
                 <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered table-striped" id="empTable">
+                <div class="table-responsive" style=" overflow-x: auto;">
+                    <table class="table table-hover table-bordered table-striped" id="empTable" style="width:auto !important; table-layout:auto !important">
                         <thead class="bg-gray-300">
                             <tr>
-                                <th scope="col">Employee Name</th>
+                                <th scope="col">Name</th>
                                 <th scope="col">CNIC</th>
                                 <th scope="col">Address</th>
                                 <th scope="col">Phone</th>
                                 <th scope="col">Per Hour Wage</th>
                                 <th scope="col">Department</th>
                                 <th scope="col">Email</th>
+                                <th scope="col">Card</th>
+                                <th scope="col">Status</th>
                                 <th scope="col">Action</th>
                             </tr>
                         </thead>
@@ -122,6 +142,22 @@
                         data: "Email",
                         orderable: true,
                         searchable: true
+                    },
+                    {
+                        data:"Card.cardCode"
+                    },
+                    {
+                        data: "isActive",
+                        render: function (data, type, row) {
+                            if (type === 'display') {
+                                var status = data ? 'Active' : 'In-Active';
+                                var badgeClass = data ? 'bg-success' : 'bg-danger';
+                                return '<span class="badge rounded-pill ' + badgeClass + ' text-white p-2 m-1">' + status + '</span>';
+                            }
+                            return data ? 'Active' : 'In-Active';
+                        },
+                        orderable: false, // Disable sorting for this column
+                        searchable: false, // Disable searching for this column
                     },
                     {
                         data: "Id", // Use the "Id" property for the action buttons

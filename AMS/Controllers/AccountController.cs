@@ -9,9 +9,11 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using AMS.Models;
+using System.Security.Policy;
 
 namespace AMS.Controllers
 {
+    
     [Authorize]
     public class AccountController : Controller
     {
@@ -74,9 +76,24 @@ namespace AMS.Controllers
                 return View(model);
             }
 
-            // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, change to shouldLockout: true
+            var user = await UserManager.FindByEmailAsync(model.Email);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Invalid login attempt.");
+                return View(model);
+            }
+
+            if (!await UserManager.IsEmailConfirmedAsync(user.Id))
+            {
+                string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                await UserManager.SendEmailAsync(user.Id, "Confirm Your Account", "Please confirm your email by clicking: "+ callbackUrl);
+                return View("EmailConfirmationView");
+            }
+
             var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
+
             switch (result)
             {
                 case SignInStatus.Success:
@@ -91,6 +108,7 @@ namespace AMS.Controllers
                     return View(model);
             }
         }
+
 
         //
         // GET: /Account/VerifyCode
@@ -142,8 +160,10 @@ namespace AMS.Controllers
         {
             var viewModel = new RegisterViewModel();
 
-            viewModel.Department = _dbContext.Departments.ToList();
-
+            viewModel.Department = _dbContext.Departments.Where(d=>d.isActive==true).ToList();
+            viewModel.Card = _dbContext.Cards
+      .Where(c => c.isActive && !_dbContext.Users.Any(u => u.CardId == c.Id))
+      .ToList();
             if (id != null)
             {
                 var existingUser = await UserManager.FindByIdAsync(id);
@@ -189,10 +209,15 @@ namespace AMS.Controllers
                         existingUser.perHour = model.perHour;
                         existingUser.FirstName = model.FirstName;
                         existingUser.LastName = model.LastName;
+                        existingUser.CardId=model.CardId;
+                        existingUser.isActive=model.isActive;
+                        existingUser.Phone=model.Phone;
+                        existingUser.Address= model.Address;
                         // Update user
                         var updateResult = await UserManager.UpdateAsync(existingUser);
                         if (updateResult.Succeeded)
                         {
+                           
                             TempData["SuccessMessage"] = "Profile updated successfully.";
                             return RedirectToAction("Register", "Account", new { id = model.Id });
                         }
@@ -214,7 +239,11 @@ namespace AMS.Controllers
                         DepartmentId = model.DepartmentId,
                         perHour = model.perHour,
                         FirstName = model.FirstName,
-                        LastName = model.LastName
+                        LastName = model.LastName,
+                        CardId = model.CardId,
+                        isActive = model.isActive,
+                        Phone= model.Phone,
+                        Address= model.Address
                     };
                     var result = await UserManager.CreateAsync(user, model.Password);
                     if (result.Succeeded)

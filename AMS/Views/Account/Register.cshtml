@@ -4,168 +4,228 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 
 }
-
+<style>
+    .requiredstar::after {
+        content: "*";
+        color: red;
+    }
+</style>
+<a class="btn btn-primary mb-3" href="/Employee/Index">Employee List</a>
 <main aria-labelledby="title">
-    <h2 id="title">@ViewBag.Title.</h2>
-    @if (!string.IsNullOrEmpty(TempData["SuccessMessage"] as string))
-    {
-        <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert">
-            <strong class="text-capitalize">Success!</strong> <span>@TempData["SuccessMessage"]</span>
-            <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
-    @if (!string.IsNullOrEmpty(TempData["ErrorMessage"] as string))
-    {
-        <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert">
-            <strong class="text-capitalize">Error!</strong> <span>@TempData["ErrorMessage"]</span>
-            <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
-
-    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form", id = "register-form" }))
-    {
-        @Html.AntiForgeryToken()
-        <hr />
-        @Html.ValidationSummary("", new { @class = "text-danger" })
-        <div class="row">
-            <div class="col-md-4">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.FirstName, new { @class = "col-form-label" })
-                    @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @id = "firstName", autocomplete = "off" })
-                    @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+    <div class="card">
+        <div class="card-body">
+            <h2 id="title" class="text-muted">@ViewBag.Title</h2>
+            @if (!string.IsNullOrEmpty(TempData["SuccessMessage"] as string))
+            {
+                <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert">
+                    <strong class="text-capitalize">Success!</strong> <span>@TempData["SuccessMessage"]</span>
+                    <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.LastName, new { @class = "col-form-label" })
-                    @Html.TextBoxFor(model => model.LastName, new { @class = "form-control", @id = "lastName", autocomplete = "off" })
-                    @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+            }
+
+            @if (!string.IsNullOrEmpty(TempData["ErrorMessage"] as string))
+            {
+                <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert">
+                    <strong class="text-capitalize">Error!</strong> <span>@TempData["ErrorMessage"]</span>
+                    <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Email, new { @class = "col-form-label" })
-                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @id = "email", autocomplete = "off" })
-                    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Password, new { @class = "col-form-label" })
-                    <div class="input-group">
-                        @Html.TextBoxFor(model => model.Password, new { @class = "form-control", @id = "password", autocomplete = "off", type = "password" })
-                        <span class="input-group-text" id="togglePassword">
-                            <i class="fa fa-eye-slash"></i>
-                        </span>
+            }
+
+
+            @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form", id = "register-form" }))
+            {
+                @Html.AntiForgeryToken()
+                <hr />
+                @Html.ValidationSummary("", new { @class = "text-danger" })
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.FirstName, new { @class = "col-form-label requiredstar" })
+                            @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @id = "firstName", autocomplete = "off" })
+                            @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                        </div>
                     </div>
-                    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.ConfirmPassword, new { @class = "col-form-label" })
-                    <div class="input-group">
-                        @Html.TextBoxFor(model => model.ConfirmPassword, new { @class = "form-control", @id = "confirmPassword", autocomplete = "off", type = "password" })
-                        <span class="input-group-text" id="toggleConfirmPassword">
-                            <i class="fa fa-eye-slash"></i>
-                        </span>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.LastName, new { @class = "col-form-label requiredstar" })
+                            @Html.TextBoxFor(model => model.LastName, new { @class = "form-control", @id = "lastName", autocomplete = "off" })
+                            @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                        </div>
                     </div>
-                    @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Email, new { @class = "col-form-label requiredstar" })
+                            @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @id = "email", autocomplete = "off" })
+                            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    @Html.LabelFor(m => m.DepartmentId, new { @class = "col-form-label" })
-                    @Html.DropDownListFor(m => m.DepartmentId, new SelectList(Model.Department, "Id", "deptName"), " --Select--", new { @class = "form-control", @id = "departmentId" })
-                    @Html.ValidationMessageFor(m => m.DepartmentId, "", new { @class = "text-danger" })
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Password, new { @class = "col-form-label requiredstar" })
+                            <div class="input-group">
+                                @Html.TextBoxFor(model => model.Password, new { @class = "form-control", @id = "password", autocomplete = "off", type = "password" })
+                                <span class="input-group-text" id="togglePassword">
+                                    <i class="fa fa-eye-slash"></i>
+                                </span>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ConfirmPassword, new { @class = "col-form-label" })
+                            <div class="input-group">
+                                @Html.TextBoxFor(model => model.ConfirmPassword, new { @class = "form-control", @id = "confirmPassword", autocomplete = "off", type = "password" })
+                                <span class="input-group-text" id="toggleConfirmPassword">
+                                    <i class="fa fa-eye-slash"></i>
+                                </span>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.DepartmentId, new { @class = "col-form-label requiredstar" })
+                            @Html.DropDownListFor(m => m.DepartmentId, new SelectList(Model.Department, "Id", "deptName"), " --Select--", new { @class = "form-control", @id = "departmentId" })
+                            @Html.ValidationMessageFor(m => m.DepartmentId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.perHour, new { @class = "col-form-label" })
-                    @Html.TextBoxFor(model => model.perHour, new { @class = "form-control", @id = "perHour", autocomplete = "off" })
-                    @Html.ValidationMessageFor(model => model.perHour, "", new { @class = "text-danger" })
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.perHour, new { @class = "col-form-label" })
+                            @Html.TextBoxFor(model => model.perHour, new { @class = "form-control", @id = "perHour", autocomplete = "off" })
+                            @Html.ValidationMessageFor(model => model.perHour, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CNIC, new { @class = "col-form-label requiredstar" })
+                            @Html.TextBoxFor(model => model.CNIC, new { @class = "form-control", @id = "cnic", autocomplete = "off" })
+                            <span class="text-danger" id="cnic-validation" style="display: none;">Please enter a valid CNIC (e.g., 12345-1234567-1)</span>
+                            @Html.ValidationMessageFor(model => model.CNIC, "", new { @class = "text-danger" })
+                            @Html.HiddenFor(Model => Model.Id)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.CardId, new { @class = "col-form-label requiredstar" })
+                            @Html.DropDownListFor(m => m.CardId, new SelectList(Model.Card, "Id", "cardCode"), " --Select--", new { @class = "form-control", @id = "cardId" })
+                            @Html.ValidationMessageFor(m => m.CardId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    @Html.LabelFor(model => model.CNIC, new { @class = "col-form-label" })
-                    @Html.TextBoxFor(model => model.CNIC, new { @class = "form-control", @id = "cnic", autocomplete = "off" })
-                    <span class="text-danger" id="cnic-validation" style="display: none;">Please enter a valid CNIC (e.g., 12345-1234567-1)</span>
-                    @Html.ValidationMessageFor(model => model.CNIC, "", new { @class = "text-danger" })
-                    @Html.HiddenFor(Model => Model.Id)
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Address, new { @class = "col-form-label requiredstar" })
+                            @Html.TextBoxFor(model => model.Address, new { @class = "form-control", @id = "address", autocomplete = "off", placeholder = "Building/Street/Area, City, UAE" })
+                            @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Phone, new { @class = "col-form-label requiredstar" })
+                            @Html.TextBoxFor(model => model.Phone, new { @class = "form-control", @id = "phone", autocomplete = "off" }) 
+                            <span class="text-danger" id="phone-validation" style="display: none;">Please enter a valid phone number (e.g., +971-45-1234567)</span>
+                            @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <br />
+                            <br />
+                            @Html.CheckBoxFor(model => model.isActive, new { @class = "form-check-input" })
+                            @Html.LabelFor(model => model.isActive, new { @class = "form-check-label" })
+                            @Html.ValidationMessageFor(model => model.isActive, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+                <div class="card-footer">
+                    <div class="row float-end">
+                        <div class="col-md-12">
+                            <input type="submit" value="Register" class="btn btn-outline-primary" />
+                        </div>
+                    </div>
 
-        <div class="row">
-            <div class="offset-md-2 col-md-10">
-                <input type="submit" value="Register" class="btn btn-outline-dark" />
-            </div>
+                </div>
+            }
         </div>
-    }
+    </div>
+
 </main>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
-<script>
-    $(document).ready(function() {
-        $('#cnic').inputmask('99999-9999999-9');
-        $('#cnic').blur(function () {
-            var cnic = $('#cnic').val().replace(/-/g, ''); 
-            var cnicDigitsOnly = cnic.replace(/\D/g, ''); 
+    <script>
+        $(document).ready(function () {
+            $('#cnic').inputmask('99999-9999999-9');
+            $('#phone').inputmask("+971-99-9999999", { placeholder: "+971-xx-xxxxxxx" });
+            $('#cnic').blur(function () {
+                var cnic = $('#cnic').val().replace(/-/g, '');
+                var cnicDigitsOnly = cnic.replace(/\D/g, '');
+                if (cnicDigitsOnly.length !== 13) {
+                    $('#cnic-validation').show();
+                } else {
+                    $('#cnic-validation').hide();
+                }
+            });
+            $('#phone').blur(function () {
+                var phone = $('#phone').val();
+                if (!phone.match(/^\+971-\d{2}-\d{7}$/)) {
+                    $('#phone-validation').show();
+                } else {
+                    $('#phone-validation').hide();
+                }
+            });
+            $('#togglePassword').click(function () {
+                event.preventDefault();
+                var passwordField = $('#password');
+                var passwordFieldType = passwordField.attr('type');
+                if (passwordFieldType === 'password') {
+                    passwordField.attr('type', 'text');
+                    $('#togglePassword i').removeClass('fa-eye-slash');
+                    $('#togglePassword i').addClass('fa-eye');
+                } else {
+                    passwordField.attr('type', 'password');
+                    $('#togglePassword i').removeClass('fa-eye');
+                    $('#togglePassword i').addClass('fa-eye-slash');
+                }
+            });
+
+            // Function to toggle confirm password visibility
+            $('#toggleConfirmPassword').click(function () {
+                event.preventDefault();
+                var confirmPasswordField = $('#confirmPassword');
+                var confirmPasswordFieldType = confirmPasswordField.attr('type');
+                if (confirmPasswordFieldType === 'password') {
+                    confirmPasswordField.attr('type', 'text');
+                    $('#toggleConfirmPassword i').removeClass('fa-eye-slash');
+                    $('#toggleConfirmPassword i').addClass('fa-eye');
+                } else {
+                    confirmPasswordField.attr('type', 'password');
+                    $('#toggleConfirmPassword i').removeClass('fa-eye');
+                    $('#toggleConfirmPassword i').addClass('fa-eye-slash');
+                }
+            });
+
+        });
+
+        document.getElementById('register-form').addEventListener('submit', function (event) {
+            var cnic = document.getElementById('cnic').value.replace(/-/g, ''); // Remove hyphens
+            var cnicDigitsOnly = cnic.replace(/\D/g, ''); // Remove non-digit characters
             if (cnicDigitsOnly.length !== 13) {
-                $('#cnic-validation').show();
-            } else {
-                $('#cnic-validation').hide();
+                document.getElementById('cnic-validation').style.display = 'block';
+                event.preventDefault(); // Prevent form submission
+            }
+            var phone = document.getElementById('phone').value;
+            if (!phone.match(/^\+971-\d{2}-\d{7}$/)) {
+                document.getElementById('phone-validation').style.display = 'block';
+                event.preventDefault(); // Prevent form submission
             }
         });
-        $('#togglePassword').click(function () {
-            event.preventDefault();
-            var passwordField = $('#password');
-            var passwordFieldType = passwordField.attr('type');
-            if (passwordFieldType === 'password') {
-                passwordField.attr('type', 'text');
-                $('#togglePassword i').removeClass('fa-eye-slash');
-                $('#togglePassword i').addClass('fa-eye');
-            } else {
-                passwordField.attr('type', 'password');
-                $('#togglePassword i').removeClass('fa-eye');
-                $('#togglePassword i').addClass('fa-eye-slash');
-            }
-        });
-
-        // Function to toggle confirm password visibility
-        $('#toggleConfirmPassword').click(function () {
-            event.preventDefault();
-            var confirmPasswordField = $('#confirmPassword');
-            var confirmPasswordFieldType = confirmPasswordField.attr('type');
-            if (confirmPasswordFieldType === 'password') {
-                confirmPasswordField.attr('type', 'text');
-                $('#toggleConfirmPassword i').removeClass('fa-eye-slash');
-                $('#toggleConfirmPassword i').addClass('fa-eye');
-            } else {
-                confirmPasswordField.attr('type', 'password');
-                $('#toggleConfirmPassword i').removeClass('fa-eye');
-                $('#toggleConfirmPassword i').addClass('fa-eye-slash');
-            }
-        });
-        
-    });
-
-    document.getElementById('register-form').addEventListener('submit', function (event) {
-        var cnic = document.getElementById('cnic').value.replace(/-/g, ''); // Remove hyphens
-        var cnicDigitsOnly = cnic.replace(/\D/g, ''); // Remove non-digit characters
-        if (cnicDigitsOnly.length !== 13) {
-            document.getElementById('cnic-validation').style.display = 'block';
-            event.preventDefault(); // Prevent form submission
-        }
-    });
-</script>
+    </script>
 }
