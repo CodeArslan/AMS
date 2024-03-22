@@ -244,7 +244,7 @@
         $('.spinner-container').fadeOut();
     }
     //add urls here in which you dont want to show loader/spinner
-    var excludedUrls = ['/department/isnameavailable','/shift/gettimevalues'];
+    var excludedUrls = ['/department/isnameavailable', '/shift/gettimevalues', '/card/isnameavailable','/card/getcarddata'];
 
     $.ajaxSetup({
         beforeSend: function (xhr, settings) {
@@ -261,6 +261,7 @@
             hideSpinner();
         }
     });
+   
     // JavaScript code
     $(document).ready(function () {
         // Jab bhi koi li element pe hover hota hai

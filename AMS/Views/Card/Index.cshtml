@@ -1,6 +1,6 @@
 ﻿@model AMS.Models.Card
 @{
-    ViewBag.Title = "index";
+    ViewBag.Title = "Card";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -161,90 +161,225 @@
 @section scripts
 {
 <script>
-    $("#cardTable").DataTable({
-        ajax: {
-            url: "/Card/GetCardData",
-            dataSrc: ""
-        },
-        columns: [
-            {
-                data: "Id",
-                orderable: true, // Enable sorting for the first column
-                searchable: true
-            },
-            {
-                data: "cardCode",
-                orderable: true, // Enable sorting for the second column
-                searchable: true
-            },
-            {
-                data: "isActive",
-                render: function (data) {
-                    return data ? 'Yes' : 'No';
-                },
-                orderable: false, // Disable sorting for this column
-                searchable: false // Disable searching for this column
-            },
-            {
-                data: "Id", // Use the "Id" property for the action buttons
-                render: function (data) {
-                    return "<a class='text-success me-2 btn btn-primary m-1 edit-btn' href='#' data-bs-toggle='modal' data-target='#updateCard' data-whatever='mdo' data-id='" + data + "'><i class='fa fa-edit'></i></a>" +
-                        "<a class='text-danger me-2 btn btn-warning delete-btn' id='del' href='#' data-id='" + data + "'><i class='fa fa-trash'></i></a>";
-                },
-                orderable: false, // Disable sorting for this column
-                searchable: false // Disable searching for this column
-            },
-        ],
-        pagingType: 'full_numbers',
-        language: {
-            paginate: {
-                first: 'First',
-                previous: '&lsaquo;',
-                next: '&rsaquo;',
-                last: 'Last'
-            },
-            searchPlaceholder: 'Min 3 Characters'
-        },
-        autoWidth: false, // Disable auto width calculation
-        columnDefs: [
-            { width: '100px', targets: '_all' } // Set a fixed width for all columns, adjust as needed
-        ],
-        drawCallback: function () {
-            // Override DataTables styles with Bootstrap styles after each draw
-            $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
-            $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
-            $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
-            $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
-        }
-    });
+    $(document).ready(function () {
+        //checks for duplicate card code
+        $('#addCard, #editCardName').on('input', function () {
+            var cardName = $(this).val();
+            var isUpdateForm = $(this).attr('id') === 'editCardName';
+            var cardId = isUpdateForm ? $('#hiddenId').val() : null;
 
-    $('#cardTable').on('click', '.edit-btn', function () {
-        var id = $(this).data('id');
-        $.ajax({
-            url: '/Card/GetCardById/' + id,
-            type: 'GET',
-            dataType: 'json',
-            success: function (card) {
-                $('#editCardName').val(card.cardCode);
-                $('#editIsActive').prop('checked', card.isActive);
-                $('#hiddenId').val(card.Id);
-                $('#updateCard').modal('show');
-            },
-            error: function (xhr, status, error) {
-                toastr.error(
-                    response.message,
-                    "Error",
-                    {
-                        "class": "btn w-100 btn-outline-danger mb-2",
-                        "id": "toast-danger",
-                        timeOut: 2000,
-                        progressBar: true,
-                        closeButton: true
+            if (cardName !== '') {
+                $.ajax({
+                    type: 'POST',
+                    url: '/Card/IsNameAvailable',
+                    data: {
+                        name: cardName,
+                        id: cardId,
+                        isUpdate: isUpdateForm
+                    },
+                    success: function (data) {
+                        var duplicateNameMessageElement = isUpdateForm ? '#duplicateNameforUpdate' : '#duplicateNameforAdd';
+
+                        var submitButton = isUpdateForm ? '#updateForm' : '#submitForm';
+
+                        if (!data) {
+                            $(duplicateNameMessageElement).html('Card Code already exists.');
+                            $(submitButton).prop('disabled', true);
+                        } else {
+                            $(duplicateNameMessageElement).html('');
+                            $(submitButton).prop('disabled', false);
+                        }
                     }
-                );
+                });
             }
         });
+        $("#cardTable").DataTable({
+            ajax: {
+                url: "/Card/GetCardData",
+                dataSrc: "",
+                beforeSend: function () {
+                    hideSpinner();
+                }
+            },
+            columns: [
+                {
+                    data: "Id",
+                    orderable: true, // Enable sorting for the first column
+                    searchable: true
+                },
+                {
+                    data: "cardCode",
+                    orderable: true, // Enable sorting for the second column
+                    searchable: true
+                },
+                {
+                    data: "isActive",
+                    render: function (data, type, row) {
+                        if (type === 'display') {
+                            var status = data ? 'Active' : 'In-Active';
+                            var badgeClass = data ? 'bg-success' : 'bg-danger';
+                            return '<span class="badge rounded-pill ' + badgeClass + ' text-white p-2 m-1">' + status + '</span>';
+                        }
+                        return data ? 'Active' : 'In-Active';
+                    },
+                    orderable: false, // Disable sorting for this column
+                    searchable: false, // Disable searching for this column
+                },
+                {
+                    data: "Id", // Use the "Id" property for the action buttons
+                    render: function (data) {
+                        return "<a class='text-success me-2 btn btn-primary m-1 edit-btn' href='#' data-bs-toggle='modal' data-target='#updateCard' data-whatever='mdo' data-id='" + data + "'><i class='fa fa-edit'></i></a>" +
+                            "<a class='text-danger me-2 btn btn-warning' id='del' href='#' data-id='" + data + "'><i class='fa fa-trash'></i></a>";
+                    },
+                    orderable: false, // Disable sorting for this column
+                    searchable: false // Disable searching for this column
+                },
+            ],
+            pagingType: 'full_numbers',
+            language: {
+                paginate: {
+                    first: 'First',
+                    previous: '&lsaquo;',
+                    next: '&rsaquo;',
+                    last: 'Last'
+                },
+                searchPlaceholder: 'Min 3 Characters'
+            },
+            autoWidth: false, // Disable auto width calculation
+            columnDefs: [
+                { width: '100px', targets: '_all' } // Set a fixed width for all columns, adjust as needed
+            ],
+            drawCallback: function () {
+                // Override DataTables styles with Bootstrap styles after each draw
+                $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
+                $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
+                $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
+                $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+            }
+        });
+        $('#cardTable').on('click', '.edit-btn', function () {
+            var id = $(this).data('id');
+            $.ajax({
+                url: '/Card/GetCardById/' + id,
+                type: 'GET',
+                dataType: 'json',
+                success: function (card) {
+                    $('#editCardName').val(card.cardCode);
+                    $('#editIsActive').prop('checked', card.isActive);
+                    $('#hiddenId').val(card.Id);
+                    $('#updateCard').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    toastr.error(
+                        response.message,
+                        "Error",
+                        {
+                            "class": "btn w-100 btn-outline-danger mb-2",
+                            "id": "toast-danger",
+                            timeOut: 2000,
+                            progressBar: true,
+                            closeButton: true
+                        }
+                    );
+                }
+            });
+        });
+        $("#updateCancel").click(function () {
+            // Reset the form
+            $('#updateCardForm')[0].reset();
+
+            // Clear validation messages
+            $('#duplicateNameforUpdate').html('');
+            $('.text-danger').html('');
+
+            toastr.warning(
+                "Updation Cancelled",
+                {
+                    "class": "btn w-100 btn-outline-danger mb-2",
+                    "id": "toast-danger",
+                    progressBar: true,
+                    closeButton: true,
+                    timeOut: 1000
+                }
+            );
+        });
+        //delete
+        $('#cardTable').on('click', '#del', function () {
+            var id = $(this).data('id');
+
+            bootbox.confirm({
+                message: "Are you sure you want to delete?",
+                buttons: {
+                    confirm: {
+                        label: 'Confirm',
+                        className: 'btn-primary'
+                    },
+                    cancel: {
+                        label: 'Cancel',
+                        className: 'btn-secondary'
+                    }
+                },
+                callback: function (result) {
+                    if (result) {
+                        // If user confirms, proceed with deletion
+                        $.ajax({
+                            url: '/Card/Delete/' + id,
+                            type: 'POST',
+                            dataType: 'json',
+                            success: function (response) {
+                                if (response.success) {
+                                    // Show success alert
+                                    $('#successMessage').text(response.message);
+                                    $('#successAlert').fadeIn();
+
+                                    // Optional: Hide error alert if it's still visible
+                                    $('#errorAlert').hide();
+
+                                    // Optionally, you can update the DataTable after successful deletion
+                                    $('#cardTable').DataTable().ajax.reload();
+
+                                    // Hide alerts after a delay
+                                    setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                                } else {
+                                    // Show error alert
+                                    $('#errorMessage').text(response.message);
+                                    $('#errorAlert').fadeIn();
+
+                                    // Optional: Hide success alert if it's still visible
+                                    $('#successAlert').hide();
+
+                                    // Hide alerts after a delay
+                                    setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                // Show error alert for AJAX failure
+                                $('#errorMessage').text("An Error Occurred While Deleting Card");
+                                $('#errorAlert').fadeIn();
+
+                                // Optional: Hide success alert if it's still visible
+                                $('#successAlert').hide();
+
+                                // Hide alerts after a delay
+                                setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                            }
+                        });
+                    }
+                }
+            });
+        });
+        //reset form when modal is closed
+        $('#addCard').on('hidden.bs.modal', function () {
+            $('#addCardForm')[0].reset();
+            $('#duplicateNameforAdd').html('');
+            $('.text-danger').html('');
+            $('#submitForm').prop('disabled', false);
+
+        });
     });
+   
+
+   
 
     //this function is used when adding department is successfull, it will only trigger when adding a department is successfull
     function handleSuccessforAdd(response) {
@@ -289,71 +424,7 @@
         setTimeout(hideAlerts, 2000);
     }
 
-    //delete
-    $('#cardTable').on('click', '#del', function () {
-        var id = $(this).data('id');
-
-        bootbox.confirm({
-            message: "Are you sure you want to delete?",
-            buttons: {
-                confirm: {
-                    label: 'Confirm',
-                    className: 'btn-primary'
-                },
-                cancel: {
-                    label: 'Cancel',
-                    className: 'btn-secondary'
-                }
-            },
-            callback: function (result) {
-                if (result) {
-                    // If user confirms, proceed with deletion
-                    $.ajax({
-                        url: '/Card/Delete/' + id,
-                        type: 'POST',
-                        dataType: 'json',
-                        success: function (response) {
-                            if (response.success) {
-                                // Show success alert
-                                $('#successMessage').text(response.message);
-                                $('#successAlert').fadeIn();
-
-                                // Optional: Hide error alert if it's still visible
-                                $('#errorAlert').hide();
-
-                                // Optionally, you can update the DataTable after successful deletion
-                                $('#cardTable').DataTable().ajax.reload();
-
-                                // Hide alerts after a delay
-                                setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
-                            } else {
-                                // Show error alert
-                                $('#errorMessage').text(response.message);
-                                $('#errorAlert').fadeIn();
-
-                                // Optional: Hide success alert if it's still visible
-                                $('#successAlert').hide();
-
-                                // Hide alerts after a delay
-                                setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            // Show error alert for AJAX failure
-                            $('#errorMessage').text("An Error Occurred While Deleting Card");
-                            $('#errorAlert').fadeIn();
-
-                            // Optional: Hide success alert if it's still visible
-                            $('#successAlert').hide();
-
-                            // Hide alerts after a delay
-                            setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
-                        }
-                    });
-                }
-            }
-        });
-    });
+   
     //this function is used when updating department is successful, it will only trigger when updating a department is successful
     function handleSuccessforUpdate(response) {
         if (response.success) {
@@ -390,42 +461,7 @@
         $('#successAlert').hide();
         setTimeout(hideAlerts, 2000);
     }
-    //reset form when modal is closed
-    $('#addCard').on('hidden.bs.modal', function () {
-        $('#addCardForm')[0].reset();
-        $('#duplicateNameforAdd').html('');
-        $('.text-danger .validation-summary-errors').html('');
-        $('#submitForm').prop('disabled', false);
-
-    });
-    //checks for duplicate department name
-    $('#addCard, #editCardName').on('input', function () {
-        var cardName = $(this).val();
-        var isUpdateForm = $(this).attr('id') === 'editCardName';
-        var cardId = isUpdateForm ? $('#hiddenId').val() : null;
-
-        if (cardName !== '') {
-            $.ajax({
-                type: 'POST',
-                url: '/Card/IsNameAvailable',
-                data: {
-                    name: cardName,
-                    id: cardId,
-                    isUpdate: isUpdateForm
-                },
-                success: function (data) {
-                    var duplicateNameMessageElement = isUpdateForm ? '#duplicateNameforUpdate' : '#duplicateNameforAdd';
-
-                    if (!data) {
-                        $(duplicateNameMessageElement).html('Card Code already exists.');
-                        $('#submitForm,#updateForm').prop('disabled', true);
-                    } else {
-                        $(duplicateNameMessageElement).html('');
-                        $('#submitForm,#updateForm').prop('disabled', false);
-                    }
-                }
-            });
-        }
-    });
+  
+   
     </script>    
 }
