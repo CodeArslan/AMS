@@ -1,0 +1,247 @@
+﻿
+@{
+    ViewBag.Title = "Inbox";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="main-content">
+    <div class="card chat-sidebar-container"
+         data-sidebar-container="chat">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="chat-sidebar-wrap" data-sidebar="chat" style="width:340px">
+                    <div class="border-end">
+                        <div class="pt-2 pb-2 ps-3 pe-3 d-flex align-items-center o-hidden box-shadow-1 chat-topbar">
+                            Recent Chats
+                            <a class="link-icon" id="reloadIcon">
+                                <i class="fa fa-sync"></i> <!-- Add reload icon here -->
+                            </a>
+                        </div>
+                        <div class="contacts-scrollable perfect-scrollbar">
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="chat-content-wrap" data-sidebar-content="chat">
+                    <div class="d-flex ps-3 pe-3 pt-2 pb-2 o-hidden box-shadow-1 chat-topbar">
+                        <a class="link-icon d-md-none" data-sidebar-toggle="chat">
+                            <i class="icon-regular i-Right ms-0 me-3"></i>
+                        </a>
+                        <div class="d-flex align-items-center">
+
+                            <p class="m-0 text-title text-16 flex-grow-1" id="chatName"></p>
+                        </div>
+                    </div>
+                    <div class="chat-content perfect-scrollbar"
+                         data-suppress-scroll-x="true">
+                        <p class="text-muted text-center text-capitalize font-monospace">Please select any contact to show message.</p>
+                    </div>
+                    <div class="ps-3 pe-3 pt-3 pb-3 box-shadow-1 chat-input-area" style="margin-top:78px">
+                        <div class="d-flex">
+                            <div class="flex-grow-1"></div>
+                            <a class="btn btn-success btn-primary me-2 disabled" data-bs-toggle="modal" data-target="#responseModal"
+                               data-whatever="mdo" id="btnApprove">Approve</a>
+                            <a class="btn btn-outline-danger disabled" data-bs-toggle="modal" data-target="#responseModal"
+                               data-whatever="mdo" id="btnReject">Reject</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end of main-content -->
+</div>
+<div class="main-content">
+    <div class="card" style="margin-top: 20px;">
+        <div class="card-header">
+            <h4 class="text-primary">Employee Leave Search</h4>
+        </div>
+        <div class="card-body">
+            <form id="leaveSearchForm">
+                <div class="form-group">
+                    <label for="employeeId">Employee Id</label>
+                    <input type="text" class="form-control" id="employeeId" placeholder="Enter Employee Id">
+                </div>
+                <div class="form-group">
+                    <label for="employeeName">Employee Name</label>
+                    <input type="text" class="form-control" id="employeeName" placeholder="Enter Employee Name">
+                </div>
+                <!-- Add new input for leave balance -->
+                <div class="form-group">
+                    <label for="leaveBalance">Leave Balance</label>
+                    <input type="number" class="form-control" id="leaveBalance" placeholder="Leave Balance" readonly>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="searchEmployee()">Search</button>
+            </form>
+
+            <!-- Display search results here -->
+            <div id="searchResults"></div>
+        </div>
+    </div>
+</div>
+<div class="modal fade"
+     id="responseModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="verifyModalContent"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="verifyModalContent_title">
+                    New Message
+                </h5>
+                <button class="btn btn-close"
+                        type="button"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-form-label" for="message-text-1">Message:</label>
+                        <textarea class="form-control"
+                                  id="message-text-1"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary"
+                        type="button"
+                        data-bs-dismiss="modal" id="cancel">
+                    Close
+                </button>
+                <button class="btn btn-primary" type="button" id="sendMessage">
+                    Send message
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+       
+        $(document).ready(function () {
+            $('#reloadIcon').click(function () {
+                $(this).find('i').toggleClass('fa-spin');
+                fetchChatData();
+
+            });
+             function fetchChatData() {
+            $.ajax({
+                url: '@Url.Action("GetChatData", "Leave")',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    $('.contacts-scrollable').empty();
+                    $.each(data, function (index, chat) {
+                        var timestamp = parseInt(chat.Date.match(/\d+/)[0]);
+                        var date = new Date(timestamp);
+
+                        var options = { year: 'numeric', month: 'short', day: 'numeric' };
+                        var formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+
+                        var html = '<div class="p-3 d-flex align-items-center border-bottom offline contact" data-chatid="' + chat.Id + '">';
+                        html += '<div>';
+                        html += '<h6 class="m-0">' + chat.Name + '</h6>';
+                        html += '<span class="text-muted text-small">' + formattedDate + '</span>';
+                        html += '</div>';
+                        html += '</div>';
+                        $('.contacts-scrollable').append(html);
+
+                    });
+                    setTimeout(function () {
+                        $('#reloadIcon').find('i').removeClass('fa-spin');
+                    }, 2000);                },
+                error: function () {
+                    console.log('Error occurred while fetching chat data.');
+                }
+            });
+            }
+            function loadChatMessage(chatId) {
+                $.ajax({
+                    url: '/Leave/GetChatMessage', // Replace with the actual URL of your action method to fetch chat message data
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { chatId: chatId }, // Pass chatId as a parameter to the server
+
+                    success: function (data) {
+                        $('.chat-content').empty();
+                        var timestamp = parseInt(data.Date.match(/\d+/)[0]);
+                        var date = new Date(timestamp);
+
+                        var options = { year: 'numeric', month: 'short', day: 'numeric' };
+                        var formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+                        // Update chat content with fetched message data
+                        $('.chat-content').html('<div class="d-flex mb-4"><div class="message flex-grow-1"><div class="d-flex"><p class="mb-1 text-title text-16 flex-grow-1">' + data.Name + '</p><span class="text-small text-muted">' + formattedDate + '</span></div><p class="m-0">' + data.Message + '</p></div></div>');
+                        $('#btnApprove,#btnReject').removeClass('disabled');
+                    },
+                    error: function () {
+                        console.log('Error occurred while fetching chat message data.');
+                    }
+                });
+            }
+            $('.contacts-scrollable').on('click', '.contact', function () {
+                var chatId = $(this).data('chatid');
+                loadChatMessage(chatId);
+                var chatName = $(this).find('h6').text();
+                $('#chatName').text(chatName);
+            });
+
+        fetchChatData();
+        setInterval(fetchChatData, 300000);
+            $("#sendMessage").click(function () {
+                toastr.success(
+                    "Message Have Been Send Successfully",
+                    {
+                        "class": "btn w-100 btn-outline-success mb-2",
+                        "id": "toast-success",
+                        timeOut: 2000,
+                        progressBar: true,
+                        closeButton: true
+                    }
+                );
+                $("#responseModal").modal('hide');
+            });
+            $("#cancel").click(function () {
+                toastr.warning(
+                    "Updation Cancelled",
+                    {
+                        "class": "btn w-100 btn-outline-danger mb-2",
+                        "id": "toast-danger",
+                        progressBar: true,
+                        closeButton: true,
+                        timeOut: 1000
+                    }
+                );
+            });
+        });
+        function searchEmployee() {
+            // Get input values
+            var employeeId = document.getElementById("employeeId").value;
+            var employeeName = document.getElementById("employeeName").value;
+
+            // Perform the search and display results
+            var leaveBalance = getLeaveBalance(); // Replace with actual data retrieval logic
+
+            // Display the results in the designated div
+            var searchResults = "Employee Id: " + employeeId + "<br>";
+            searchResults += "Employee Name: " + employeeName + "<br>";
+            searchResults += "Leave Balance: " + leaveBalance + "<br>";
+
+            document.getElementById("searchResults").innerHTML = searchResults;
+
+            // Update the Leave Balance input field
+            document.getElementById("leaveBalance").value = leaveBalance;
+        }
+
+        function getLeaveBalance() {
+            // Simulate getting numeric data from an API or database
+            return 10; // Replace with actual data retrieval logic
+        }
+    </script>
+}
+
