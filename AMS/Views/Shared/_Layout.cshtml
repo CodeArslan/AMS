@@ -75,6 +75,7 @@
                     <li class="nav-item no-open" data-item="">
                         <a class="nav-item-hold" href="/Leave/Inbox">
                             <i class="fa fa-bed-alt fa-lg"></i><span class="nav-text">Leave Requests</span>
+                            <span class="badge badge-square badge-square-opacity-primary m-1" id="leaveRequestsBadge"></span>
                         </a>
                     </li>
                     <li class="nav-item no-open" data-item="">
@@ -189,10 +190,10 @@
                     <div class="row mt-4">
                         <div class="col-md-12 text-center">
                             <ul class="list-inline social-icons">
-                                <li class="list-inline-item"><a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a></li>
-                                <li class="list-inline-item"><a href="#" target="_blank"><i class="fab fa-twitter"></i></a></li>
-                                <li class="list-inline-item"><a href="#" target="_blank"><i class="fab fa-linkedin-in"></i></a></li>
-                                <li class="list-inline-item"><a href="#" target="_blank"><i class="fab fa-instagram"></i></a></li>
+                                <li class="list-inline-item"><a href="#" target="_blank"><i class="fab fa-facebook-f fa-lg"></i></a></li>
+                                <li class="list-inline-item"><a href="#" target="_blank"><i class="fab fa-twitter fa-lg"></i></a></li>
+                                <li class="list-inline-item"><a href="#" target="_blank"><i class="fab fa-linkedin-in fa-lg"></i></a></li>
+                                <li class="list-inline-item"><a href="#" target="_blank"><i class="fab fa-instagram fa-lg"></i></a></li>
                             </ul>
                         </div>
                     </div>
@@ -227,6 +228,23 @@
 </html>
 
 <script>
+    getInboxCount();
+    function getInboxCount() {
+        $.ajax({
+            url: '/Leave/GetInboxCount',
+            type: 'GET',
+            beforeSend: function () {
+                hideSpinner();
+            },
+            success: function (data) {
+                $('#leaveRequestsBadge').text(data);
+                setInterval(getInboxCount, 2 * 60 * 1000);
+            },
+            error: function () {
+                console.log('Error occurred while fetching chat message data.');
+            }
+        });
+    }
     // Function to hide success and error alerts after a delay
     function hideAlerts() {
         $('#successAlert, #errorAlert').fadeOut(2000, function () {
@@ -244,11 +262,10 @@
         $('.spinner-container').fadeOut();
     }
     //add urls here in which you dont want to show loader/spinner
-    var excludedUrls = ['/department/isnameavailable', '/shift/gettimevalues', '/card/isnameavailable','/card/getcarddata'];
+    var excludedUrls = ['/department/isnameavailable', '/shift/gettimevalues', '/card/isnameavailable', '/card/getcarddata'];
 
     $.ajaxSetup({
         beforeSend: function (xhr, settings) {
-            // Check if the current request URL is in the excluded URLs array
             if (excludedUrls.includes(settings.url.toLowerCase())) {
                 return; // Skip the global spinner handling for this request
             } else {

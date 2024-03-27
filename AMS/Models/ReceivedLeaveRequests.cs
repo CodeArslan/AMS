@@ -14,6 +14,7 @@ namespace AMS.Models
         public string Subject {  get; set; }
         public DateTime? Date { get; set; } = DateTime.Now;
         public bool isRead {  get; set; }
+        public string Decision { get; set; }
 
     }
 }

@@ -1,9 +1,27 @@
-﻿
+﻿@model AMS.Models.LeaveResponse
 @{
     ViewBag.Title = "Inbox";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<style>
+    #badge-position {
+        position: relative;
+        left: 120%;
+    }
 
+    .active-chat {
+        background-color: #c2c2c2; /* Light Slate Gray */
+    }
+</style>
+<a href="/Leave/Index" class="btn btn-primary mb-4">Leaves</a>
+<div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
+    <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
+    <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert" style="display:none">
+    <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
+    <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
 <div class="main-content">
     <div class="card chat-sidebar-container"
          data-sidebar-container="chat">
@@ -12,13 +30,16 @@
                 <div class="chat-sidebar-wrap" data-sidebar="chat" style="width:340px">
                     <div class="border-end">
                         <div class="pt-2 pb-2 ps-3 pe-3 d-flex align-items-center o-hidden box-shadow-1 chat-topbar">
-                            Recent Chats
-                            <a class="link-icon" id="reloadIcon">
-                                <i class="fa fa-sync"></i> <!-- Add reload icon here -->
+                            Chats
+                            <a class="link-icon" id="reloadIcon" style="margin-left:78%">
+                                <i class="fa fa-sync fa-lg"></i> <!-- Reload icon -->
                             </a>
+
+
                         </div>
+
                         <div class="contacts-scrollable perfect-scrollbar">
-                           
+
                         </div>
                     </div>
                 </div>
@@ -30,7 +51,6 @@
                             <i class="icon-regular i-Right ms-0 me-3"></i>
                         </a>
                         <div class="d-flex align-items-center">
-
                             <p class="m-0 text-title text-16 flex-grow-1" id="chatName"></p>
                         </div>
                     </div>
@@ -55,192 +75,290 @@
     <!-- end of main-content -->
 </div>
 <div class="main-content">
-    <div class="card" style="margin-top: 20px;">
-        <div class="card-header">
-            <h4 class="text-primary">Employee Leave Search</h4>
-        </div>
-        <div class="card-body">
-            <form id="leaveSearchForm">
-                <div class="form-group">
-                    <label for="employeeId">Employee Id</label>
-                    <input type="text" class="form-control" id="employeeId" placeholder="Enter Employee Id">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card" style="margin-top: 20px;">
+                <div class="card-header">
+                    <h4 class="text-primary">Leave Balance</h4>
                 </div>
-                <div class="form-group">
-                    <label for="employeeName">Employee Name</label>
-                    <input type="text" class="form-control" id="employeeName" placeholder="Enter Employee Name">
-                </div>
-                <!-- Add new input for leave balance -->
-                <div class="form-group">
-                    <label for="leaveBalance">Leave Balance</label>
-                    <input type="number" class="form-control" id="leaveBalance" placeholder="Leave Balance" readonly>
-                </div>
-                <button type="button" class="btn btn-primary" onclick="searchEmployee()">Search</button>
-            </form>
+                <div class="card-body">
+                    <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert" style="display:none">
+                        <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
+                        <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <form id="leaveSearchForm">
+                        <div class="form-group">
+                            <label for="employeeId">Employee Email</label>
+                            <input type="text" class="form-control" id="employeeEmail" placeholder="Enter Employee Email">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="employeeName">Employee Name</label>
+                                    <input type="text" class="form-control" id="employeeName" readonly disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="leaveBalance">Leave Balance</label>
+                                    <input type="number" class="form-control" id="leaveBalance" readonly disabled>
+                                </div>
+                            </div>
+                        </div>
 
-            <!-- Display search results here -->
-            <div id="searchResults"></div>
+
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <div class="row justify-content-end">
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-primary" id="searchButton">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
 </div>
-<div class="modal fade"
-     id="responseModal"
-     tabindex="-1"
-     role="dialog"
-     aria-labelledby="verifyModalContent"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="verifyModalContent_title">
-                    New Message
-                </h5>
-                <button class="btn btn-close"
-                        type="button"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-            </div>
+<div class="modal fade" id="responseModal" tabindex="-1" role="dialog" aria-labelledby="verifyModalContent" aria-hidden="true">
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="verifyModalContent_title">
+                New Message
+            </h5>
+            <button class="btn btn-close"
+                    type="button"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+        </div>
+        @using (Ajax.BeginForm("AddLeave", "Leave", new AjaxOptions
+        {
+            HttpMethod = "POST",
+            OnBegin="onBegin",
+            OnSuccess = "handleSuccessforLeave",
+            OnFailure = "handleFailureforLeave",
+        }, new { id = "leaveDecisionForm" }))
+        {
             <div class="modal-body">
-                <form>
-                    <div class="form-group">
-                        <label class="col-form-label" for="message-text-1">Message:</label>
-                        <textarea class="form-control"
-                                  id="message-text-1"></textarea>
+
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.From, new { @class = "col-form-label" })
+                            @Html.TextBoxFor(model => model.From, new { @class = "form-control", @id = "fromDate", @type = "date", autocomplete = "off" })
+                            @Html.ValidationMessageFor(model => model.From, "", new { @class = "text-danger" })
+                        </div>
                     </div>
-                </form>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.To, new { @class = "col-form-label" })
+                            @Html.TextBoxFor(model => model.To, new { @class = "form-control", @id = "toDate", @type = "date", autocomplete = "off" })
+                            @Html.ValidationMessageFor(model => model.To, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Message, new { @class = "col-form-label" })
+                            @Html.TextBoxFor(model => model.Message, new { @class = "form-control", autocomplete = "off" })
+                            @Html.HiddenFor(model => model.rlrId, new { @id = "hiddenchatId" })
+                            @Html.HiddenFor(model => model.Decision, new { @id = "hiddenDecision" })
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary"
-                        type="button"
-                        data-bs-dismiss="modal" id="cancel">
-                    Close
-                </button>
-                <button class="btn btn-primary" type="button" id="sendMessage">
-                    Send message
-                </button>
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal" id="cancel">Close</button>
+                <button class="btn btn-primary" type="submit" id="sendMessage">Send</button>
             </div>
-        </div>
+        }
+
     </div>
+</div>
 </div>
 @section scripts{
     <script>
-       
+
         $(document).ready(function () {
+            $("#btnApprove").click(function () {
+                $("#verifyModalContent_title").text("Approve Message");
+                $("#fromDate, #toDate, #hiddenchatId").closest(".row").show();
+                $("#hiddenDecision").val("Approved");
+            });
+
+            $("#btnReject").click(function () {
+                $("#verifyModalContent_title").text("Reject Message");
+                $("#fromDate, #toDate, #Message").closest(".row").hide();
+                $("#hiddenDecision").val("Rejected");
+
+            });
+            $("#searchButton").click(function () {
+                var email = $("#employeeEmail").val();
+                $.ajax({
+                    type: 'GET',
+                    url: '@Url.Action("GetLeaveBalance", "Leave")',
+                    beforeSend: function () {
+                        hideSpinner();
+                    },
+                    data: { email: email },
+                    success: function (response) {
+                        if (response.success) {
+                            $("#employeeName").val(response.user.FirstName + " " + response.user.LastName);
+                            $("#leaveBalance").val(response.user.leaveBalance);
+                        } else {
+                            $("#errorAlert").html(response.message);
+                            setTimeout(hideAlerts, 2000);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText); // Log error message
+                    }
+                });
+            });
             $('#reloadIcon').click(function () {
                 $(this).find('i').toggleClass('fa-spin');
                 fetchChatData();
 
             });
-             function fetchChatData() {
-            $.ajax({
-                url: '@Url.Action("GetChatData", "Leave")',
-                type: 'GET',
-                dataType: 'json',
-                success: function (data) {
-                    $('.contacts-scrollable').empty();
-                    $.each(data, function (index, chat) {
-                        var timestamp = parseInt(chat.Date.match(/\d+/)[0]);
-                        var date = new Date(timestamp);
-
-                        var options = { year: 'numeric', month: 'short', day: 'numeric' };
-                        var formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
-
-                        var html = '<div class="p-3 d-flex align-items-center border-bottom offline contact" data-chatid="' + chat.Id + '">';
-                        html += '<div>';
-                        html += '<h6 class="m-0">' + chat.Name + '</h6>';
-                        html += '<span class="text-muted text-small">' + formattedDate + '</span>';
-                        html += '</div>';
-                        html += '</div>';
-                        $('.contacts-scrollable').append(html);
-
-                    });
-                    setTimeout(function () {
-                        $('#reloadIcon').find('i').removeClass('fa-spin');
-                    }, 2000);                },
-                error: function () {
-                    console.log('Error occurred while fetching chat data.');
-                }
-            });
+            var isFirstTime = 1;
+            function fetchChatData() {
+                debugger;
+    $.ajax({
+        url: '@Url.Action("GetChatData", "Leave")',
+        type: 'GET',
+        dataType: 'json',
+        beforeSend: function () {
+            // This condition ensures that executeFunction() is only called after the first call to fetchChatData()
+            if (isFirstTime != 1) {
+                hideSpinner();
+            } else {
+                showSpinner();
+                isFirstTime = 0;
             }
+        },        success: function (data) {
+            $('.contacts-scrollable').empty();
+            $.each(data, function (index, chat) {
+                var timestamp = parseInt(chat.Date.match(/\d+/)[0]);
+                var date = new Date(timestamp);
+
+                var options = { year: 'numeric', month: 'short', day: 'numeric' };
+                var formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+
+                var badge = '';
+                if (chat.Decision === 'Approved') {
+                    badge = '<span class="badge rounded-pill bg-success text-white p-2 m-1" id="badge-position">Approved</span>';
+                } else if (chat.Decision === 'Rejected') {
+                    badge = '<span class="badge rounded-pill bg-danger text-white p-2 m-1" id="badge-position">Rejected</span>';
+                } else {
+                    badge = '<span class="badge rounded-pill bg-warning text-dark p-2 m-1" id="badge-position">Pending</span>';
+                }
+
+                var html = '<div class="p-3 d-flex align-items-center border-bottom contact" data-chatid="' + chat.Id + '">';
+                html += '<div>';
+                html += '<h6 class="m-0">' + chat.Name + '</h6>';
+                html += '<span class="text-muted text-small">' + formattedDate + '</span>';
+                html += badge; // Adding badge here
+                html += '</div>';
+                html += '</div>';
+                $('.contacts-scrollable').append(html);
+            });
+            setInterval(fetchChatData,  2*60 * 1000);
+            setTimeout(function () {
+                $('#reloadIcon').find('i').removeClass('fa-spin');
+            }, 1000);
+        },
+        error: function (response) {
+            $('#errorMessage').text('Error occurred while fetching chat data: ' + response.error+ ' Please Try Again!');
+            $('#errorAlert').show();
+            setTimeout(hideAlerts, 2000);
+
+        }
+    });
+}
             function loadChatMessage(chatId) {
                 $.ajax({
-                    url: '/Leave/GetChatMessage', // Replace with the actual URL of your action method to fetch chat message data
+                    url: '/Leave/GetChatMessage',
                     type: 'GET',
+                    beforeSend: function () {
+                        hideSpinner();
+                    },
                     dataType: 'json',
-                    data: { chatId: chatId }, // Pass chatId as a parameter to the server
+                    data: { chatId: chatId },
 
                     success: function (data) {
                         $('.chat-content').empty();
-                        var timestamp = parseInt(data.Date.match(/\d+/)[0]);
+                        var timestamp = parseInt(data.ChatMessage.Date.match(/\d+/)[0]);
                         var date = new Date(timestamp);
 
                         var options = { year: 'numeric', month: 'short', day: 'numeric' };
                         var formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
-                        // Update chat content with fetched message data
-                        $('.chat-content').html('<div class="d-flex mb-4"><div class="message flex-grow-1"><div class="d-flex"><p class="mb-1 text-title text-16 flex-grow-1">' + data.Name + '</p><span class="text-small text-muted">' + formattedDate + '</span></div><p class="m-0">' + data.Message + '</p></div></div>');
-                        $('#btnApprove,#btnReject').removeClass('disabled');
-                    },
+
+                        // Update chat content with fetched message data including leaveCount
+                        var chatContent = '<div class="d-flex mb-4"><div class="message flex-grow-1"><div class="d-flex"><p class="mb-1 text-title text-16 flex-grow-1">' + data.ChatMessage.Name + '</p><span class="text-small text-muted">' + formattedDate + '</span></div><p class="m-0">' + data.ChatMessage.Message + '</p></div></div>';
+                        $('.chat-content').html(chatContent);
+
+                        // Add leave count information
+                        if (data.LeaveCount !== undefined) {
+                            $('.chat-content').append('<p>Leave Count: ' + data.LeaveCount + '</p>');
+                        }
+
+                        if (data.ChatMessage.Decision === null) {
+                            $('#btnApprove, #btnReject').removeClass('disabled');
+                        } else {
+                            $('#btnApprove, #btnReject').addClass('disabled');
+                        }                    },
                     error: function () {
                         console.log('Error occurred while fetching chat message data.');
                     }
                 });
             }
+
             $('.contacts-scrollable').on('click', '.contact', function () {
+                // Remove active class from all contacts
+                $('.contact').removeClass('active-chat');
+
+                // Add active class to the clicked contact
+                $(this).addClass('active-chat');
+
                 var chatId = $(this).data('chatid');
+                $("#hiddenchatId").val('');
+                $("#hiddenchatId").val(chatId);
                 loadChatMessage(chatId);
                 var chatName = $(this).find('h6').text();
                 $('#chatName').text(chatName);
             });
 
         fetchChatData();
-        setInterval(fetchChatData, 300000);
-            $("#sendMessage").click(function () {
-                toastr.success(
-                    "Message Have Been Send Successfully",
-                    {
-                        "class": "btn w-100 btn-outline-success mb-2",
-                        "id": "toast-success",
-                        timeOut: 2000,
-                        progressBar: true,
-                        closeButton: true
-                    }
-                );
-                $("#responseModal").modal('hide');
-            });
-            $("#cancel").click(function () {
-                toastr.warning(
-                    "Updation Cancelled",
-                    {
-                        "class": "btn w-100 btn-outline-danger mb-2",
-                        "id": "toast-danger",
-                        progressBar: true,
-                        closeButton: true,
-                        timeOut: 1000
-                    }
-                );
-            });
+           
+
         });
-        function searchEmployee() {
-            // Get input values
-            var employeeId = document.getElementById("employeeId").value;
-            var employeeName = document.getElementById("employeeName").value;
+        function onBegin() {
+            showSpinner();
+        }
+        function handleSuccessforLeave(data) {
+            $("#responseModal").modal('hide');
+            $('#reloadIcon').click();
 
-            // Perform the search and display results
-            var leaveBalance = getLeaveBalance(); // Replace with actual data retrieval logic
+            $('#successMessage').text("Leave Email Sent Succesfully !!");
+            $('#successAlert').show();
+            setTimeout(hideAlerts, 2000);
 
-            // Display the results in the designated div
-            var searchResults = "Employee Id: " + employeeId + "<br>";
-            searchResults += "Employee Name: " + employeeName + "<br>";
-            searchResults += "Leave Balance: " + leaveBalance + "<br>";
-
-            document.getElementById("searchResults").innerHTML = searchResults;
-
-            // Update the Leave Balance input field
-            document.getElementById("leaveBalance").value = leaveBalance;
         }
 
-        function getLeaveBalance() {
-            // Simulate getting numeric data from an API or database
-            return 10; // Replace with actual data retrieval logic
+        function handleFailureforLeave(xhr, status, error) {
+            // Display error message
+            $('#errorMessage').text("An Error Occurred While Sending Leave Email. Please Try Again");
+            $('#errorAlert').show();
+            setTimeout(hideAlerts, 2000);
+
         }
     </script>
 }

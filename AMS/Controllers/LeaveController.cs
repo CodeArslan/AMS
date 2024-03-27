@@ -13,44 +13,76 @@ using AMS.Models;
 using System.Configuration;
 using static AMS.Controllers.LeaveController;
 using System.Web.Helpers;
+using static System.Data.Entity.Infrastructure.Design.Executor;
+using System.Data.Entity;
+using System.Threading.Tasks;
 
 namespace AMS.Controllers
 {
     public class LeaveController : Controller
     {
         private ApplicationDbContext _dbContext;
-        private System.Timers.Timer timer;
         public LeaveController()
         {
             _dbContext = new ApplicationDbContext();
-            timer = new System.Timers.Timer(120000); // 60000 milliseconds = 1 minute
-            timer.Elapsed += Timer_Elapsed;
-            timer.AutoReset = true;
+           
         }
+        public async Task<ActionResult> GetLeaveData()
+        {
+            var leaveList = await _dbContext.receivedLeaveRequests.AsNoTracking().ToListAsync();
+            return Json(leaveList, JsonRequestBehavior.AllowGet);
+        }
+
         // GET: Leave
         public ActionResult Index()
         {
             return View();
         }
+        [HttpGet]
+        public JsonResult GetLeaveBalance(string Email)
+        {
+            var user = _dbContext.Users.Where(u => u.Email == Email).FirstOrDefault();
+
+            if (user != null)
+            {
+                // Employee found, return their data
+                return Json(new { success = true, user=user },JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                // Employee not found, return appropriate response
+                return Json(new { success = false, message = "Employee not found." });
+            }
+        }
         public ActionResult Inbox()
         {
             ReceiveUnreadEmailsFromGmail();
-            timer.Start();
             return View();
 
         }
 
-        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+      
+        [HttpGet]
+        public JsonResult GetInboxCount()
         {
-            // Execute the method to receive unread emails
-            ReceiveUnreadEmailsFromGmail();
-            //timer.Start();
+            //ReceiveUnreadEmailsFromGmail();
+            var chats = _dbContext.receivedLeaveRequests.Where(c=>c.isRead==false).ToList(); 
+            return Json(chats.Count(), JsonRequestBehavior.AllowGet);
         }
         [HttpGet]
         public JsonResult GetChatData()
         {
-            var chats = _dbContext.receivedLeaveRequests.ToList(); // Assuming you have a Chat model and DbContext setup
-            return Json(chats, JsonRequestBehavior.AllowGet);
+            try
+            {
+                ReceiveUnreadEmailsFromGmail();
+                var chatList = _dbContext.receivedLeaveRequests.OrderByDescending(c => c.Date);
+                return Json(chatList, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = "An error occurred while fetching chat data: " + ex.Message;
+                return Json(new { error = errorMessage });
+            }
         }
         [HttpGet]
         public JsonResult GetChatMessage(int chatId)
@@ -59,7 +91,18 @@ namespace AMS.Controllers
             var chatMessage = _dbContext.receivedLeaveRequests.FirstOrDefault(c => c.Id == chatId);
             if (chatMessage != null)
             {
-                return Json(chatMessage, JsonRequestBehavior.AllowGet);
+                var leaveCount = _dbContext.Users
+                                    .Where(l => l.Email == chatMessage.From)
+                                    .Select(l => l.leaveBalance)
+                                    .FirstOrDefault();
+
+                var responseData = new
+                {
+                    ChatMessage = chatMessage,
+                    LeaveCount = leaveCount
+                };
+
+                return Json(responseData, JsonRequestBehavior.AllowGet);
             }
             else
             {
@@ -138,5 +181,109 @@ namespace AMS.Controllers
                 client.Disconnect(true);
             }
         }
+        public ActionResult AddLeave(LeaveResponse response)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    if (response.Id == 0)
+                    {
+                        var fromDate = response.From;
+                        var toDate = response.To;
+
+                       
+                        var message = response.Message;
+                        var decision = response.Decision;
+                        var Email = _dbContext.receivedLeaveRequests.Where(e => e.Id == response.rlrId).FirstOrDefault();
+                        var leaveBalance = 0;
+                        if(fromDate!= null&&toDate!=null) {
+                            var days = (toDate.Value - fromDate.Value).Days;
+                            var user = _dbContext.Users.Where(l => l.Email == Email.From).FirstOrDefault();
+                            leaveBalance = user.leaveBalance;
+                            user.leaveBalance = user.leaveBalance - days;
+                            _dbContext.SaveChanges();
+                        }
+                        sendLeaveEmail(fromDate, toDate, message, Email.From,decision, leaveBalance);
+                        Email.Decision = response.Decision;
+                        _dbContext.LeaveResponses.Add(response);
+                        _dbContext.SaveChanges();
+                        return Json(new { success = true, message = "Leave Sent Successfully." });
+                    }
+                }
+            }
+            catch(Exception)
+            {
+                return Json(new { success = false, message = "An error occurred while processing your request." });
+
+            }
+
+            return View(response);
+        }
+        public ActionResult sendLeaveEmail(DateTime? from, DateTime? to, string message, string email, string decision, int newLeaveBalance)
+        {
+            try
+            {
+                string senderEmail = ConfigurationManager.AppSettings["Email"].ToString(); // Sender's email address
+                string senderPassword = ConfigurationManager.AppSettings["Password"].ToString(); // Sender's email password
+                string smtpHost = "smtp.gmail.com";
+                int smtpPort = 587;
+                bool enableSSL = true;
+
+                // Create a new MailMessage instance
+                MailMessage mail = new MailMessage();
+
+                // Set sender and recipient email addresses
+                mail.From = new MailAddress(senderEmail);
+                mail.To.Add(email);
+                string body;
+                int finalLeaveBalance=0;
+                int totalDays=0;
+                if (from!=null&&to!=null)
+                {
+                    // Calculate total days of leave
+                     totalDays = (to.Value - from.Value).Days;
+
+                    // Calculate final leave balance
+                     finalLeaveBalance = newLeaveBalance - totalDays;
+                }    
+             
+                // Set email subject based on decision
+                if (decision.Equals("Approved", StringComparison.OrdinalIgnoreCase))
+                {
+                    mail.Subject = "Leave Application Approved";
+                    body = $"Your leave has been approved from {from:d} to {to:d} for {totalDays} days.\nYour new leave balance is {finalLeaveBalance}.";
+                    mail.Body = body;
+
+                }
+                else if (decision.Equals("Rejected", StringComparison.OrdinalIgnoreCase))
+                {
+                    mail.Subject = "Leave Application Rejected";
+                    body = $"Unfortunately! Your leave application has been rejected.\nYour current leave balance is {newLeaveBalance}.";
+                    mail.Body = body;
+
+                }
+
+
+
+                // Create SMTP client
+                SmtpClient smtpClient = new SmtpClient(smtpHost, smtpPort);
+                smtpClient.EnableSsl = enableSSL;
+                smtpClient.UseDefaultCredentials = false;
+                smtpClient.Credentials = new System.Net.NetworkCredential(senderEmail, senderPassword);
+
+                // Send the email
+                smtpClient.Send(mail);
+
+                // Optionally, return a success message
+                return Content("Email sent successfully!");
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions
+                return Content("Error: " + ex.Message);
+            }
+        }
+
     }
 }
