@@ -31,6 +31,8 @@ namespace AMS.Models
         [Required]
         [Display(Name = "Per Hour Wage:")]
         public int perHour {  get; set; }
+        public int leaveBalance { get; set; }
+
         public int totalPay {  get; set; }
         public Department Department { get; set; }
         [ForeignKey("Department")]
@@ -63,6 +65,10 @@ namespace AMS.Models
         public DbSet<Shift> Shifts { get; set; }
         public DbSet<Labour> Labours { get; set; }
         public DbSet<Card> Cards { get; set; }
+        public DbSet<Meeting> Meetings { get; set; }
+        public DbSet<EmployeeHasMeeting> employeeHasMeetings { get; set; }
+        public DbSet<ReceivedLeaveRequests> receivedLeaveRequests { get; set; }
+        public DbSet<LeaveResponse> LeaveResponses { get; set; }
 
         public static ApplicationDbContext Create()
         {

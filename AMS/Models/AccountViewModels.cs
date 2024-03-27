@@ -112,6 +112,7 @@ namespace AMS.Models
         public int CardId { get; set; }
 
         public bool isActive { get; set; }
+        public int leaveBalance { get; set; }   
 
     }
 

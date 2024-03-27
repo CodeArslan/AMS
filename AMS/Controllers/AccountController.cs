@@ -242,8 +242,9 @@ namespace AMS.Controllers
                         LastName = model.LastName,
                         CardId = model.CardId,
                         isActive = model.isActive,
-                        Phone= model.Phone,
-                        Address= model.Address
+                        Phone = model.Phone,
+                        Address = model.Address,
+                        leaveBalance = 2,
                     };
                     var result = await UserManager.CreateAsync(user, model.Password);
                     if (result.Succeeded)
