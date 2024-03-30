@@ -1,0 +1,498 @@
+﻿@model AMS.ViewModels.LeaveResponseViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+</head>
+<body>
+    <div class="main-content">
+        <div class="breadcrumb">
+            <ul>
+                <li><a href="/Leave/Index">Leave</a></li>
+            </ul>
+        </div>
+        <div class="separator-breadcrumb border-top"></div>
+    </div>
+
+    <div class="main-content">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h4 class="text-primary">Leave Balance</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlertforleaveSearch" style="display:none">
+                            <strong class="text-capitalize">Error!</strong> <span id="errorMessageforleaveSearch"></span>
+                            <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        <form id="leaveSearchForm">
+                            <div class="form-group">
+                                <label for="employeeId">Employee Email</label>
+                                <input type="text" class="form-control" id="employeeEmail" placeholder="Enter Employee Email">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="employeeName">Employee Name</label>
+                                        <input type="text" class="form-control" id="employeeName" readonly disabled>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="leaveBalance">Leave Balance</label>
+                                        <input type="number" class="form-control" id="leaveBalance" readonly disabled>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row justify-content-end">
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-primary" id="searchButton">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h4 class="text-primary">Leave Form</h4>
+                    </div>
+                    @using (Ajax.BeginForm("LeaveDetails", "Leave", new AjaxOptions
+                    {
+                        HttpMethod = "POST",
+                        OnBegin = "validateForm",
+                        OnSuccess = "handleSuccessforAdd",
+                        OnFailure = "handleFailureforAdd",
+                    }, new { id = "addLeaveForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div class="card-body">
+                            <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlertaddLeave" style="display:none">
+                                <strong class="text-capitalize">Success!</strong> <span id="successMessageaddLeave"></span>
+                                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlertaddLeave" style="display:none">
+                                <strong class="text-capitalize">Error!</strong> <span id="errorMessageaddLeave"></span>
+                                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.receivedLeaveRequests.From, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.receivedLeaveRequests.From, new { @class = "form-control", @id = "EmployeeEmail", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.receivedLeaveRequests.From, "", new { @class = "text-danger", @id = "errorForEmail" })
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.receivedLeaveRequests.Name, new { @class = "col-form-label" })
+                                        @Html.TextBoxFor(model => model.receivedLeaveRequests.Name, new { @class = "form-control disabled", @id = "EmployeeName", autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.receivedLeaveRequests.Name, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.receivedLeaveRequests.Message, new { @class = "col-form-label" })
+                                        @Html.TextBoxFor(model => model.receivedLeaveRequests.Message, new { @class = "form-control", @id = "leaveReason", autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.receivedLeaveRequests.Message, "", new { @class = "text-danger", @id = "errorForMessage" })
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.LeaveResponse.From, new { @class = "col-form-label" })
+                                        @Html.TextBoxFor(model => model.LeaveResponse.From, "{0:yyyy-MM-dd}", new { @class = "form-control", @id = "DateFrom", @type = "date", autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.LeaveResponse.From, "", new { @class = "text-danger", @id = "FromDate" })
+                                    </div>
+
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.LeaveResponse.To, new { @class = "col-form-label" })
+                                        @Html.TextBoxFor(model => model.LeaveResponse.To, "{0:yyyy-MM-dd}", new { @class = "form-control", @id = "DateTo", @type = "date", autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.LeaveResponse.To, "", new { @class = "text-danger", @id = "ToDate" })
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="col-auto">
+                                <button class="btn btn-primary" type="submit" id="sendMessage">Add</button>
+
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    
+    <div class="col-md-12 mb-3">
+
+
+        <div class="card text-start">
+
+            <div class="card-header">
+                <h4 class="text-25 text-muted">Leave List</h4>
+            </div>
+            <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
+                <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
+                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert" style="display:none">
+                <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
+                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped" id="LeaveTable">
+                        <thead class="bg-gray-300">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Leave Name</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Read</th>
+                            </tr>
+                        </thead>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+</body>
+</html>
+
+@section scripts
+{
+    <script>
+        function validateForm() {
+            //showSpinner();
+            var message = $("#leaveReason").val();
+            var email = $("#EmployeeEmail").val();
+            var date = $("#DateFrom").val();
+            var enddate = $("#DateTo").val();
+       
+            var emailPattern = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            var isValid = true;
+
+
+            if (message === "") {
+                $("#errorForMessage").text("please enter message");
+                isvalid = false;
+            } else {
+                $("#errorForMessage").text("");
+            }
+            
+            if (email === "") {
+                $("#errorForEmail").text("Please Provide An Email");
+                isValid = false;
+            } else if (!emailPattern.test(email)) {
+                $("#errorForEmail").text("Please provide a valid email address.");
+                isValid = false;
+            } else {
+                $("#errorForEmail").text("");
+            }
+
+            if (date === "") {
+                $("#FromDate").text("please enter message");
+                isvalid = false;
+            } else {
+                $("#FromDate").text("");
+            }
+
+            if (enddate === "") {
+                $("#ToDate").text("Please Enter Date");
+               isValid = false;
+            } else {
+                $("#ToDate").text("");
+            }
+            // Check if both FromDate and ToDate are valid and proceed with the comparison
+            if (isValid && new Date(date) > new Date(enddate)) {
+                $("#errorAlertaddLeave").fadeIn();
+                $("#errorMessageaddLeave").text("Ensure From Date is earlier than To Date");
+                isValid = false;
+            }
+            else {
+                $("#errorAlertaddLeave").fadeOut();
+                $("#errorMessageaddLeave").text("");
+
+            }
+            return isValid;
+        }
+
+        function handleSuccessforAdd(response)
+        {
+                if (response.success) {
+                    // Show success alert
+                    $('#successMessageaddLeave').text(response.message);
+                    $('#successAlertaddLeave').fadeIn();
+                    $('#errorAlertaddLeave').hide();
+
+                    event.preventDefault();
+                    $('#LeaveTable').DataTable().ajax.reload();
+                    $("#sendMessage").modal('hide');
+
+                    //Form Reset
+                    $('#addLeaveForm')[0].reset();
+
+                    setTimeout(function () {
+                        $('#successAlertaddLeave').fadeOut();
+                    }, 2000);
+                }
+                else
+                {
+                    // Show error alert
+                    $('#errorMessageaddLeave').text(response.message);
+                    $('#errorAlertaddLeave').fadeIn();
+                    $('#successAlertaddLeave').hide();
+                    setTimeout(function () {
+                        $('#errorAlertaddLeave').fadeOut();
+                    }, 2000);
+                }
+            }
+        function handleFailureforAdd()
+        {
+                // Show error alert for AJAX failure
+                $('#errorMessageaddLeave').text("An Error Occurred While Adding Leave");
+                $('#errorAlertaddLeave').fadeIn();
+
+                // Optional: Hide success alert if it's still visible
+                $('#successAlertaddLeave').hide();
+            setTimeout(function () {
+                $('#errorAlertaddLeave').fadeOut();
+            }, 2000);
+        }
+        
+
+
+        $(document).ready(function () {
+            $("#LeaveTable").DataTable({
+                ajax: {
+                    url: "/Leave/GetLeaveData",
+                    dataSrc: ""
+                },
+                columns: [
+                    {
+                        data: "Id",
+                        orderable: true, // Enable sorting for the first column
+                        searchable: true
+                    },
+                    {
+                        data: "Name",
+                        orderable: true, // Enable sorting for the second column
+                        searchable: true
+                    },
+                    {
+                        data: "isRead",
+                        render: function (data, type, row) {
+                            if (type === 'display') {
+                                var status = data ? 'Active' : 'In-Active';
+                                var badgeClass = data ? 'bg-success' : 'bg-danger';
+                                return '<span class="badge rounded-pill ' + badgeClass + ' text-white p-2 m-1">' + status + '</span>';
+                            }
+                            return data ? 'Active' : 'In-Active';
+                        },
+                        orderable: false, // Disable sorting for this column
+                        searchable: false, // Disable searching for this column
+                    },
+
+                    {
+                        data: "Id", // Use the "Id" property for the action buttons
+                        render: function (data) {
+                            return "<a class='text-danger me-2 btn btn-warning delete-btn' id='del' href='#' data-id='" + data + "'><i class='fa fa-trash'></i></a>";
+                        },
+                        orderable: false, // Disable sorting for this column
+                        searchable: false // Disable searching for this column
+                    },
+
+                ],
+                pagingType: 'full_numbers',
+                language: {
+                    paginate: {
+                        first: 'First',
+                        previous: '&lsaquo;',
+                        next: '&rsaquo;',
+                        last: 'Last'
+                    },
+                    searchPlaceholder: 'Min 3 Characters'
+                },
+                autoWidth: false, // Disable auto width calculation
+                columnDefs: [
+                    { width: '100px', targets: '_all' } // Set a fixed width for all columns, adjust as needed
+                ],
+                drawCallback: function () {
+                    // Override DataTables styles with Bootstrap styles after each draw
+                    $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
+                    $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
+                    $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
+                    $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+                }
+            });
+            $('#LeaveTable').on('click', '#del', function () {
+                var id = $(this).data('id');
+
+                bootbox.confirm({
+                    message: "Are you sure you want to delete?",
+                    buttons: {
+                        confirm: {
+                            label: 'Confirm',
+                            className: 'btn-primary'
+                        },
+                        cancel: {
+                            label: 'Cancel',
+                            className: 'btn-secondary'
+                        }
+                    },
+                    callback: function (result) {
+                        if (result) {
+                            // If user confirms, proceed with deletion
+                            $.ajax({
+                                url: '/Leave/Delete/' + id,
+                                type: 'POST',
+                                dataType: 'json',
+                                success: function (response) {
+                                    if (response.success) {
+                                        // Show success alert
+                                        $('#successMessage').text(response.message);
+                                        $('#successAlert').fadeIn();
+
+                                        // Optional: Hide error alert if it's still visible
+                                        $('#errorAlert').hide();
+
+                                        // Optionally, you can update the DataTable after successful deletion
+                                        $('#leaveTable').DataTable().ajax.reload();
+
+                                        event.preventDefault();
+                                        $('#LeaveTable').DataTable().ajax.reload();
+                                        $("#sendMessage").modal('hide');
+                                        setTimeout(hideAlerts, 2000);
+
+                                        // Hide alerts after a delay
+                                        setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                                    } else {
+                                        // Show error alert
+                                        $('#errorMessage').text(response.message);
+                                        $('#errorAlert').fadeIn();
+
+                                        // Optional: Hide success alert if it's still visible
+                                        $('#successAlert').hide();
+
+                                        // Hide alerts after a delay
+                                        setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    // Show error alert for AJAX failure
+                                    $('#errorMessage').text("An Error Occurred While Deleting Leave");
+                                    $('#errorAlert').fadeIn();
+
+                                    // Optional: Hide success alert if it's still visible
+                                    $('#successAlert').hide();
+
+                                    // Hide alerts after a delay
+                                    setTimeout(hideAlerts, 2000); // Adjust the delay as needed (in milliseconds)
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+
+            $("#searchButton").click(function () {
+    var email = $("#employeeEmail").val();
+    $.ajax({
+        type: 'GET',
+        url: '@Url.Action("GetLeaveBalance", "Leave")',
+        beforeSend: function () {
+        hideSpinner();
+        },
+        data: { email: email },
+        success: function (response) {
+        if (response.success) {
+        $("#employeeName").val(response.user.FirstName + " " + response.user.LastName);
+        $("#leaveBalance").val(response.user.leaveBalance);
+        } else {
+        $("#errorAlert").html(response.message);
+        setTimeout(hideAlerts, 2000);
+        }
+        },
+        error: function (xhr, status, error) {
+            
+                // Show error alert for AJAX failure
+                $('#errorAlertforleaveSearch').text("Employee not Registered.");
+                $('#errorAlertforleaveSearch').fadeIn();
+
+                
+                setTimeout(function () {
+                    $('#errorAlertforleaveSearch').fadeOut();
+                }, 2000);
+            
+        }
+        });
+        });
+
+
+
+        $("#EmployeeEmail").blur(function () {
+
+        var email = $("#EmployeeEmail").val();
+
+        $.ajax({
+        type: 'GET',
+        url: '@Url.Action("GetLeave", "Leave")',
+            beforeSend: function ()
+        {
+                hideSpinner();
+        },
+             data: { email: email },
+            success: function (response)
+            {
+                if (response.success)
+                {
+                    $("#EmployeeName").val(response.user.FirstName + " " + response.user.LastName);
+                }
+                else
+                {
+                    $("#errorAlert").html(response.message);
+                    setTimeout(hideAlerts, 2000);
+        }
+      },
+            error: function (xhr, status, error)
+            {
+                console.error(xhr.responseText);
+            }
+        });
+        });
+        });
+
+    </script>
+        }
+
