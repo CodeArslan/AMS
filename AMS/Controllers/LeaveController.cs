@@ -16,6 +16,7 @@ using System.Web.Helpers;
 using static System.Data.Entity.Infrastructure.Design.Executor;
 using System.Data.Entity;
 using System.Threading.Tasks;
+using AMS.ViewModels;
 
 namespace AMS.Controllers
 {
@@ -27,6 +28,7 @@ namespace AMS.Controllers
             _dbContext = new ApplicationDbContext();
            
         }
+
         public async Task<ActionResult> GetLeaveData()
         {
             var leaveList = await _dbContext.receivedLeaveRequests.AsNoTracking().ToListAsync();
@@ -38,6 +40,7 @@ namespace AMS.Controllers
         {
             return View();
         }
+        
         [HttpGet]
         public JsonResult GetLeaveBalance(string Email)
         {
@@ -56,7 +59,7 @@ namespace AMS.Controllers
         }
         public ActionResult Inbox()
         {
-            ReceiveUnreadEmailsFromGmail();
+            //ReceiveUnreadEmailsFromGmail();
             return View();
 
         }
@@ -66,7 +69,7 @@ namespace AMS.Controllers
         public JsonResult GetInboxCount()
         {
             //ReceiveUnreadEmailsFromGmail();
-            var chats = _dbContext.receivedLeaveRequests.Where(c=>c.isRead==false).ToList(); 
+            var chats = _dbContext.receivedLeaveRequests.Where(c=>c.isRead==false && c.Subject!=null).ToList(); 
             return Json(chats.Count(), JsonRequestBehavior.AllowGet);
         }
         [HttpGet]
@@ -74,8 +77,8 @@ namespace AMS.Controllers
         {
             try
             {
-                ReceiveUnreadEmailsFromGmail();
-                var chatList = _dbContext.receivedLeaveRequests.OrderByDescending(c => c.Date);
+                //ReceiveUnreadEmailsFromGmail();
+                var chatList = _dbContext.receivedLeaveRequests.Where(c=>c.Subject!=null).OrderByDescending(c => c.Date);
                 return Json(chatList, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
@@ -206,6 +209,7 @@ namespace AMS.Controllers
                         }
                         sendLeaveEmail(fromDate, toDate, message, Email.From,decision, leaveBalance);
                         Email.Decision = response.Decision;
+                        Email.isRead = true;
                         _dbContext.LeaveResponses.Add(response);
                         _dbContext.SaveChanges();
                         return Json(new { success = true, message = "Leave Sent Successfully." });
@@ -283,6 +287,74 @@ namespace AMS.Controllers
                 // Handle any exceptions
                 return Content("Error: " + ex.Message);
             }
+        }
+        public ActionResult LeaveBalanceReferesh()
+        {
+            if(DateTime.Today.Day==1)
+            {
+                var users =  _dbContext.Users.ToList();
+                foreach (var user in users)
+                {
+                    user.leaveBalance += 2;
+                }
+                _dbContext.SaveChanges();
+            }
+            return Content("");
+        }
+        public ActionResult Delete(int id)
+        {
+            var leaveInDb = _dbContext.receivedLeaveRequests.SingleOrDefault(c => c.Id == id);
+            if (leaveInDb == null)
+            {
+                return Json(new { success = false, message = "Leave Record Doesnot Found" });
+            }
+
+            else
+            {
+                _dbContext.receivedLeaveRequests.Remove(leaveInDb);
+                _dbContext.SaveChanges();
+                return Json(new { success = true, message = "Leave Record Successfully Deleted" });
+            }
+        }
+        public ActionResult LeaveDetails(LeaveResponseViewModel viewModel)
+        {
+            try
+            {
+                var isEmailRegistered = _dbContext.Users.Where(u => u.Email == viewModel.ReceivedLeaveRequests.From).FirstOrDefault();
+                if (isEmailRegistered != null)
+                {
+                    var receivedleaveRequests = new ReceivedLeaveRequests()
+                    {
+                        From = viewModel.ReceivedLeaveRequests.From,
+                        Decision = "Approved",
+                        Message = viewModel.ReceivedLeaveRequests.Message,
+                        Name = viewModel.ReceivedLeaveRequests.Name,
+                    };
+                    _dbContext.receivedLeaveRequests.Add(receivedleaveRequests);
+                    _dbContext.SaveChanges();
+                    var fkrlr = receivedleaveRequests.Id;
+                    var leaveResponse = new LeaveResponse()
+                    {
+                        To = viewModel.LeaveResponse.To,
+                        From = viewModel.LeaveResponse.From,
+                        Decision = "Approved",
+                        rlrId = fkrlr,
+                    };
+                    _dbContext.LeaveResponses.Add(leaveResponse);
+                    _dbContext.SaveChanges();
+                    return Json(new { success = true, message = "Leave added successfully" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Employee not registered!" });
+                }
+
+            }
+            catch
+            {
+                return Json(new { success = false, message = "An error occured while processing your request. Please try again!" });
+            }
+
         }
 
     }

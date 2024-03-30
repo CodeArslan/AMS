@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>@ViewBag.Title | AMS</title>
+    <link rel="icon" type="image/png" href="~/dist-assets/images/faces/ams-logo.png" sizes="16x16">
     <!-- CSS Stylesheets -->
     <link href="~/dist-assets/fonts/fontawesome6/pro/css/all.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/dist-assets/css/plugins/toastr.css" />
@@ -33,7 +34,7 @@
     <div class="app-admin-wrap layout-sidebar-large">
         <div class="main-header">
             <div class="logo">
-                <img src="~/dist-assets/images/ams-logo.png" style="height:65px; width:65px;" />
+                <img src="~/dist-assets/images/faces/ams-logo.png" style="height:65px; width:65px;"/>
             </div>
             <div class="menu-toggle">
                 <div></div>
@@ -229,6 +230,7 @@
 
 <script>
     getInboxCount();
+    leaveBalanceRefresh();
     function getInboxCount() {
         $.ajax({
             url: '/Leave/GetInboxCount',
@@ -242,6 +244,15 @@
             },
             error: function () {
                 console.log('Error occurred while fetching chat message data.');
+            }
+        });
+    }
+    function leaveBalanceRefresh() {
+        $.ajax({
+            url: '/Leave/LeaveBalanceReferesh',
+            type: 'GET',
+            beforeSend: function () {
+                hideSpinner();
             }
         });
     }

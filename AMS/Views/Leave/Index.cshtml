@@ -91,26 +91,26 @@
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.receivedLeaveRequests.From, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.receivedLeaveRequests.From, new { @class = "form-control", @id = "EmployeeEmail", autocomplete = "off" })
-                                    @Html.ValidationMessageFor(model => model.receivedLeaveRequests.From, "", new { @class = "text-danger", @id = "errorForEmail" })
+                                    @Html.LabelFor(model => model.ReceivedLeaveRequests.From, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.ReceivedLeaveRequests.From, new { @class = "form-control", @id = "EmployeeEmail", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.ReceivedLeaveRequests.From, "", new { @class = "text-danger", @id = "errorForEmail" })
                                 </div>
 
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        @Html.LabelFor(model => model.receivedLeaveRequests.Name, new { @class = "col-form-label" })
-                                        @Html.TextBoxFor(model => model.receivedLeaveRequests.Name, new { @class = "form-control disabled", @id = "EmployeeName", autocomplete = "off" })
-                                        @Html.ValidationMessageFor(model => model.receivedLeaveRequests.Name, "", new { @class = "text-danger" })
+                                        @Html.LabelFor(model => model.ReceivedLeaveRequests.Name, new { @class = "col-form-label" })
+                                        @Html.TextBoxFor(model => model.ReceivedLeaveRequests.Name, new { @class = "form-control disabled", @id = "EmployeeName", autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.ReceivedLeaveRequests.Name, "", new { @class = "text-danger" })
                                     </div>
 
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        @Html.LabelFor(model => model.receivedLeaveRequests.Message, new { @class = "col-form-label" })
-                                        @Html.TextBoxFor(model => model.receivedLeaveRequests.Message, new { @class = "form-control", @id = "leaveReason", autocomplete = "off" })
-                                        @Html.ValidationMessageFor(model => model.receivedLeaveRequests.Message, "", new { @class = "text-danger", @id = "errorForMessage" })
+                                        @Html.LabelFor(model => model.ReceivedLeaveRequests.Message, new { @class = "col-form-label" })
+                                        @Html.TextBoxFor(model => model.ReceivedLeaveRequests.Message, new { @class = "form-control", @id = "leaveReason", autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.ReceivedLeaveRequests.Message, "", new { @class = "text-danger", @id = "errorForMessage" })
 
                                     </div>
                                 </div>
@@ -467,7 +467,7 @@
 
         $.ajax({
         type: 'GET',
-        url: '@Url.Action("GetLeave", "Leave")',
+        url: '@Url.Action("GetLeaveBalance", "Leave")',
             beforeSend: function ()
         {
                 hideSpinner();

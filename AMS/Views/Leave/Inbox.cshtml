@@ -122,67 +122,67 @@
 
 </div>
 <div class="modal fade" id="responseModal" tabindex="-1" role="dialog" aria-labelledby="verifyModalContent" aria-hidden="true">
-<div class="modal-dialog" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="verifyModalContent_title">
-                New Message
-            </h5>
-            <button class="btn btn-close"
-                    type="button"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="verifyModalContent_title">
+                    New Message
+                </h5>
+                <button class="btn btn-close"
+                        type="button"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            @using (Ajax.BeginForm("AddLeave", "Leave", new AjaxOptions
+            {
+                HttpMethod = "POST",
+                OnBegin = "onBegin",
+                OnSuccess = "handleSuccessforLeave",
+                OnFailure = "handleFailureforLeave",
+            }, new { id = "leaveDecisionForm" }))
+            {
+                <div class="modal-body">
+
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.From, new { @class = "col-form-label" })
+                                @Html.TextBoxFor(model => model.From, new { @class = "form-control", @id = "fromDate", @type = "date", autocomplete = "off" })
+                                @Html.ValidationMessageFor(model => model.From, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.To, new { @class = "col-form-label" })
+                                @Html.TextBoxFor(model => model.To, new { @class = "form-control", @id = "toDate", @type = "date", autocomplete = "off" })
+                                @Html.ValidationMessageFor(model => model.To, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.Message, new { @class = "col-form-label" })
+                                @Html.TextBoxFor(model => model.Message, new { @class = "form-control", autocomplete = "off" })
+                                @Html.HiddenFor(model => model.rlrId, new { @id = "hiddenchatId" })
+                                @Html.HiddenFor(model => model.Decision, new { @id = "hiddenDecision" })
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal" id="cancel">Close</button>
+                    <button class="btn btn-primary" type="submit" id="sendMessage">Send</button>
+                </div>
+            }
+
         </div>
-        @using (Ajax.BeginForm("AddLeave", "Leave", new AjaxOptions
-        {
-            HttpMethod = "POST",
-            OnBegin="onBegin",
-            OnSuccess = "handleSuccessforLeave",
-            OnFailure = "handleFailureforLeave",
-        }, new { id = "leaveDecisionForm" }))
-        {
-            <div class="modal-body">
-
-
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.From, new { @class = "col-form-label" })
-                            @Html.TextBoxFor(model => model.From, new { @class = "form-control", @id = "fromDate", @type = "date", autocomplete = "off" })
-                            @Html.ValidationMessageFor(model => model.From, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.To, new { @class = "col-form-label" })
-                            @Html.TextBoxFor(model => model.To, new { @class = "form-control", @id = "toDate", @type = "date", autocomplete = "off" })
-                            @Html.ValidationMessageFor(model => model.To, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.Message, new { @class = "col-form-label" })
-                            @Html.TextBoxFor(model => model.Message, new { @class = "form-control", autocomplete = "off" })
-                            @Html.HiddenFor(model => model.rlrId, new { @id = "hiddenchatId" })
-                            @Html.HiddenFor(model => model.Decision, new { @id = "hiddenDecision" })
-                        </div>
-                    </div>
-                </div>
-
-
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal" id="cancel">Close</button>
-                <button class="btn btn-primary" type="submit" id="sendMessage">Send</button>
-            </div>
-        }
-
     </div>
-</div>
 </div>
 @section scripts{
     <script>
@@ -230,20 +230,20 @@
             });
             var isFirstTime = 1;
             function fetchChatData() {
-                debugger;
-    $.ajax({
-        url: '@Url.Action("GetChatData", "Leave")',
-        type: 'GET',
-        dataType: 'json',
-        beforeSend: function () {
-            // This condition ensures that executeFunction() is only called after the first call to fetchChatData()
-            if (isFirstTime != 1) {
-                hideSpinner();
-            } else {
-                showSpinner();
-                isFirstTime = 0;
-            }
-        },        success: function (data) {
+            $.ajax({
+              url: '@Url.Action("GetChatData", "Leave")',
+              type: 'GET',
+              dataType: 'json',
+              beforeSend: function () {
+                  // This condition ensures that executeFunction() is only called after the first call to fetchChatData()
+                  if (isFirstTime != 1) {
+                      hideSpinner();
+                  } else {
+                      showSpinner();
+                      isFirstTime = 0;
+                  }
+             },
+        success: function (data) {
             $('.contacts-scrollable').empty();
             $.each(data, function (index, chat) {
                 var timestamp = parseInt(chat.Date.match(/\d+/)[0]);
@@ -270,7 +270,7 @@
                 html += '</div>';
                 $('.contacts-scrollable').append(html);
             });
-            setInterval(fetchChatData,  2*60 * 1000);
+            setInterval(triggerReloadButton,  2*60 * 1000);
             setTimeout(function () {
                 $('#reloadIcon').find('i').removeClass('fa-spin');
             }, 1000);
@@ -282,7 +282,11 @@
 
         }
     });
-}
+            }
+            function triggerReloadButton() {
+                $('#reloadIcon').click();
+
+            }
             function loadChatMessage(chatId) {
                 $.ajax({
                     url: '/Leave/GetChatMessage',
@@ -337,7 +341,7 @@
             });
 
         fetchChatData();
-           
+
 
         });
         function onBegin() {
@@ -345,8 +349,7 @@
         }
         function handleSuccessforLeave(data) {
             $("#responseModal").modal('hide');
-            $('#reloadIcon').click();
-
+            triggerReloadButton();
             $('#successMessage').text("Leave Email Sent Succesfully !!");
             $('#successAlert').show();
             setTimeout(hideAlerts, 2000);
