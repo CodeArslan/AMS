@@ -45,6 +45,8 @@ namespace AMS.Models
         public int CardId { get; set; }
 
         public bool isActive { get; set; }
+        public string Gender { get; set; }
+        public string Designation { get; set; }
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
             

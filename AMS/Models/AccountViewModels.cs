@@ -113,6 +113,8 @@ namespace AMS.Models
 
         public bool isActive { get; set; }
         public int leaveBalance { get; set; }   
+        public string Designation { get; set; }
+        public string Gender { get; set; }
 
     }
 
