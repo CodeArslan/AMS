@@ -12,11 +12,14 @@ namespace AMS.Controllers
 {
     public class EmailsController : Controller
     {
+        private object _dbContext;
+
         // GET: Emails
         public ActionResult Index()
         {
             return View();
         }
+       
         [HttpPost]
         public ActionResult SendEmail(Email model, HttpPostedFileBase attachment)
         {
@@ -26,7 +29,13 @@ namespace AMS.Controllers
                 {
                     MailMessage mail = new MailMessage();
                     mail.From = new MailAddress(ConfigurationManager.AppSettings["Email"].ToString());
-                    mail.To.Add(model.Recipient);
+                    
+                    // Split the recipients by comma and add them individually
+                    string[] recipients = model.Recipient.Split(',');
+                    foreach (string recipient in recipients)
+                    {
+                        mail.To.Add(recipient.Trim());
+                    }
                     mail.Subject = model.Subject;
                     mail.Body = model.Message;
 
@@ -49,16 +58,16 @@ namespace AMS.Controllers
                     // Send the email
                     smtp.Send(mail);
 
-                    ViewBag.Message = "Email sent successfully.";
+                    return Json(new { success = true, message = "Email sent successfully." });
                 }
                 catch (Exception ex)
                 {
-                    ViewBag.Error = "Error sending email: " + ex.Message;
+                    return Json(new { success = false, message = "Error sending email" });
                 }
             }
 
             // If model state is not valid, return the view with validation errors
-            return View(model);
+            return Json(new { success = false, message = "Error" });
         }
     }
 }
