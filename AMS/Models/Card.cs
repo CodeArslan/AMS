@@ -12,8 +12,7 @@ namespace AMS.Models
         public int Id { get; set; }
         [Required(ErrorMessage = "Please Provide Card Code")]
         [DisplayName("Card Code:")]
-        public int cardCode { get; set; }
-
+        public string cardCode { get; set; }
         public bool isActive { get; set; }
     }
 }

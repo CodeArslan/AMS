@@ -82,7 +82,7 @@ namespace AMS.Controllers
         }
         //this function is used to check duplicate name for department
         [HttpPost]
-        public JsonResult IsNameAvailable(int name, int? id, bool isUpdate)
+        public JsonResult IsNameAvailable(string name, int? id, bool isUpdate)
         {
             bool isNameAvailable;
 
