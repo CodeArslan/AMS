@@ -23,6 +23,15 @@
                     @Html.AntiForgeryToken()
 
                 <div class="row">
+                    <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlertEmail" style="display:none">
+                        <strong class="text-capitalize">Success!</strong> <span id="successMessageaddEmail"></span>
+                        <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlertEmail" style="display:none">
+                        <strong class="text-capitalize">Error!</strong> <span id="errorMessageaddEmail"></span>
+                        <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
                     <div class="col-md-12 mb-3">
                         <div class="input-group mb-3">
                             @Html.LabelFor(m => m.Recipient, new { @class = "input-group-text" })
@@ -48,7 +57,7 @@
 
                 </div>
 
-                    <button type="submit" class="btn btn-primary">Send</button>
+                    <button type="submit" class="btn btn-primary" id="send">Send</button>
                 }
             </div>
         </div>
@@ -56,3 +65,34 @@
 
 </body>
 </html>
+
+@section scripts
+{
+    <script>
+        function handleSuccess(response) {
+                // Show success alert
+                $('#successMessageaddEmail').text(response.message);
+                $('#successAlertEmail').fadeIn();
+
+                event.preventDefault();
+              //Form Reset
+                $('#emailForm')[0].reset();
+
+                setTimeout(function () {
+                    $('#successAlertEmail').fadeOut();
+                }, 2000);
+           
+        }
+        function handleFailure() {
+            // Show error alert for AJAX failure
+            $('#errorMessageaddEmail').text("An Error Occurred While Adding Email");
+            $('#errorAlertEmail').fadeIn();
+
+            // Optional: Hide success alert if it's still visible
+            $('#successAlertEmail').hide();
+            setTimeout(function () {
+                $('#errorAlertEmail').fadeOut();
+            }, 2000);
+        }
+    </script>
+}
