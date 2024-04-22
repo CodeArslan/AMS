@@ -402,6 +402,9 @@
                 $.ajax({
                     url: '/Shift/GetTimeValues', // Replace 'Controller' with your actual controller name
                     type: 'GET',
+                    beforeSend: function () {
+                        hideSpinner();
+                    },
                     data: { shiftId: selectedShiftId },
                     success: function (data) {
                         // Convert ticks to time format

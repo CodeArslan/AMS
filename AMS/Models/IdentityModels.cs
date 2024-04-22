@@ -71,6 +71,7 @@ namespace AMS.Models
         public DbSet<EmployeeHasMeeting> employeeHasMeetings { get; set; }
         public DbSet<ReceivedLeaveRequests> receivedLeaveRequests { get; set; }
         public DbSet<LeaveResponse> LeaveResponses { get; set; }
+        public DbSet<Attendance> Attendance { get; set; }
 
         public static ApplicationDbContext Create()
         {
