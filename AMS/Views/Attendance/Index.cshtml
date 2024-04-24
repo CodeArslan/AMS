@@ -1,0 +1,295 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="main-content">
+    <div class="breadcrumb">
+        <ul>
+            <li><a href="#">Attendance</a></li>
+            <li>View Attendance</li>
+        </ul>
+    </div>
+    <div class="separator-breadcrumb border-top"></div>
+</div>
+
+<div class="col-md-12 mb-3">
+    <div class="card text-start">
+        <div class="card-header">
+            <h4 class="text-25">Attendance List</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <!-- Add Datepicker Input -->
+                    <div class="form-group">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="basic-addon1">Select Date:</span>
+                            <input class="form-control" type="date" aria-label="date" aria-describedby="basic-addon1" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <!-- Add Dropdown for Filter -->
+                    <div class="form-group">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="basic-addon2">Filter By Department:</span>
+                            <select class="form-control" id="filterDropdown" placeholder="Department" aria-label="Department" aria-describedby="basic-addon2">
+                                <option value="">All</option>
+                                <option value="Delivered">HR</option>
+                                <option value="Pending">Sales</option>
+                                <option value="Not Delivered">Transport</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <a class="btn btn-primary" id="recordByFilter" href="#" style="width:150px;">Filter</a>
+                    </div>
+                </div>
+            </div>
+            <!-- DataTable -->
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered table-striped" id="empAttendanceTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Employee Name</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Time In</th>
+                            <th scope="col">Time Out</th>
+                            <th scope="col">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="updateDepartment" tabindex="-1" role="dialog" aria-labelledby="verifyModalContent" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="verifyModalContent_title">Update Department</h5>
+                <button class="btn btn-close" type="button" data-bs-dismiss="modal" id="modal-close" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="col-form-label" for="recipient-name-2">Name:</label>
+                            <input class="form-control" id="recipient-name-2" type="text" value="John Doe" />
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label" for="recipient-name-2">Age:</label>
+                            <input class="form-control" id="recipient-name-2" type="text" value="25" />
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label" for="recipient-name-2">Phone:</label>
+                            <input class="form-control" id="recipient-name-2" type="text" value="555-1234" />
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label" for="recipient-name-2">Dob:</label>
+                            <input class="form-control" id="recipient-name-2" type="date" value="1998-01-01" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+
+                        <div class="form-group">
+                            <label class="col-form-label" for="message-text-1">Address:</label>
+                            <input class="form-control" id="message-text-1" value="123 Main St, Cityville" />
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label" for="message-text-1">Id Card:</label>
+                            <input class="form-control" id="message-text-1" value="ABC123456" />
+
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label" for="message-text-1">Reference:</label>
+                            <input class="form-control" id="message-text-1" value="Ref123" />
+
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label" for="message-text-1">Gender:</label>
+                            <input class="form-control" id="message-text-1" value="Male" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" id="close" data-bs-dismiss="modal">Close</button>
+                <a id="update" class="btn btn-primary">Update</a>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script>
+
+        $(document).ready(function () {
+            // DataTable initialization
+            var empAttendanceTable = $('#empAttendanceTable').DataTable({
+                "ajax": {
+                    "url": '/Attendance/GetEmployeeAttendanceData',
+                    "type": "GET",
+                    "datatype": "json",
+                    "dataSrc": "",
+                    "contentType": 'application/json; charset=utf-8',
+                    "beforeSend": function (xhr) {
+                        hideSpinner();
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "ApplicationUser",
+                        "render": function (data, type, row) {
+                            return data.FirstName + " " + data.LastName;
+                        }
+                    },
+                    {
+                        "data": "date",
+                        "render": function (data, type, row) {
+                            if (data) {
+                                // Parse the date using Moment.js
+                                var parsedDate = moment(parseInt(data.substr(6)));
+                                // Format the date as "20 Mar, 2024"
+                                return parsedDate.format("DD MMM, YYYY");
+                            } else {
+                                return ""; // Return empty string if data is null or empty
+                            }
+                        }
+                    },
+                    {
+                        "data": "timeIn",
+                        "render": function (data) {
+                            if (data === "00:00:00") {
+                                return "--:--";
+                            } else {
+                                return moment(data, 'HH:mm:ss').format('h:mm A');
+                            }
+                        }
+                    },
+                    {
+                        "data": "timeOut",
+                        "render": function (data) {
+                            if (data === "00:00:00") {
+                                return "--:--";
+                            } else {
+                                return moment(data, 'HH:mm:ss').format('h:mm A');
+                            }
+                        }
+                    },
+                    { "data": "totalWorkedTime" }
+                ]
+            });
+
+            // Reload table data every 5 seconds
+            setInterval(function () {
+                empAttendanceTable.ajax.reload();
+            }, 500);
+            $("#recordByFilter").on("click", function () {
+                toastr.warning(
+                    "Please Wait While We Load Complete Records..",
+                    "Wait!!",
+                    {
+                        "class": "btn w-100 btn-outline-warning mb-2",
+                        "id": "toast-warning"
+                    }
+                );
+            });
+            $("#update").click(function () {
+                $.ajax({
+                    url: "/Department/AddDepartment",
+                    success: function (data) {
+                        toastr.success(
+                            "Department Have Been Updated Successfully",
+                            {
+                                "class": "btn w-100 btn-outline-success mb-2",
+                                "id": "toast-success",
+                                timeOut: 2000,
+                                progressBar: true,
+                                closeButton: true
+                            }
+                        );
+                        $("#updateDepartment").modal('hide');
+                    },
+                    error: function () {
+                        toastr.error(
+                            "An Error Occured While Updating Department",
+                            {
+                                "class": "btn w-100 btn-outline-danger mb-2",
+                                "id": "toast-danger",
+                                timeOut: 2000,
+                                progressBar: true,
+                                closeButton: true
+                            }
+                        );
+                    }
+                });
+            });
+            $("#close").click(function () {
+                toastr.warning(
+                    "Updation Cancelled",
+                    {
+                        "class": "btn w-100 btn-outline-danger mb-2",
+                        "id": "toast-danger",
+                        progressBar: true,
+                        closeButton: true,
+                        timeOut: 1000
+                    }
+                );
+            });
+            $("#del").click(function () {
+                bootbox.confirm({
+                    message: "Are you sure you want to delete?",
+                    buttons: {
+                        confirm: {
+                            label: 'Confirm', // Change 'OK' to 'Confirm' or any other text you prefer
+                            className: 'btn-primary' // You can also customize the button's class
+                        },
+                        cancel: {
+                            label: 'Cancel',
+                            className: 'btn-secondary'
+                        }
+                    },
+                    callback: function (result) {
+                        if (result) {
+                            toastr.success(
+                                "Attendance Record has been deleted successfully",
+                                {
+                                    "class": "btn w-100 btn-outline-success mb-2",
+                                    "id": "toast-success",
+                                    timeOut: 2000,
+                                    progressBar: true,
+                                    closeButton: true
+                                }
+                            );
+                        } else {
+                            toastr.warning(
+                                "Operation Cancelled",
+                                "Cancelled",
+                                {
+                                    "class": "btn w-100 btn-outline-warning mb-2",
+                                    "id": "toast-warning",
+                                    timeOut: 1000,
+                                }
+                            );
+                        }
+                    }
+                });
+
+
+            });
+
+        });
+    </script>
+}
+
+
+
