@@ -1,0 +1,127 @@
+﻿@model List<AMS.Models.Meeting>
+
+@{
+    ViewBag.Title = "Add Meeting";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<style>
+    .dropdown {
+        position: absolute;
+        top: 7px;
+        right: 7px;
+    }
+</style>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+
+            <div class="card" style="max-height: 400px; overflow-y: auto; height:400px;">
+                <div class="card-body">
+                    <h5 class="card-title">Meeting List</h5>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="meetingStatusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Select Status
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="meetingStatusDropdown">
+                            <li><a class="dropdown-item" href="#" data-value="">All</a></li>
+                            <li><a class="dropdown-item" href="#" data-value="In Progress">In Progress</a></li>
+                            <li><a class="dropdown-item" href="#" data-value="Scheduled">Scheduled</a></li>
+                            <li><a class="dropdown-item" href="#" data-value="Completed">Completed</a></li>
+                        </ul>
+                    </div>
+                    <ul id="orderList" class="list-group">
+                        @foreach (var meeting in Model)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <!-- Display order information with badges for status -->
+                                <div>
+                                    <strong>Meeting Number:</strong> @meeting.Id <br>
+                                    <strong>Meeting Date:</strong> @meeting.Date.ToString("dd MMM, yyyy") <br>
+                                </div>
+                                <!-- Badge for order status -->
+                                @if (meeting.Status == "Completed")
+                                {
+                                    <span class="badge bg-success m2 position-absolute top-0 end-0 mt-1 me-1">@meeting.Status</span>
+                                }
+                                else if (meeting.Status == "In Progress")
+                                {
+                                    <span class="badge bg-info m2 position-absolute top-0 end-0 mt-1 me-1">@meeting.Status</span>
+                                }
+                                else if (meeting.Status == "Scheduled")
+                                {
+                                    <span class="badge bg-warning text-dark m2 position-absolute top-0 end-0 mt-1 me-1">@meeting.Status</span>
+                                }
+                                <!-- Button to redirect to Quotation controller's Index action -->
+                                <button class="btn btn-outline-primary btn-sm" onclick="redirectToMeetingForm('@meeting.Id')" style="margin-top:36px">Details</button>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.dropdown-item').on('click', function () {
+                // Remove active class from all dropdown items
+                $('.dropdown-item').removeClass('active');
+                // Add active class to the clicked dropdown item
+                $(this).addClass('active');
+            });
+            // Function to filter orders based on selected status
+            $('.dropdown-menu').on('click', '.dropdown-item', function() {
+                var selectedText = $(this).text(); // Get the text of selected item
+                $('#meetingStatusDropdown').text(selectedText); // Update the text of dropdown button
+                var selectedStatus = $(this).attr('data-value');
+    $.ajax({
+        url: '/Meeting/filteredMeeting',
+        type: 'GET',
+        data: { status: selectedStatus },
+        success: function(data) {
+            $('#orderList').empty(); // Clear existing list
+            if (data.length > 0) {
+                $.each(data, function(index, meeting) {
+                    // Append each order to the list
+                    var statusBadge = '';
+                    if (meeting.Status === 'Completed') {
+                        statusBadge = '<span class="badge bg-success m2 position-absolute top-0 end-0 mt-1 me-1">Completed</span>';
+                    } else if (meeting.Status === 'In Progress') {
+                        statusBadge = '<span class="badge bg-info m2 position-absolute top-0 end-0 mt-1 me-1">In Progress</span>';
+                    } else if (meeting.Status === 'Scheduled') {
+                        statusBadge = '<span class="badge bg-warning text-dark m2 position-absolute top-0 end-0 mt-1 me-1">Scheduled</span>';
+                    }
+                    var meetingDate = new Date(parseInt(meeting.Date.substr(6)));
+
+                    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    var formattedDate = ('0' + meetingDate.getDate()).slice(-2) + ' ' + months[meetingDate.getMonth()] + ', ' + meetingDate.getFullYear();
+
+                    var listItem = '<li class="list-group-item d-flex justify-content-between align-items-center">' +
+                        '<div>' +
+                        '<strong>Meeting Number:</strong> ' + meeting.Id + '<br>' +
+                        '<strong>Meeting Date:</strong> ' + formattedDate + '<br>' +
+                        '</div>' +
+                        statusBadge +
+                        '<button class="btn btn-outline-primary btn-sm" onclick="redirectToMeetingForm(' + meeting.Id + ')" style="margin-top:36px">Details</button>' +
+                        '</li>';
+                    $('#orderList').append(listItem);
+                });
+            } else {
+                // If no data found, display message
+                $('#orderList').html('<p class="text-muted">No data found!!!</p>');
+            }
+        }
+    });
+});
+        });
+        function redirectToMeetingForm(meetingId) {
+            // Redirect to Quotation controller's Index action with orderId parameter
+            window.location.href = '@Url.Action("Index", "Meeting")' + '?id=' + meetingId;        }
+    </script>
+}

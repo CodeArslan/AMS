@@ -28,5 +28,6 @@ namespace AMS.Models
 
         [Required(ErrorMessage = "Please provide meeting location")]
         public string Location { get; set; }
+        public string Status { get; set; }
     }
 }

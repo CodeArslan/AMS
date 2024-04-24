@@ -1,0 +1,453 @@
+﻿@model AMS.ViewModels.EmployeeMeetingViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<style>
+    .fadeProp {
+        opacity: 0;
+        pointer-events: none;
+    }
+    .green-light {
+    width: 10px; /* Adjust size as needed */
+    height: 10px; /* Adjust size as needed */
+    background-color: green;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 5px; /* Adjust distance from the button */
+    animation: blink-animation 1s infinite alternate;
+}
+
+@@keyframes blink-animation {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+</style>
+<div class="row">
+    <div class="col-md-12">
+
+        <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="invoice-tab" data-bs-toggle="tab" href="#invoice" role="tab" aria-controls="invoice" aria-selected="true">Meeting Details</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="edit-tab" data-bs-toggle="tab" href="#edit" role="tab" aria-controls="edit" aria-selected="false">
+                    <div class="green-light"></div> Attendees
+                </a>
+            </li>
+        </ul>
+        <div class="card">
+
+            <div class="tab-content" id="myTabContent">
+                <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
+                    <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
+                    <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert" style="display:none">
+                    <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
+                    <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
+
+                    @using (Ajax.BeginForm("Create", "Meeting", null, new AjaxOptions { HttpMethod = "POST", OnSuccess = "handleMeetingCreation", OnFailure= "handleMeetingFailure", OnBegin= "validateForm" }))
+                    {
+                        <div class="d-sm-flex mb-5" data-view="print">
+                            <span class="m-auto"></span>
+                            <div class="form-group">
+                                <input type="submit" value="Create" class="btn btn-primary" />
+                            </div>
+                        </div>
+                        <div class="row justify-content-between">
+                            <div class="col-md-9"></div>
+                            <div class="col-md-3 text-end">
+                                <label class="d-block text-12 text-muted">Meeting Status</label>
+                                <div class="pe-0 mb-4">
+                                    <label class="radio radio-reverse radio-danger">
+                                        <input type="radio" name="meetingStatus" value="Scheduled" onchange="setMeetingStatus()" /><span>Scheduled</span><span class="checkmark"></span>
+                                    </label>
+                                    <label class="radio radio-reverse radio-warning">
+                                        <input type="radio" name="meetingStatus" value="In Progress" onchange="setMeetingStatus()" /><span>In Progress</span><span class="checkmark"></span>
+                                    </label>
+                                    <label class="radio radio-reverse radio-success">
+                                        <input type="radio" name="meetingStatus" value="Completed" onchange="setMeetingStatus()" /><span>Completed</span><span class="checkmark"></span>
+                                    </label>
+                                    @Html.TextBoxFor(model => model.Meeting.Status, new { id = "meetingStatusInput", @class = "form-control fadeProp", @readonly = "readonly" })
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Meeting.Date)
+                                    @Html.TextBoxFor(model => model.Meeting.Date, new { @class = "form-control", type = "date",@id="meeting-date" })
+                                    @Html.ValidationMessageFor(model => model.Meeting.Date, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Meeting.StartTime)
+                                    @Html.TextBoxFor(model => model.Meeting.StartTime, new { @class = "form-control", type = "time",@id="startTime" })
+                                    @Html.ValidationMessageFor(model => model.Meeting.StartTime, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Meeting.EndTime)
+                                    @Html.TextBoxFor(model => model.Meeting.EndTime, new { @class = "form-control", type = "time", @id="endTime" })
+                                    @Html.ValidationMessageFor(model => model.Meeting.EndTime, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Meeting.Agenda)
+                                    @Html.TextBoxFor(model => model.Meeting.Agenda, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Meeting.Agenda, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Meeting.Location)
+                                    @Html.TextBoxFor(model => model.Meeting.Location, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Meeting.Location, "", new { @class = "text-danger" })
+                                    @Html.HiddenFor(model => model.EmployeeIds, new { id = "employeeIds" })
+                                    @Html.HiddenFor(model => model.Meeting.Id, new { id = "employeeIds" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    @Html.Label("Department:")
+                                    <div class="dropdownforDepartment">
+                                        <button class="btn btn-secondary dropdown-toggle" type="button" id="tableDropdownButton" data-bs-toggle="dropdown" aria-expanded="false" @(Model.Meeting.Id != 0 ? "disabled" : "") style="width:329px">
+                                            --Select Department--
+                                        </button>
+                                        <div class="dropdown-menu" style="width:270px" aria-labelledby="deptDropdownButton">
+                                            <a class="dropdown-item dropdown-item-unique" data-value="">
+                                                --Select Department--
+                                            </a>
+
+                                            @foreach (var item in Model.Departments)
+                                            {
+                                                <a class="dropdown-item dropdown-item-unique" data-value="@item.Id">
+                                                    @item.deptName
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="col-md-1">
+                                <br/>
+                                <i class="far fa-info-circle" id="depInfoIcon" title="Please select departments to add attendees of selected departments. You can further modify the attendee list from the attendees tab." style="font-size: 24px;"></i>
+
+                            </div>
+
+                        </div>
+
+                    }
+                </div>
+                <div class="tab-pane fade" id="edit" role="tabpanel" aria-labelledby="edit-tab">
+                    @if (Model.Meeting.Id != 0)
+                    {
+                        <i class="far fa-info-circle" id="infoIcon" title="You cannot update attendees list while updating meeting details." style="font-size: 24px;"></i>
+
+                    }
+                    @*<div class="d-flex mb-5">
+            <span class="m-auto">
+            </span>
+
+        </div>*@
+                    <br />
+                    <br />
+                    <div class="row" id="attendeesContainer">
+                        @if (Model.Meeting.Id != 0)
+                        {
+                            foreach (var employee in Model.User)
+                            {
+                                <div class="col-md-3">
+                                    <div class="labour-card disabled" id="labour@(employee.Id)" data-employee-id="@employee.Id" data-employee-email="@employee.Email">
+                                        <span class="labour-name">@employee.FirstName @employee.LastName</span>
+                                        <input type="checkbox" class="checkbox-employee" value="@employee.Id" @(Model.EmployeeIds.Contains(employee.Id.ToString()) ? "checked" : "")>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+    </div>
+
+@*<div class="row">
+   
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="text-primary">Meeting Details</h4>
+            </div>
+            <div class="card-body">
+             
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="text-primary">Attendees</h4>
+            </div>
+            <div class="card-body" id="attendeesContainer">
+            </div>
+        </div>
+    </div>
+</div>*@
+
+@section scripts
+{
+    <script>
+
+        function validateForm() {
+            showSpinner();
+            
+            var startTime = $('#startTime').val();
+            var endTime = $('#endTime').val();
+
+            // Convert start and end times to Date objects
+            var startDate = new Date('2000-01-01 ' + startTime);
+            var endDate = new Date('2000-01-01 ' + endTime);
+            if (employeeIds.length === 0) {
+                // Employee list is empty, display error message
+                $('#depInfoIcon').tooltip('show');
+                $('#errorMessage').text('Please select at least one attendee.');
+                $('#errorAlert').show();
+                hideSpinner();
+                return false; // Prevent form submission
+            }
+            // Compare start and end times
+            if (endDate <= startDate) {
+                // End time is not greater than start time, display error message
+                $('#errorMessage').text('End time must be greater than start time.');
+                $('#errorAlert').show();
+                hideSpinner();
+                return false; // Prevent form submission
+            }
+    // Check if it's an update case
+    if (@Model.Meeting.Id != 0) {
+        var date = '@Model.Meeting.Date.ToString("yyyy-MM-dd")'; // Get the date from the model
+        var selectedDate = $('#meeting-date').val();
+
+        // Extract year, month, and day from selectedDate
+        var selectedDateObj = new Date(selectedDate);
+        var year = selectedDateObj.getFullYear();
+        var month = selectedDateObj.getMonth() + 1; // Adding 1 because getMonth() returns zero-based month
+        var day = selectedDateObj.getDate();
+
+        // Format selected date
+        var formattedSelectedDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+
+        // Compare the selected date with the date from the model and today's date
+        if (date !== formattedSelectedDate) {
+            var currentDate = new Date();
+            var yearCurrent = currentDate.getFullYear();
+            var monthCurrent = currentDate.getMonth() + 1; // Adding 1 because getMonth() returns zero-based month
+            var dayCurrent = currentDate.getDate();
+            var formattedCurrentDate = yearCurrent + '-' + (monthCurrent < 10 ? '0' : '') + monthCurrent + '-' + (dayCurrent < 10 ? '0' : '') + dayCurrent;
+            if (formattedSelectedDate < formattedCurrentDate) {
+                // Date is different from the original date and not today's date, display error message
+                $('#errorMessage').text('Cannot change meeting date to a past date in update mode. You can still select the previously selected date for this meeting.');
+                $('#errorAlert').show();
+                hideSpinner();
+
+                return false; // Prevent form submission
+            }
+            return true;
+        }
+    } else {
+        // Get the selected date value
+        var selectedDate = $('#meeting-date').val();
+
+        // Create Date objects for comparison
+        var currentDate = new Date();
+        var selectedDateObj = new Date(selectedDate);
+
+        // Compare the selected date with the current date
+        if (selectedDateObj < currentDate) {
+            // Date is in the past, display error message
+            $('#errorMessage').text('Please select a meeting date prior to today\'s date.');
+            $('#errorAlert').show();
+            hideSpinner();
+
+            return false; // Prevent form submission
+        }
+    }
+    return true; // Allow form submission for new meeting entries and valid updates
+}
+
+          document.addEventListener('DOMContentLoaded', function () {
+              var orderDateInput = document.getElementById('meeting-date');
+var orderDate = new Date('@Model.Meeting.Date.ToString("yyyy-MM-dd")');
+var formattedDate = orderDate.toISOString().split('T')[0];
+orderDateInput.value = formattedDate;
+  });
+        function setMeetingStatus() {
+            var selectedStatus = $('input[name="meetingStatus"]:checked').val();
+            $('#meetingStatusInput').val(selectedStatus);
+        }
+        $(document).ready(function () {
+          
+            $("#infoIcon").tooltip({
+                show: {
+                    effect: "slideDown",
+                    delay: 250
+                }
+            });
+            
+            $("#depInfoIcon").tooltip({
+                show: {
+                    effect: "slideDown",
+                    delay: 250
+                }
+            });
+            if (@Model.Meeting.Id!= 0) {
+              
+                    // Get the pre-populated date from the input field
+                    var prePopulatedDate = $('#meeting-date').val();
+
+                    // Convert prePopulatedDate to ISO format for comparison
+                    var prePopulatedDateISO = prePopulatedDate.split('/').reverse().join('-');
+
+                    // Set the min attribute to the pre-populated date
+                    $('#meeting-date').attr('min', prePopulatedDateISO);
+            }
+            else {
+                var today = new Date().toISOString().split('T')[0];
+                $('#meeting-date').attr('min', today);
+                $('#startTime').val('');
+
+                // Meeting End Time ko reset karna
+                $('#endTime').val('');
+
+                // Meeting Date ko reset karna
+                $('#meeting-date').val('');
+            }
+
+
+
+             var orderStatus = '@Model.Meeting.Status';
+            $('input[name="meetingStatus"]').filter(function () {
+     return $(this).val() === orderStatus;
+ }).prop('checked', true);
+            $('.dropdown-item-unique').on('click', function () {
+                var $this = $(this);
+                var tick = $this.find('.tick');
+
+                if (tick.length === 0) {
+                    $this.prepend('<span class="tick"><i class="fas fa-check"></i></span>');
+                    $this.css('font-weight', 'bold'); // Make the selected item bold
+                } else {
+                    tick.remove();
+                    $this.css('font-weight', 'normal'); // Make the unselected item normal
+                }
+
+                // Assuming you want to handle selectedShiftId here as well
+                var selecteDeptId = [];
+                $('.dropdown-item-unique .tick').each(function () {
+                    selecteDeptId.push($(this).closest('.dropdown-item-unique').data('value'));
+                });
+                console.log(selecteDeptId);
+                fetchEmployeesByDepartmentIds(selecteDeptId);
+            });
+        });
+        var employeeIds = [];
+
+        function fetchEmployeesByDepartmentIds(departmentIds) {
+            $.ajax({
+                url: '/Employee/GetEmployeesForMeeting',
+                type: 'GET',
+                traditional: true, // Add this option to ensure proper handling of array parameters
+                data: { departmentIds: departmentIds }, // Pass departmentIds as an array
+                dataType: 'json',
+                success: function (response) {
+                    if (response.success) {
+                        var employees = response.data;
+                        var html = '';
+                        employees.forEach(function (employee) {
+                            html += '<div class="col-md-3">';
+                            html += '<div class="labour-card" id="labour' + employee.Id + '" data-employee-id="' + employee.Id + '" data-employee-email="' + employee.Email + '">';
+                            html += '<span class="labour-name">' + employee.FirstName + ' ' + employee.LastName + '</span>';
+                            // Replace the button with a checkbox
+                            html += '<input type="checkbox" class="checkbox-employee" value="' + employee.Id + '" checked>';
+                            html += '</div>';
+                            html += '</div>';
+                            employeeIds.push(employee.Id);
+                        });
+
+                        $('#attendeesContainer').html(html);
+                        $('#employeeIds').val(employeeIds.join(','));
+                        $('.checkbox-employee').change(function () {
+                            var employeeId = $(this).val();
+                            if ($(this).is(':checked')) {
+                                // Add employeeId to the array if checkbox is checked
+                                employeeIds.push(employeeId);
+                            } else {
+                                // Remove employeeId from the array if checkbox is unchecked
+                                var index = employeeIds.indexOf(employeeId);
+                                if (index !== -1) {
+                                    employeeIds.splice(index, 1);
+                                }
+                            }
+                            // Update the value of the hidden input field
+                            $('#employeeIds').val(employeeIds.join(','));
+                        });
+
+                        if (response.message) {
+                            $('#errorMessage').text(response.message);
+                            $('#errorAlert').show();
+                        } else {
+                            $('#successAlert').hide();
+                        }
+                    } else {
+                        $('#errorMessage').text(response.message);
+                        $('#errorAlert').show();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#errorMessage').text('Error occurred while fetching employees: ' + error);
+                    $('#errorAlert').show();
+                }
+            });
+        }
+        function handleMeetingCreation(response) {
+            hideSpinner();
+
+            if (response.success) {
+                $('#successMessage').text(response.message);
+                $('#successAlert').show();
+            } else {
+                $('#errorMessage').text(response.message);
+                $('#errorAlert').show();
+            }
+            setInterval(hideAlerts, 2000);
+        }
+
+        function handleMeetingFailure(xhr, status, error) {
+            hideSpinner();
+
+            $('#errorMessage').text("Failed to create/update meeting");
+            $('#errorAlert').show();
+            setInterval(hideAlerts, 2000);
+
+        }
+
+    </script>
+}
+
