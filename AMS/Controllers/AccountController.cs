@@ -10,6 +10,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using AMS.Models;
 using System.Security.Policy;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace AMS.Controllers
 {
@@ -179,6 +180,20 @@ namespace AMS.Controllers
                     viewModel.totalPay = existingUser.totalPay;
                     viewModel.DepartmentId = existingUser.DepartmentId;
                     viewModel.Email = existingUser.Email;
+                    viewModel.Designation= existingUser.Designation;
+                    viewModel.Gender = existingUser.Gender;
+                    viewModel.isActive=existingUser.isActive;
+                    viewModel.CardId= existingUser.CardId;
+                    // Existing user ka card add karen
+                    var existingCard = _dbContext.Cards.FirstOrDefault(c => c.Id == existingUser.CardId);
+                    if (existingCard != null)
+                    {
+                        // Check karen kya existing card already viewModel.Card mein hai ya nahi
+                        if (!viewModel.Card.Any(c => c.Id == existingCard.Id))
+                        {
+                            viewModel.Card.Add(existingCard);
+                        }
+                    }
                 }
             }
 
@@ -213,6 +228,20 @@ namespace AMS.Controllers
                         existingUser.isActive=model.isActive;
                         existingUser.Phone=model.Phone;
                         existingUser.Address= model.Address;
+                        existingUser.Gender=model.Gender;
+                        existingUser.Designation=model.Designation;
+                        existingUser.Role=model.Role;
+
+                        var userRoles = await UserManager.GetRolesAsync(existingUser.Id);
+
+                        // Remove user from all existing roles
+                        foreach (var role in userRoles)
+                        {
+                            await UserManager.RemoveFromRoleAsync(existingUser.Id, role);
+                        }
+
+                        await UserManager.AddToRoleAsync(existingUser.Id, model.Role);
+
                         // Update user
                         var updateResult = await UserManager.UpdateAsync(existingUser);
                         if (updateResult.Succeeded)
@@ -245,10 +274,19 @@ namespace AMS.Controllers
                         Phone = model.Phone,
                         Address = model.Address,
                         leaveBalance = 2,
+                        Designation=model.Designation,
+                        Gender=model.Gender,
+                        Role=model.Role,
                     };
                     var result = await UserManager.CreateAsync(user, model.Password);
                     if (result.Succeeded)
                     {
+                        await UserManager.AddToRoleAsync(user.Id, model.Role);
+                        //var roleStore = new RoleStore<IdentityRole>(new ApplicationDbContext());
+                        //var roleManager=new RoleManager<IdentityRole>(roleStore);
+                        //await roleManager.CreateAsync(new IdentityRole("Admin"));
+                        //await roleManager.CreateAsync(new IdentityRole("Employee"));
+                        //await roleManager.CreateAsync(new IdentityRole("HR"));
                         await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                         TempData["SuccessMessage"] = "Registration successful.";
                         return RedirectToAction("Register", "Account");

@@ -129,10 +129,32 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             @Html.LabelFor(m => m.Phone, new { @class = "col-form-label requiredstar" })
-                            @Html.TextBoxFor(model => model.Phone, new { @class = "form-control", @id = "phone", autocomplete = "off" }) 
+                            @Html.TextBoxFor(model => model.Phone, new { @class = "form-control", @id = "phone", autocomplete = "off" })
                             <span class="text-danger" id="phone-validation" style="display: none;">Please enter a valid phone number (e.g., +971-45-1234567)</span>
                             @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
                         </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Designation, new { @class = "col-form-label requiredstar" })
+                            @Html.TextBoxFor(model => model.Designation, new { @class = "form-control", @id = "designation", autocomplete = "off" })
+                            @Html.ValidationMessageFor(model => model.Designation, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        @Html.LabelFor(model => model.Role, new { @class = "col-form-label requiredstar" })
+                        @Html.DropDownListFor(model => model.Role, new SelectList(new[]
+  {
+      new SelectListItem { Text = "Select Role" },
+      new SelectListItem { Text = "Admin", Value = "Admin" },
+      new SelectListItem { Text = "HR", Value = "Hr" },
+      new SelectListItem { Text = "Employee", Value = "Employee" }
+  }, "Value", "Text"), new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Role, "", new { @class = "text-danger" })
+
                     </div>
                     <div class="col-md-4">
                         <div class="form-check">
@@ -143,6 +165,23 @@
                             @Html.ValidationMessageFor(model => model.isActive, "", new { @class = "text-danger" })
                         </div>
                     </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Gender, new { @class = "col-form-label requiredstar" })
+                            <div>
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(model => model.Gender, "Male", new { id = "genderMale" })
+                                    Male
+                                </label>
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(model => model.Gender, "Female", new { id = "genderFemale" })
+                                    Female
+                                </label>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.Gender, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
                 </div>
                 <div class="card-footer">
                     <div class="row float-end">

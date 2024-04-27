@@ -115,6 +115,8 @@ namespace AMS.Models
         public int leaveBalance { get; set; }   
         public string Designation { get; set; }
         public string Gender { get; set; }
+        [Required]
+        public string Role { get; set; }
 
     }
 
