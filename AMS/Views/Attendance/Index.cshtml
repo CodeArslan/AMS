@@ -51,7 +51,7 @@
                 </div>
             </div>
             <!-- DataTable -->
-            <div class="table-responsive">
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                 <table class="table table-hover table-bordered table-striped" id="empAttendanceTable">
                     <thead class="table-dark">
                         <tr>
@@ -66,6 +66,7 @@
                     </tbody>
                 </table>
             </div>
+
         </div>
     </div>
 </div>
@@ -135,6 +136,7 @@
         $(document).ready(function () {
             // DataTable initialization
             var empAttendanceTable = $('#empAttendanceTable').DataTable({
+                "paging": false,
                 "ajax": {
                     "url": '/Attendance/GetEmployeeAttendanceData',
                     "type": "GET",
