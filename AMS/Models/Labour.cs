@@ -29,6 +29,8 @@ namespace AMS.Models
 
         public int perHour { get; set; }
         public int totalPay {  get; set; }
+        public int leaveBalance {  get; set; }
+        public bool isActive {  get; set; }
 
         public Department Department { get; set; }
         [ForeignKey("Department")]

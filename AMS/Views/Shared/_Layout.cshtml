@@ -216,7 +216,7 @@
                                     </a>
                                     <ul class="submenu">
                                         <li><a href="/Attendance/AddAttendanceForCardHolders">For Card Holders</a></li>
-                                        <li><a href="/Attendance/AddAttendanceForLabours">For Labours</a></li>
+                                        <li><a href="/Attendance/AttendanceForLabours">For Labours</a></li>
                                     </ul>
                                 </li>
                             }
@@ -297,6 +297,13 @@
 <script>
     getInboxCount();
     leaveBalanceRefresh();
+    //markAbsent();
+    setInterval(function () {
+        leaveBalanceRefresh();
+    }, 24 * 60 * 60 * 1000);
+    //setInterval(function () {
+    //    markAbsent();
+    //}, 24 * 60 * 60 * 1000);
     function getInboxCount() {
         $.ajax({
             url: '/Leave/GetInboxCount',
@@ -322,6 +329,15 @@
             }
         });
     }
+    //function markAbsent() {
+    //    $.ajax({
+    //        url: '/Attendance/MarkAbsent',
+    //        type: 'GET',
+    //        beforeSend: function () {
+    //            hideSpinner();
+    //        }
+    //    });
+    //}
     // Function to hide success and error alerts after a delay
     function hideAlerts() {
         $('#successAlert, #errorAlert').fadeOut(2000, function () {

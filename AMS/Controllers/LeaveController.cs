@@ -45,11 +45,15 @@ namespace AMS.Controllers
         public JsonResult GetLeaveBalance(string Email)
         {
             var user = _dbContext.Users.Where(u => u.Email == Email).FirstOrDefault();
-
+            var labour=_dbContext.Labours.Where(l=>l.Email == Email).FirstOrDefault();
             if (user != null)
             {
                 // Employee found, return their data
                 return Json(new { success = true, user=user },JsonRequestBehavior.AllowGet);
+            }
+            else if (labour!=null)
+            {
+                return Json(new { success = true, user = labour }, JsonRequestBehavior.AllowGet);
             }
             else
             {
@@ -203,14 +207,28 @@ namespace AMS.Controllers
                         var leaveBalance = 0;
                         if(fromDate!= null&&toDate!=null) {
                             var days = (toDate.Value - fromDate.Value).Days;
-                            var user = _dbContext.Users.Where(l => l.Email == Email.From).FirstOrDefault();
-                            leaveBalance = user.leaveBalance;
-                            user.leaveBalance = user.leaveBalance - days;
-                            _dbContext.SaveChanges();
+                            var employee = _dbContext.Users.Where(l => l.Email == Email.From).FirstOrDefault();
+                            var labour=_dbContext.Labours.Where(l=>l.Email==Email.From).FirstOrDefault();
+                            if(employee!=null)
+                            {
+                                leaveBalance = employee.leaveBalance;
+                                employee.leaveBalance = employee.leaveBalance - days;
+                                Email.employeeId = employee.Id;
+                                _dbContext.SaveChanges();
+                            }
+                            else
+                            {
+                                leaveBalance = labour.leaveBalance;
+                                labour.leaveBalance = labour.leaveBalance - days;
+                                Email.labourId = labour.Id;
+                                _dbContext.SaveChanges();
+                            }
+                           
                         }
                         sendLeaveEmail(fromDate, toDate, message, Email.From,decision, leaveBalance);
                         Email.Decision = response.Decision;
                         Email.isRead = true;
+
                         _dbContext.LeaveResponses.Add(response);
                         _dbContext.SaveChanges();
                         return Json(new { success = true, message = "Leave Sent Successfully." });
@@ -294,9 +312,14 @@ namespace AMS.Controllers
             if(DateTime.Today.Day==1)
             {
                 var users =  _dbContext.Users.ToList();
+                var labours=_dbContext.Labours.ToList();
                 foreach (var user in users)
                 {
                     user.leaveBalance += 2;
+                }
+                foreach(var labour in labours)
+                {
+                    labour.leaveBalance += 2;
                 }
                 _dbContext.SaveChanges();
             }
@@ -321,8 +344,10 @@ namespace AMS.Controllers
         {
             try
             {
-                var isEmailRegistered = _dbContext.Users.Where(u => u.Email == viewModel.ReceivedLeaveRequests.From).FirstOrDefault();
-                if (isEmailRegistered != null)
+                var employee = _dbContext.Users.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From);
+                var labour = _dbContext.Labours.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From);
+
+                if (employee != null || labour != null)
                 {
                     var receivedleaveRequests = new ReceivedLeaveRequests()
                     {
@@ -330,10 +355,14 @@ namespace AMS.Controllers
                         Decision = "Approved",
                         Message = viewModel.ReceivedLeaveRequests.Message,
                         Name = viewModel.ReceivedLeaveRequests.Name,
+                        employeeId = employee != null ? employee.Id.ToString() : null,
+                        labourId = labour != null ? labour.Id : (int?)null,
                     };
+
                     _dbContext.receivedLeaveRequests.Add(receivedleaveRequests);
                     _dbContext.SaveChanges();
                     var fkrlr = receivedleaveRequests.Id;
+
                     var leaveResponse = new LeaveResponse()
                     {
                         To = viewModel.LeaveResponse.To,
@@ -341,6 +370,7 @@ namespace AMS.Controllers
                         Decision = "Approved",
                         rlrId = fkrlr,
                     };
+
                     _dbContext.LeaveResponses.Add(leaveResponse);
                     _dbContext.SaveChanges();
                     return Json(new { success = true, message = "Leave added successfully" });

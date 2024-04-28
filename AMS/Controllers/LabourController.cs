@@ -71,7 +71,7 @@ namespace AMS.Controllers
                         labourInDb.perHour = labour.perHour;
                         labourInDb.totalPay = labour.totalPay;
                         labourInDb.departmentId = labour.departmentId;
-
+                        labourInDb.isActive = labour.isActive;
                         _dbContext.SaveChanges();
                         return Json(new { success = true, message = "Labour Updated Successfully." });
                     }

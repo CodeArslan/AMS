@@ -54,6 +54,7 @@
                                     <th scope="col">Per Hour Wage</th>
                                     <th scope="col">Total Pay</th>
                                     <th scope="col">Department</th>
+                                    <th scope="col">isActive</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
@@ -70,7 +71,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="verifyModalContent_title">New Shift</h5>
+                    <h5 class="modal-title" id="verifyModalContent_title">New Labour</h5>
                     <button class="btn btn-close" type="button" data-bs-dismiss="modal" id="modal-close" aria-label="Close"></button>
                 </div>
 
@@ -138,6 +139,15 @@
                                     @Html.LabelFor(model => model.Labour.departmentId, new { @class = "col-form-label" })
                                     @Html.DropDownListFor(model => model.Labour.departmentId, new SelectList(Model.Department, "Id", "deptName"), " --Select--", new { @class = "form-control" })
                                     @Html.ValidationMessageFor(model => model.Labour.departmentId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <br />
+                                    <br />
+                                    @Html.CheckBoxFor(model => model.Labour.isActive, new { @class = "form-check-input" })
+                                    @Html.LabelFor(model => model.Labour.isActive, new { @class = "form-check-label" })
+                                    @Html.ValidationMessageFor(model => model.Labour.isActive, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                         </div>
@@ -228,6 +238,15 @@
                                     @Html.HiddenFor(model => model.Labour.Id, new { @id = "updateLabourId" });
                                 </div>
                             </div>
+                            <div class="col-md-4">
+                                    <div class="form-check">
+                                        <br />
+                                        <br />
+                                        @Html.CheckBoxFor(model => model.Labour.isActive, new { @class = "form-check-input" })
+                                        @Html.LabelFor(model => model.Labour.isActive, new { @class = "form-check-label",@id="labouractiveCheck" })
+                                        @Html.ValidationMessageFor(model => model.Labour.isActive, "", new { @class = "text-danger" })
+                                    </div>
+                            </div>
                         </div>
 
                     </div>
@@ -288,6 +307,19 @@
                         },
                     },
                     {
+                        data: "isActive",
+                        render: function (data, type, row) {
+                            if (type === 'display') {
+                                var status = data ? 'Active' : 'In-Active';
+                                var badgeClass = data ? 'bg-success' : 'bg-danger';
+                                return '<span class="badge rounded-pill ' + badgeClass + ' text-white p-2 m-1">' + status + '</span>';
+                            }
+                            return data ? 'Active' : 'In-Active';
+                        },
+                        orderable: false, // Disable sorting for this column
+                        searchable: false, // Disable searching for this column
+                    },
+                    {
                         data: "Id", // Use the "Id" property for the action buttons
                         render: function (data) {
                             return "<a class='text-success me-2 btn btn-primary m-1 edit-btn' href='#' data-bs-toggle='modal' data-target='#updateLabour' data-whatever='mdo' data-id='" + data + "'><i class='fa fa-edit'></i></a>" +
@@ -333,6 +365,7 @@
                         $('#updateLabourTotalPay').val(labour.totalPay);
                         $('#updateLabourDepartmentId').val(labour.departmentId);
                         $('#updateLabourId').val(labour.Id);
+                        $('#labouractiveCheck').prop('checked', labour.isActive);
                         $('#updateLabour').modal('show');
                     },
                     error: function (xhr, status, error) {
