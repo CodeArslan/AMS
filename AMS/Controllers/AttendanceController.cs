@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Globalization;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
@@ -31,6 +32,37 @@ namespace AMS.Controllers
         {
             return View();
         }
+        [HttpGet]
+        public ActionResult GetLabourList(DateTime? date)
+        {
+            // Get the list of labours for whom attendance has not been marked today
+            var selectedDate = date ?? DateTime.Now.Date;
+            var attendedLaboursToday = _dbContext.Attendance
+                .Where(a => a.date == selectedDate && a.labourId != null)
+                .Select(a => a.labourId)
+                .ToList();
+
+            // Get the list of labours excluding those for whom attendance has been marked today
+            var labourList = _dbContext.Labours
+                .Include(l => l.Shift)
+                .AsNoTracking()
+                .Where(l => l.shiftId != null && !attendedLaboursToday.Contains(l.Id))
+                .ToList();
+
+            // Format the labour list
+            var formattedLabourList = labourList.Select(labList => new
+            {
+                Id = labList.Id,
+                FirstName = labList.FirstName,
+                LastName = labList.LastName,
+                TimeIn = labList.Shift != null && labList.Shift.startTime != null ? labList.Shift.startTime.ToString(@"hh\:mm\:ss") : "00:00:00",
+                TimeOut = labList.Shift != null && labList.Shift.endTime != null ? labList.Shift.endTime.ToString(@"hh\:mm\:ss") : "00:00:00"
+                // Other properties as needed
+            }).ToList();
+
+            return Json(formattedLabourList, JsonRequestBehavior.AllowGet);
+        }
+
         public void StartListening()
         {
             // Start listening for RFID card data in a background thread
@@ -41,13 +73,24 @@ namespace AMS.Controllers
         [HttpGet]
         public ActionResult GetEmployeeAttendanceData()
         {
-            var attList = _dbContext.Attendance.Include(c => c.ApplicationUser).AsNoTracking().ToList();
+            // Get the current date
+            DateTime currentDate = DateTime.Today;
+
+            // Retrieve records for the current date and order them by date in descending order
+            var attList = _dbContext.Attendance
+                .Include(c => c.ApplicationUser)
+                .Include(c => c.Labour)
+                .Where(att => att.date == currentDate && att.employeeId!=null && att.status!="Absent")
+                .OrderBy(att => att.date)
+                .AsNoTracking()
+                .ToList();
 
             // Format timeIn and timeOut values to string representation
             var formattedAttList = attList.Select(att => new
             {
                 Id = att.Id,
                 ApplicationUser = att.ApplicationUser,
+                Labour = att.Labour,
                 date = att.date,
                 timeIn = att.timeIn.ToString(@"hh\:mm\:ss"), // Format as HH:mm:ss
                 timeOut = att.timeOut.ToString(@"hh\:mm\:ss"), // Format as HH:mm:ss
@@ -56,6 +99,7 @@ namespace AMS.Controllers
 
             return Json(formattedAttList, JsonRequestBehavior.AllowGet);
         }
+
 
         private void ListenForRFID()
         {
@@ -123,7 +167,7 @@ namespace AMS.Controllers
 
                     var currentDate = DateTime.Now.Date;
                     var existingAttendance = _dbContext.Attendance
-                        .Where(a => a.employeeId == employeeId && DbFunctions.TruncateTime(a.date) == currentDate)
+                        .Where(a => a.employeeId == employeeId && DbFunctions.TruncateTime(a.date) == currentDate )
                         .FirstOrDefault();
 
                     if (existingAttendance != null)
@@ -254,5 +298,149 @@ namespace AMS.Controllers
             }
             base.Dispose(disposing);
         }
+
+        public ActionResult UploadLabourAttendance(List<Attendance> attendances)
+        {
+            foreach(var attendance in attendances)
+            {
+                var existingLabour = _dbContext.Labours.Where(l => l.Id == attendance.Id).FirstOrDefault();
+                if (existingLabour != null)
+                {
+                    int labourId = existingLabour.Id;
+                    var currentDate = DateTime.Now.Date;
+                    var existingAttendance = _dbContext.Attendance
+                       .Where(a => a.labourId == labourId && DbFunctions.TruncateTime(a.date) == currentDate)
+                       .FirstOrDefault();
+                    if (existingAttendance != null)
+                    {
+                        existingAttendance.timeIn = attendance.timeIn;
+                        existingAttendance.timeOut = attendance.timeOut;
+                        existingAttendance.status = "Present";
+                        // Calculate total worked hours
+                        TimeSpan workedHours = existingAttendance.timeOut - existingAttendance.timeIn;
+                        // Calculate total worked hours and minutes
+                        int totalWorkedHours = (int)workedHours.TotalHours;
+                        int totalWorkedMinutes = workedHours.Minutes;
+
+                        // Format the total worked hours and minutes
+                        string formattedTotalWorkedTime = $"{totalWorkedHours} Hours {totalWorkedMinutes} Minutes";
+
+                        // Store the formatted total worked time in the database column
+                        existingAttendance.totalWorkedTime = formattedTotalWorkedTime;
+                        _dbContext.SaveChanges();
+                    }
+                    else
+                    {
+                        TimeSpan workedHours = attendance.timeOut - attendance.timeIn;
+                        // Calculate total worked hours and minutes
+                        int totalWorkedHours = (int)workedHours.TotalHours;
+                        int totalWorkedMinutes = workedHours.Minutes;
+
+                        // Format the total worked hours and minutes
+                        string formattedTotalWorkedTime = $"{totalWorkedHours} Hours {totalWorkedMinutes} Minutes";
+                        // Employee is checking in for the first time today, mark time in
+                        Attendance attendance1 = new Attendance
+                        {
+                            date = DateTime.Now.Date,
+                            timeIn =attendance.timeIn,
+                            timeOut = attendance.timeOut,
+                            labourId = labourId,
+                            totalWorkedTime=formattedTotalWorkedTime,
+                            status="Present"
+                        };
+                        _dbContext.Attendance.Add(attendance1);
+                        _dbContext.SaveChanges();
+
+                    }
+                }
+
+            }
+            return Json(new { success = true, message = "Attendance Has Been Uploaded" });
+        }
+        public ActionResult GetLabourAttendance(DateTime? date)
+        {
+            // Use the provided date or default to current date if not provided
+            var selectedDate = date ?? DateTime.Now.Date;
+            var allLabours = _dbContext.Labours.Where(l=>l.shiftId!=null&&l.isActive==true).ToList(); // Assuming you have a Labour table in your database
+            var presentLabours = _dbContext.Attendance
+                .Include(a => a.Labour)
+                .Where(a => a.date == selectedDate && a.labourId != null && a.status == "present")
+                .OrderBy(att => att.date)
+                .AsNoTracking()
+                .ToList();
+
+            var formattedAttList = allLabours.Select(labour =>
+            {
+                var attendance = presentLabours.FirstOrDefault(att => att.labourId == labour.Id);
+                return new
+                {
+                    Id = labour.Id,
+                    Labour = labour,
+                    date = attendance != null ? (DateTime?)attendance.date : null,
+                    timeIn = attendance != null ? (attendance.timeIn != null ? attendance.timeIn.ToString(@"hh\:mm\:ss") : null) : null, // Format as HH:mm:ss
+                    timeOut = attendance != null ? (attendance.timeOut != null ? attendance.timeOut.ToString(@"hh\:mm\:ss") : null) : null, // Format as HH:mm:ss
+                    totalWorkedTime = attendance != null ? attendance.totalWorkedTime : null,
+                    status = attendance != null ? "Present" : "Absent"
+                };
+            }).ToList();
+
+            return Json(formattedAttList, JsonRequestBehavior.AllowGet);
+        }
+
+        //public ActionResult MarkAbsent()
+        //{
+        //    var activeLabours = _dbContext.Labours
+        //        .Where(l => l.shiftId != null && l.isActive)
+        //        .ToList();
+
+        //    var activeEmployees = _dbContext.Users
+        //        .Where(e => e.isActive)
+        //        .ToList();
+
+        //    var today = DateTime.Today;
+
+        //    foreach (var labour in activeLabours)
+        //    {
+        //        // Check if attendance already exists for this labour on today's date
+        //        var existingAttendance = _dbContext.Attendance
+        //            .FirstOrDefault(a => a.labourId == labour.Id && a.date == today);
+
+        //        if (existingAttendance == null)
+        //        {
+        //            var attendance = new Attendance
+        //            {
+        //                date = today,
+        //                labourId = labour.Id,
+        //                status = "Absent"
+        //            };
+
+        //            _dbContext.Attendance.Add(attendance);
+        //        }
+        //    }
+
+        //    foreach (var employee in activeEmployees)
+        //    {
+        //        // Check if attendance already exists for this employee on today's date
+        //        var existingAttendance = _dbContext.Attendance
+        //            .FirstOrDefault(a => a.employeeId == employee.Id && a.date == today);
+
+        //        if (existingAttendance == null)
+        //        {
+        //            var attendance = new Attendance
+        //            {
+        //                date = today,
+        //                employeeId = employee.Id,
+        //                status = "Absent"
+        //            };
+
+        //            _dbContext.Attendance.Add(attendance);
+        //        }
+        //    }
+
+        //    _dbContext.SaveChanges();
+
+        //    return Content("");
+        //}
+
     }
 }

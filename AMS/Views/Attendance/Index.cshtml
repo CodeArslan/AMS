@@ -149,9 +149,14 @@
                 },
                 "columns": [
                     {
-                        "data": "ApplicationUser",
+                        "data": null,
                         "render": function (data, type, row) {
-                            return data.FirstName + " " + data.LastName;
+                            // Check if Labour object is present
+                            if (data.Labour) {
+                                return data.Labour.FirstName + " " + data.Labour.LastName;
+                            } else {
+                                return data.ApplicationUser.FirstName + " " + data.ApplicationUser.LastName;
+                            }
                         }
                     },
                     {

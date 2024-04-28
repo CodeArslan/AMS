@@ -24,5 +24,6 @@ namespace AMS.Models
         public string employeeId { get; set; }
 
         public string totalWorkedTime { get; set; }
+        public string status { get; set; }
     }
 }

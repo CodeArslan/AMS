@@ -297,13 +297,6 @@
 <script>
     getInboxCount();
     leaveBalanceRefresh();
-    //markAbsent();
-    setInterval(function () {
-        leaveBalanceRefresh();
-    }, 24 * 60 * 60 * 1000);
-    //setInterval(function () {
-    //    markAbsent();
-    //}, 24 * 60 * 60 * 1000);
     function getInboxCount() {
         $.ajax({
             url: '/Leave/GetInboxCount',

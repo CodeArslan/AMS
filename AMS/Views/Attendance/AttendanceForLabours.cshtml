@@ -1,0 +1,419 @@
+﻿
+@{
+    ViewBag.Title = "AttendanceForLabours";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .dataTables_filter {
+        margin-bottom: 10px;
+    }
+    .present {
+        background-color: green !important;
+    }
+
+    .absent {
+        background-color: red !important;
+    }
+</style>
+<div class="main-content">
+    <div class="breadcrumb">
+        <ul>
+            <li><a href="#">Attendance</a></li>
+            <li>Add Attendance For Labours</li>
+        </ul>
+    </div>
+    <div class="separator-breadcrumb border-top"></div>
+</div>
+
+<div class="col-md-12 mb-3">
+    <div class="card text-start">
+        <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
+            <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
+            <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert" style="display:none">
+            <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
+            <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="card-header">
+            <h3 class="text-mute">Add Attendance</h3>
+        </div>
+        <div class="card-body">
+            <h3>Search By Date</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <input class="form-control" type="date" id="filterAttendanceDate">
+
+
+                    </div>
+                </div>
+            </div>
+
+            @*<h3 class="card-title mb-3">Add Attendance</h3>*@
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered table-striped" id="addLabourAttendanceTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Employee Name</th>
+                            <th scope="col">Time In</th>
+                            <th scope="col">Time Out</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
+
+
+        </div>
+        <div class="card-footer">
+            <div style="text-align:center">
+                <a class="btn btn-primary" style="width:25%" href="#" id="upload">Upload</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-12 mb-3">
+    <div class="card text-start">
+        <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
+            <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
+            <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert" style="display:none">
+            <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
+            <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="card-header">
+            <h3 class="text-mute">Labour Attendance</h3>
+        </div>
+        <div class="card-body">
+            <h3>Search By Date</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <input class="form-control" type="date" id="filterDate">
+
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered table-striped" id="labourAttendance">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Employee Name</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Time In</th>
+                            <th scope="col">Time Out</th>
+                            <th scope="col">Total Worked Time</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="card-footer"></div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            $("#filterDate").on("change", function () {
+                // Call the fetchlabourAttendance() function when the date changes
+                fetchlabourAttendance();
+            });
+            $("#filterAttendanceDate").on("change", function () {
+                // Call the fetchlabourAttendance() function when the date changes
+                fetchLabours();
+            });
+            var today = new Date().toISOString().slice(0, 10);
+
+            // Set the value of the input field to today's date
+            $("#filterDate").val(today);
+            $("#filterAttendanceDate").val(today);
+            fetchlabourAttendance();
+            function fetchlabourAttendance() {
+                var selectedDate = $("#filterDate").val();
+                $('#labourAttendance').DataTable({
+                    "destroy": true,
+                    "ajax": {
+                        "url": '/Attendance/GetLabourAttendance',
+                        "type": "GET",
+                        "datatype": "json",
+                        "dataSrc": "",
+                        "data": {
+                            date: selectedDate // Pass the selected date as a parameter
+                        },
+                        "contentType": 'application/json; charset=utf-8',
+                        "beforeSend": function (xhr) {
+                            hideSpinner();
+                        }
+                    },
+                    "columns": [
+                        {
+                            "data": null, "render": function (data, type, row) {
+                                return row.Labour.FirstName + ' ' + row.Labour.LastName;
+                            }
+                        },
+                        {
+                            "data": "date",
+                            "render": function (data, type, row) {
+                                if (data) {
+                                    // Parse the date using Moment.js
+                                    var parsedDate = moment(parseInt(data.substr(6)));
+                                    // Format the date as "20 Mar, 2024"
+                                    return parsedDate.format("DD MMM, YYYY");
+                                } else {
+                                    return ""; // Return empty string if data is null or empty
+                                }
+                            }
+                        },
+                        {
+                            "data": "timeIn",
+                            "render": function (data) {
+                                if (data) {
+                                    return moment(data, 'HH:mm:ss').format('h:mm A');
+                                } else {
+                                    return "--:--";
+
+                                }
+                            }
+                        },
+                        {
+                            "data": "timeOut",
+                            "render": function (data) {
+                                if (data) {
+                                    return moment(data, 'HH:mm:ss').format('h:mm A');
+                                } else {
+                                    return "--:--";
+
+                                }
+                            }
+                        },
+                        {
+                            "data": "totalWorkedTime", 
+                        },
+                        {
+                            "data": "status",
+                            "render": function (data, type, row) {
+                                if (data === "Present") {
+                                    return '<td style="background-color: green !important;"><div>' + data + '</div></td>';
+                                } else {
+                                    return '<td style="background-color: red !important;"><div>Absent</div></td>';
+                                }
+                            }
+                        }
+
+                    ],
+                    "initComplete": function (settings, json) {
+                        $('#labourAttendance tbody tr').each(function () {
+                            var statusCell = $(this).find('td:eq(5)');
+                            var status = statusCell.text();
+                            if (status === "Present") {
+                                statusCell.css({
+                                    'background-color': 'forestgreen',
+                                    'color': 'white',
+                                    'text-align': 'center'
+                                });
+                            } else {
+                                statusCell.css({
+                                    'background-color': 'red',
+                                    'text-align': 'center'
+                                });
+                            }
+                        });
+                    },
+                    pagingType: 'full_numbers',
+                    language: {
+                        paginate: {
+                            first: 'First',
+                            previous: '&lsaquo;',
+                            next: '&rsaquo;',
+                            last: 'Last'
+                        },
+                        searchPlaceholder: 'Min 3 Characters'
+                    },
+                    autoWidth: false, // Disable auto width calculation
+                    columnDefs: [
+                        { width: '100px', targets: '_all' } // Set a fixed width for all columns, adjust as needed
+                    ],
+                    drawCallback: function () {
+                        // Override DataTables styles with Bootstrap styles after each draw
+                        $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
+                        $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
+                        $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
+                        $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+                    }
+                });
+
+            }
+            fetchLabours();
+            function fetchLabours() {
+                var selectedDate = $("#filterAttendanceDate").val();
+                $('#addLabourAttendanceTable').DataTable({
+                    "destroy": true,
+                    "ajax": {
+                        "url": '/Attendance/GetLabourList',
+                        "type": "GET",
+                        "datatype": "json",
+                        "data": {
+                            date: selectedDate // Pass the selected date as a parameter
+                        },
+                        "dataSrc": "",
+                        "contentType": 'application/json; charset=utf-8',
+                        "beforeSend": function (xhr) {
+                            hideSpinner();
+                        }
+                    },
+                    "columns": [
+                        {
+                            "data": null,
+                            "render": function (data, type, full, meta) {
+                                return full.FirstName + ' ' + full.LastName;
+                            }
+                        },
+                        {
+                            "data": "TimeIn",
+                            "render": function (data, type, full, meta) {
+                                if (data) {
+                                    return '<td><div class="input-group timepicker"><input type="time" class="form-control" id="startTime_' + full.Id + '" value="' + data.slice(0, 5) + '" data-id="' + full.Id + '" /></div></td>';
+                                } else {
+                                    return '<td><div class="input-group timepicker"><input type="time" class="form-control" id="startTime_' + full.Id + '" value="" data-id="' + full.Id + '" /></div></td>';
+                                }
+                            }
+                        },
+
+                        {
+                            "data": "TimeOut",
+                            "render": function (data, type, full, meta) {
+                                if (data) {
+                                    return '<td><div class="input-group timepicker"><input type="time" class="form-control" id="endTime_' + full.Id + '" value="' + data.slice(0, 5) + '" /></div></td>';
+                                } else {
+                                    return '<td><div class="input-group timepicker"><input type="time" class="form-control" id="endTime_' + full.Id + '" value="" /></div></td>';
+                                }
+                            }
+                        },
+
+
+
+
+                        {
+                            "data": null,
+                            "render": function (data, type, full, meta) {
+                                return '<td>' +
+                                    '<div class="form-check form-check-inline">' +
+                                    '<input class="form-check-input status-radio" type="radio" name="status_' + full.Id + '" id="status-present_' + full.Id + '" value="present" checked>' +
+                                    '<label class="form-check-label" for="status-present_' + full.Id + '">Present</label>' +
+                                    '</div>' +
+                                    '<div class="form-check form-check-inline">' +
+                                    '<input class="form-check-input status-radio" type="radio" name="status_' + full.Id + '" id="status-absent_' + full.Id + '" value="absent">' +
+                                    '<label class="form-check-label" for="status-absent_' + full.Id + '">Absent</label>' +
+                                    '</div>' +
+                                    '</td>';
+                            }
+                        }
+
+
+                    ],
+
+                    pagingType: 'full_numbers',
+                    language: {
+                        paginate: {
+                            first: 'First',
+                            previous: '&lsaquo;',
+                            next: '&rsaquo;',
+                            last: 'Last'
+                        },
+                        searchPlaceholder: 'Min 3 Characters'
+                    },
+                    autoWidth: false, // Disable auto width calculation
+                    columnDefs: [
+                        { width: '100px', targets: '_all' } // Set a fixed width for all columns, adjust as needed
+                    ],
+                    drawCallback: function () {
+                        // Override DataTables styles with Bootstrap styles after each draw
+                        $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
+                        $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
+                        $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
+                        $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+                    }
+                });
+            }
+            $(document).on('change', '.status-radio', function () {
+                var rowId = $(this).attr('id').split('_')[1]; // Extract the row ID from the radio button ID
+                var selectedValue = $(this).val(); // Get the value of the selected radio button
+
+                // Disable/enable input fields based on the selected radio button value
+                if (selectedValue === 'absent') {
+                    $('#startTime_' + rowId).prop('disabled', true);
+                    $('#endTime_' + rowId).prop('disabled', true);
+                } else {
+                    $('#startTime_' + rowId).prop('disabled', false);
+                    $('#endTime_' + rowId).prop('disabled', false);
+                }
+            });
+
+            // Disable input fields initially
+            $('input[value="absent"]').each(function () {
+                var rowId = $(this).attr('id').split('_')[1]; // Extract the row ID from the radio button ID
+                $('#startTime_' + rowId).prop('disabled', true);
+                $('#endTime_' + rowId).prop('disabled', true);
+            });
+
+            $('#upload').on('click', function () {
+                var dataToUpload = []; // Array to store data of rows marked as 'Present'
+
+                // Iterate over each row in the DataTable
+                $('#addLabourAttendanceTable').find('tbody tr').each(function () {
+                    var rowData = $(this).find('td'); // Get the columns of the current row
+                    var status = $(rowData[3]).find('input[type=radio]:checked').val(); // Get the value of the checked radio button (status)
+
+                    // If status is 'Present', extract ID, TimeIn, and TimeOut values
+                    if (status === 'present') {
+                        var id = $(rowData[1]).find('input[type=time]').data('id');
+                        var timeIn = $(rowData[1]).find('input[type=time]').val(); // Get TimeIn from the second column input
+                        var timeOut = $(rowData[2]).find('input[type=time]').val(); // Get TimeOut from the third column input
+
+                        // Add the data to the array
+                        dataToUpload.push({ id: id, timeIn: timeIn, timeOut: timeOut });
+                    }
+                });
+
+                $.ajax({
+                    url: '/Attendance/UploadLabourAttendance',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToUpload),
+                    success: function (response) {
+                        fetchlabourAttendance();
+                        fetchLabours();
+                        // Show success alert
+                        $('#successMessage').text(response.message);
+                        $('#successAlert').fadeIn();
+
+                        // Optional: Hide error alert if it's still visible
+                        $('#errorAlert').hide();
+
+
+                        // Hide alerts after a delay
+                        setTimeout(hideAlerts, 2000);
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error
+                    }
+                });
+            });
+        });
+
+    </script>
+}
