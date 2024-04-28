@@ -1,0 +1,282 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="breadcrumb">
+            <ul>
+                <li><a href="/Card/Index">Card</a></li>
+            </ul>
+        </div>
+        <div class="separator-breadcrumb border-top"></div>
+    </div>
+
+    <div class="col-md-12 mb-3">
+
+
+        <div class="card text-start">
+
+            <div class="card-header">
+                <h4 class="text-25 text-muted">Payroll<i class="fas fa-sync-alt float-end text-20 mr-5"id="reloadIcon" title="Press to Reload Payroll Table"></i></h4>
+            </div>
+            <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
+                <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
+                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert" style="display:none">
+                <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
+                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped" id="payrollTable">
+                        <thead class="bg-gray-300">
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Employee Name</th>
+                                <th scope="col">Year</th>
+                                <th scope="col">Month</th>
+                                <th scope="col">Cumulative Hours</th>
+                                <th scope="col">Base Salary</th>
+                                <th scope="col">Bonus Paid</th>
+                                <th scope="col">Cumulative Salary</th>
+                                <th scope="col">Approved Salary</th>
+                                <th scope="col">Salary Left</th>
+                                <th scope="col">Send For Approval</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-warning float-end" id="sendForApproval" style="margin-right:2%">Send For Approval</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+@section scripts
+{
+<script>
+    $(document).ready(function () {
+        $("#reloadIcon").tooltip({
+            placement: "left", // Set the tooltip placement to left
+            show: {
+                effect: "slideDown",
+                delay: 250
+            }
+        });
+        $("#reloadIcon").click(function () {
+            $(this).toggleClass('fa-spin');
+            fetchPayrollRecords();
+        });
+        var monthNames = [
+            "January", "February", "March", "April", "May", "June", "July",
+            "August", "September", "October", "November", "December"
+        ];
+
+        function fetchPayrollRecords() {
+            var payrollTable = $('#payrollTable').DataTable({
+                destroy: true,
+                ajax: {
+                    url: '/Payroll/GetPayrollData', // Replace with your backend route
+                    dataSrc: '',
+                },
+                columns: [
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            // Calculate the difference between TotalSalary and salaryApproved
+                            var remainingAmount = parseFloat(row.TotalSalary - row.salaryApproved).toFixed(2);
+
+                            // Check if remaining amount is greater than 0
+                            if (remainingAmount > 0) {
+                                // If remaining amount is greater than 0, return the checkbox
+                                return '<label class="checkbox checkbox-primary"><input type="checkbox" class="row-checkbox" data-id="' + row.Id + '" /><span class="checkmark"></span></label>';
+                            } else {
+                                // If remaining amount is not greater than 0, return an empty string
+                                return '';
+                            }
+                        },
+                        width: '0px'
+                    },
+                    {
+                        "data": "ApplicationUser",
+                        "render": function (data, type, row) {
+                            return data.FirstName + " " + data.LastName;
+                        }
+                    },
+                    {
+                        data: 'Year',
+                        width: '35px'
+                    },
+                    {
+                        data: 'Month',
+                        render: function (data) {
+                            // Convert numeric month to month name
+                            return monthNames[data - 1]; // Subtract 1 because JavaScript months are zero-indexed
+                        },
+                        width: '45px'
+                    },
+                    {
+                        "data": "TotalHoursWorked",
+                        "render": function (data) {
+                            // Format TotalHoursWorked to two decimal places
+                            return parseFloat(data).toFixed(2);
+                        },
+                        width: '70px'
+
+                    },
+                    {
+                        "data": "TotalSalary",
+                        "render": function (data) {
+                            // Format TotalSalary to two decimal places
+                            return parseFloat(data).toFixed(2);
+                        },
+                        width: '50px'
+
+                    },
+                    {
+                        "data": "Bonus",
+                        width: '35px'
+
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            // Calculate the total of Bonus and TotalSalary
+                            var total = parseFloat(row.Bonus) + parseFloat(row.TotalSalary);
+
+                            // Format total to two decimal places
+                            return total.toFixed(2);
+                        },
+                        "width": '50px'
+                    },
+
+                    {
+                        "data": "salaryApproved",
+                        "render": function (data) {
+                            // Format TotalSalary to two decimal places
+                            return parseFloat(data).toFixed(2);
+                        },
+                        width: '75px'
+
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            // Calculate the difference between TotalSalary and salaryApproved
+                            var remainingAmount = parseFloat(row.TotalSalary - row.salaryApproved).toFixed(2);
+
+                            // Return the calculated difference
+                            return remainingAmount;
+                        },
+                        width: '45px'
+
+                    },
+                    {
+                        "data": "isSendForApproval",
+                        "render": function (data) {
+                            return data ? 'Yes' : 'No';
+                        }
+                    }
+                ],
+                pagingType: 'full_numbers',
+                language: {
+                    paginate: {
+                        first: 'First',
+                        previous: '&lsaquo;',
+                        next: '&rsaquo;',
+                        last: 'Last'
+                    },
+                    searchPlaceholder: 'Min 3 Characters'
+                },
+                autoWidth: false,
+                columnDefs: [
+                    { width: '100px', targets: '_all' }
+                ],
+                drawCallback: function () {
+                    // Override DataTables styles with Bootstrap styles after each draw
+                    $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
+                    $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
+                    $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
+                    $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+                },
+                initComplete: function () {
+                    $("#reloadIcon").removeClass('fa-spin');
+                }
+            });
+
+        }
+
+        fetchPayrollRecords();
+
+        $('#sendForApproval').on('click', function () {
+            var selectedIds = [];
+
+            // Iterate over each checked checkbox and retrieve its data-id attribute
+            $('.row-checkbox:checked').each(function () {
+                selectedIds.push($(this).data('id'));
+            });
+           
+            // Check if any IDs are selected
+            if (selectedIds.length > 0) {
+                toastr.success(
+                    "Sending Report To HR Department For Approval",
+                    {
+                        "class": "btn w-100 btn-outline-success mb-2",
+                        "id": "toast-success",
+                        timeOut: 1000,
+                        progressBar: true,
+                        closeButton: true
+                    }
+                );
+                // Send the selected IDs to the server
+                $.ajax({
+                    url: '/Payroll/sendForApproval', // Update the URL to match your controller and action method
+                    type: 'POST',
+                    "beforeSend": function (xhr) {
+                        hideSpinner();
+                    },// Assuming you're sending data via POST method
+                    data: { id: selectedIds }, // Send the selected IDs as data
+                    traditional: true, // This is needed to properly serialize the array in ASP.NET MVC
+                    success: function (response) {
+                        $('#successMessage').text('Report sent for approval successfully. Please Wait Until HR Approve the Salary'); // Set the success message text
+                        $('#successAlert').fadeIn();
+                        setInterval(hideAlerts, 2000);
+                        payrollTable.ajax.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        $('#errorMessage').text('Failed to send report for approval. Please try again later.'); // Set the error message text
+                        $('#errorAlert').fadeIn();
+                        setInterval(hideAlerts, 2000);
+
+                    }
+                });
+            } else {
+                $('#errorMessage').text('Please Select Atleast One Row to Send For Approval'); // Set the error message text
+                $('#errorAlert').fadeIn();
+                setInterval(hideAlerts, 2000);
+
+            }
+
+        });
+
+
+
+    });
+
+</script>    
+}

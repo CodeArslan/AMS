@@ -77,7 +77,7 @@ namespace AMS.Controllers
         {
             try
             {
-                //ReceiveUnreadEmailsFromGmail();
+                ReceiveUnreadEmailsFromGmail();
                 var chatList = _dbContext.receivedLeaveRequests.Where(c=>c.Subject!=null).OrderByDescending(c => c.Date);
                 return Json(chatList, JsonRequestBehavior.AllowGet);
             }
@@ -175,10 +175,11 @@ namespace AMS.Controllers
                                 };
                                 _dbContext.receivedLeaveRequests.Add(ReceivedEmailRequests);
                                 _dbContext.SaveChanges();
+                                inbox.AddFlags(uid, MessageFlags.Seen, true);
                             }
                         }
 
-                        inbox.AddFlags(uid, MessageFlags.Seen, true);
+                        
                     }
                 }
                 client.Disconnect(true);

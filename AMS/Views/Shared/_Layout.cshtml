@@ -55,153 +55,176 @@
         {
 
 
-<div class="side-content-wrap">
-    <div class="sidebar-left open rtl-ps-none"
-         data-perfect-scrollbar=""
-         data-suppress-scroll-x="true">
-        @if (User.IsInRole("Admin"))
-        {
-            <!-- Admin ke liye saare buttons -->
-        <ul class="navigation-left">
-            <!-- Yahan Admin ke buttons honge -->
-            <li class="nav-item no-open" data-item="">
-                <a class="nav-item-hold" href="/Home/Dashboard">
-                    <i class="fa fa-chart-bar fa-lg"></i><span class="nav-text">Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item" data-item="attendance">
-                <a class="nav-item-hold" href="#">
-                    <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
-                </a>
-                <div class="triangle"></div>
-            </li>
-            <li class="nav-item" data-item="manage">
-                <a class="nav-item-hold" href="#">
-                    <i class="fa fa-sliders-h fa-lg"></i><span class="nav-text">Manage</span>
-                </a>
-                <div class="triangle"></div>
-            </li>
-            <li class="nav-item no-open" data-item="">
-                <a class="nav-item-hold" href="/Payroll/Inbox">
-                    <i class="fas fa-money-check fa-lg"></i><span class="nav-text">Payroll</span>
-                </a>
-            </li>
-            <li class="nav-item no-open" data-item="">
-                <a class="nav-item-hold" href="/Leave/Inbox">
-                    <i class="fa fa-bed-alt fa-lg"></i><span class="nav-text">Leave Requests</span>
-                    <span class="badge badge-square badge-square-opacity-primary m-1" id="leaveRequestsBadge"></span>
-                </a>
-            </li>
-            <li class="nav-item no-open" data-item="">
-                <a class="nav-item-hold" href="/Leave/ComposeEmail">
-                    <i class="fas fa-mailbox fa-lg"></i><span class="nav-text">Compose Email</span>
-                </a>
-            </li>
-            <li class="nav-item no-open" data-item="">
-                <a class="nav-item-hold" href="/Shift/AssignShift">
-                    <i class="fas fa-exchange-alt fa-lg"></i><span class="nav-text">Assign Shift</span>
-                </a>
-            </li>
-            <li class="nav-item no-open" data-item="">
-                <a class="nav-item-hold" href="/Reporting/Index">
-                    <i class="fas fa-check-circle fa-lg"></i><span class="nav-text">Reporting</span>
-                </a>
-            </li>
-            <li class="nav-item no-open" data-item="">
-                <a class="nav-item-hold" href="/Account/Login">
-                    <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
-                </a>
-            </li>
-        </ul>
-        }
-        else if (User.IsInRole("HR") || User.IsInRole("Employee"))
-        {
-            <!-- HR aur Employee ke liye sirf Attendance button -->
-            <ul class="navigation-left">
-                <li class="nav-item" data-item="attendance">
-                    <a class="nav-item-hold" href="#">
-                        <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
-                    </a>
-                    <div class="triangle"></div>
-                </li>
-                <li class="nav-item no-open" data-item="">
-                    <a class="nav-item-hold" href="/Account/Login">
-                        <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
-                    </a>
-                </li>
-            </ul>
-        }
-    </div>
-    <div class="sidebar-left-secondary rtl-ps-none" data-perfect-scrollbar="" data-suppress-scroll-x="true">
-        <!-- Submenu Dashboards for Admin-->
-        @if (User.IsInRole("Admin"))
-        {
-            <ul class="childNav" data-parent="manage">
-                <li class="nav-item">
-                    <a href="/Department/Index">
-                        <i class="fa fa-building"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Department</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/Employee/Index">
-                        <i class="fa fa-user"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Employee</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/Shift/Index">
-                        <i class="fa fa-shipping-fast"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Shift</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/Meeting/Index">
-                        <i class="fas fa-table"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Meeting</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/Labour/Index">
-                        <i class="fas fa-user-hard-hat"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Labour</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/Card/Index">
-                        <i class="fa-solid fa-credit-card"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Card</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/Leave/Index">
-                        <i class="fas fa-house-person-leave"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Leave</span>
-                    </a>
-                </li>
-            </ul>
-        }
-
-        <!-- Submenu Dashboards for HR and Employee-->
-        @if (User.IsInRole("HR") || User.IsInRole("Employee")|| User.IsInRole("Admin"))
-        {
-            <ul class="childNav" data-parent="attendance">
-                <li class="nav-item">
-                    <a href="/Attendance/Index">
-                        <i class="fa fa-table"></i><span class="item-name" style="margin-left:15px;font-size:15px;">View Attendance</span>
-                    </a>
-                </li>
-                <!-- Only show Add Attendance submenu for Admin -->
-                @if (User.IsInRole("Admin"))
-                {
-                    <li class="nav-item dropdown-sidemenu">
-                        <a>
-                            <i class="fa fa-calendar"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Add Attendance</span><i class="dd-arrow fa fa-chevron-down"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="/Attendance/AddAttendanceForCardHolders">For Card Holders</a></li>
-                            <li><a href="/Attendance/AddAttendanceForLabours">For Labours</a></li>
+            <div class="side-content-wrap">
+                <div class="sidebar-left open rtl-ps-none"
+                     data-perfect-scrollbar=""
+                     data-suppress-scroll-x="true">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <!-- Admin ke liye saare buttons -->
+                        <ul class="navigation-left">
+                            <!-- Yahan Admin ke buttons honge -->
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Home/Dashboard">
+                                    <i class="fa fa-chart-bar fa-lg"></i><span class="nav-text">Dashboard</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" data-item="attendance">
+                                <a class="nav-item-hold" href="#">
+                                    <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
+                                </a>
+                                <div class="triangle"></div>
+                            </li>
+                            <li class="nav-item" data-item="manage">
+                                <a class="nav-item-hold" href="#">
+                                    <i class="fa fa-sliders-h fa-lg"></i><span class="nav-text">Manage</span>
+                                </a>
+                                <div class="triangle"></div>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Payroll/Index">
+                                    <i class="fas fa-money-check fa-lg"></i><span class="nav-text">Payroll</span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Leave/Inbox">
+                                    <i class="fa fa-bed-alt fa-lg"></i><span class="nav-text">Leave Requests</span>
+                                    <span class="badge badge-square badge-square-opacity-primary m-1" id="leaveRequestsBadge"></span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Leave/ComposeEmail">
+                                    <i class="fas fa-mailbox fa-lg"></i><span class="nav-text">Compose Email</span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Shift/AssignShift">
+                                    <i class="fas fa-exchange-alt fa-lg"></i><span class="nav-text">Assign Shift</span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Reporting/Index">
+                                    <i class="fas fa-check-circle fa-lg"></i><span class="nav-text">Reporting</span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Account/Login">
+                                    <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
+                                </a>
+                            </li>
                         </ul>
+                    }
+                    else if (User.IsInRole("Employee"))
+                    {
+                        <!-- HR aur Employee ke liye sirf Attendance button -->
+                        <ul class="navigation-left">
+
+                            <li class="nav-item" data-item="attendance">
+                                <a class="nav-item-hold" href="#">
+                                    <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
+                                </a>
+                                <div class="triangle"></div>
+                            </li>
+                           
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Account/Login">
+                                    <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                    else if (User.IsInRole("HR"))
+                    {
+                <ul class="navigation-left">
+                    <li class="nav-item" data-item="attendance">
+                        <a class="nav-item-hold" href="#">
+                            <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
+                        </a>
+                        <div class="triangle"></div>
                     </li>
-                }
-            </ul>
-        }
-    </div>
-    <div class="sidebar-overlay"></div>
-</div>
+                    <li class="nav-item no-open" data-item="">
+                        <a class="nav-item-hold" href="/Payroll/RequestedSalaries">
+                            <i class="fas fa-money-check fa-lg"></i><span class="nav-text">Payroll</span>
+                        </a>
+                    </li>
+                    <li class="nav-item no-open" data-item="">
+                        <a class="nav-item-hold" href="/Account/Login">
+                            <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
+                        </a>
+                    </li>
+                </ul>
+                    }
+                </div>
+                <div class="sidebar-left-secondary rtl-ps-none" data-perfect-scrollbar="" data-suppress-scroll-x="true">
+                    <!-- Submenu Dashboards for Admin-->
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <ul class="childNav" data-parent="manage">
+                            <li class="nav-item">
+                                <a href="/Department/Index">
+                                    <i class="fa fa-building"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Department</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/Employee/Index">
+                                    <i class="fa fa-user"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Employee</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/Shift/Index">
+                                    <i class="fa fa-shipping-fast"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Shift</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/Meeting/Index">
+                                    <i class="fas fa-table"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Meeting</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/Labour/Index">
+                                    <i class="fas fa-user-hard-hat"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Labour</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/Card/Index">
+                                    <i class="fa-solid fa-credit-card"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Card</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/Leave/Index">
+                                    <i class="fas fa-house-person-leave"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Leave</span>
+                                </a>
+                            </li>
+                        </ul>
+                    }
+
+                    <!-- Submenu Dashboards for HR and Employee-->
+                    @if (User.IsInRole("HR") || User.IsInRole("Employee") || User.IsInRole("Admin"))
+                    {
+                        <ul class="childNav" data-parent="attendance">
+                            <li class="nav-item">
+                                <a href="/Attendance/Index">
+                                    <i class="fa fa-table"></i><span class="item-name" style="margin-left:15px;font-size:15px;">View Attendance</span>
+                                </a>
+                            </li>
+                            <!-- Only show Add Attendance submenu for Admin -->
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item dropdown-sidemenu">
+                                    <a>
+                                        <i class="fa fa-calendar"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Add Attendance</span><i class="dd-arrow fa fa-chevron-down"></i>
+                                    </a>
+                                    <ul class="submenu">
+                                        <li><a href="/Attendance/AddAttendanceForCardHolders">For Card Holders</a></li>
+                                        <li><a href="/Attendance/AddAttendanceForLabours">For Labours</a></li>
+                                    </ul>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+                <div class="sidebar-overlay"></div>
+            </div>
 
         }
         <!-- =============== Left side End ================-->
@@ -332,7 +355,7 @@
             hideSpinner();
         }
     });
-   
+
     // JavaScript code
     $(document).ready(function () {
         // Jab bhi koi li element pe hover hota hai
