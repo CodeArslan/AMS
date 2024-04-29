@@ -121,9 +121,17 @@
                 },
                 columns: [
                     {
-                        "data": "ApplicationUser",
+                        "data": null,
                         "render": function (data, type, row) {
-                            return data.FirstName + " " + data.LastName;
+                            if (data.Labour) {
+                                return data.Labour.FirstName + " " + data.Labour.LastName;
+                            }
+                            else if (data.ApplicationUser) {
+                                return data.ApplicationUser.FirstName + " " + data.ApplicationUser.LastName;
+                            }
+                            else {
+                                return "Null";
+                            }
                         }
                     },
                     { data: 'Year' },

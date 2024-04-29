@@ -280,7 +280,8 @@ namespace AMS.Controllers
                     Year = currentYear,
                     TotalHoursWorked = totalHoursWorked,
                     TotalSalary = totalSalary,
-                    employeeId = employeeId
+                    employeeId = employeeId,
+                    Bonus=0
                 };
 
                 _dbContext.Payroll.Add(payroll);
@@ -289,6 +290,76 @@ namespace AMS.Controllers
             _dbContext.SaveChanges();
         }
 
+        private void CalculatePayrollforLabour(int labourId)
+        {
+            // Get the current month and year
+            int currentMonth = DateTime.Now.Month;
+            int currentYear = DateTime.Now.Year;
+
+            // Retrieve attendance records for the current month, year, and employee
+            var attendances = _dbContext.Attendance
+                .Where(a => a.labourId == labourId && a.date.Month == currentMonth && a.date.Year == currentYear)
+                .ToList();
+
+            // Initialize variables for total hours worked and total salary
+            double totalHoursWorked = 0;
+            int totalMinutesWorked = 0;
+            decimal totalSalary = 0;
+
+            // Assuming hourly rate is $10 for simplicity
+            decimal hourlyRate = _dbContext.Labours.Where(e => e.Id == labourId).Select(e => e.perHour).FirstOrDefault();
+
+            // Calculate total hours worked and total minutes worked
+            foreach (var attendance in attendances)
+            {
+                // Calculate total time worked for this attendance record
+                TimeSpan workedTime = attendance.timeOut - attendance.timeIn;
+
+                // Add total hours and minutes worked
+                totalHoursWorked += workedTime.TotalHours;
+                totalMinutesWorked += workedTime.Minutes;
+            }
+
+            // Convert total minutes to hours
+            totalHoursWorked += totalMinutesWorked / 60.0;
+
+            // Calculate total salary based on total hours worked
+            totalSalary = (decimal)totalHoursWorked * hourlyRate;
+
+            // Format totalSalary to two decimal places
+            totalSalary = Math.Round(totalSalary, 2);
+
+            // Format totalHoursWorked to two decimal places
+            totalHoursWorked = Math.Round(totalHoursWorked, 2);
+
+            // Check if there's already a payroll entry for the current month, year, and employee
+            var existingPayroll = _dbContext.Payroll
+                .FirstOrDefault(p => p.Month == currentMonth && p.Year == currentYear && p.labourId == labourId);
+
+            if (existingPayroll != null)
+            {
+                // Update existing payroll entry
+                existingPayroll.TotalHoursWorked = totalHoursWorked;
+                existingPayroll.TotalSalary = totalSalary;
+            }
+            else
+            {
+                // Create new payroll entry
+                var payroll = new Payroll
+                {
+                    Month = currentMonth,
+                    Year = currentYear,
+                    TotalHoursWorked = totalHoursWorked,
+                    TotalSalary = totalSalary,
+                    labourId = labourId,
+                    Bonus=0
+                };
+
+                _dbContext.Payroll.Add(payroll);
+            }
+
+            _dbContext.SaveChanges();
+        }
 
         protected override void Dispose(bool disposing)
         {
@@ -328,6 +399,8 @@ namespace AMS.Controllers
                         // Store the formatted total worked time in the database column
                         existingAttendance.totalWorkedTime = formattedTotalWorkedTime;
                         _dbContext.SaveChanges();
+                        CalculatePayrollforLabour(existingLabour.Id);
+
                     }
                     else
                     {
@@ -350,6 +423,7 @@ namespace AMS.Controllers
                         };
                         _dbContext.Attendance.Add(attendance1);
                         _dbContext.SaveChanges();
+                        CalculatePayrollforLabour(labourId);
 
                     }
                 }

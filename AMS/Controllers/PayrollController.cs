@@ -27,7 +27,7 @@ namespace AMS.Controllers
         }
         public ActionResult GetPayrollData()
         {
-            var payrollList=_dbContext.Payroll.Include(c=>c.ApplicationUser).ToList();
+            var payrollList=_dbContext.Payroll.Include(c=>c.ApplicationUser).Include(c=>c.Labour).ToList();
             return Json(payrollList, JsonRequestBehavior.AllowGet);
         }
 

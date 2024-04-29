@@ -113,11 +113,20 @@
                         width: '0px'
                     },
                     {
-                        "data": "ApplicationUser",
+                        "data": null,
                         "render": function (data, type, row) {
-                            return data.FirstName + " " + data.LastName;
+                            if (data.Labour) {
+                                return data.Labour.FirstName + " " + data.Labour.LastName;
+                            }
+                            else if (data.ApplicationUser) {
+                                return data.ApplicationUser.FirstName + " " + data.ApplicationUser.LastName;
+                            }
+                            else {
+                                return "Null";
+                            }
                         }
                     },
+
                     {
                         data: 'Year',
                         width: '35px'
@@ -156,8 +165,14 @@
                     {
                         "data": null,
                         "render": function (data, type, row) {
+                            // Parse Bonus to a float, if null, treat it as 0
+                            var bonus = row.Bonus ? parseFloat(row.Bonus) : 0;
+
+                            // Parse TotalSalary to a float
+                            var totalSalary = parseFloat(row.TotalSalary);
+
                             // Calculate the total of Bonus and TotalSalary
-                            var total = parseFloat(row.Bonus) + parseFloat(row.TotalSalary);
+                            var total = bonus + totalSalary;
 
                             // Format total to two decimal places
                             return total.toFixed(2);
