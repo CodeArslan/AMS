@@ -166,12 +166,9 @@
                     {
                         "data": "isApproved",
                         "render": function (data, type, row) {
-                            if (data === false) {
-                                return "<a class='text-success me-2 btn btn-outline-primary m-1' href='#' data-bs-toggle='modal' data-target='#approveSalary' data-whatever='mdo' data-id='" + row.Id + "' data-reqSalary='" + row.requestedSalary +"' >Approve</a>"; // Add '+' here
-
-                                // If isApproved is false, render a button with data-id attribute
+                            if (!data && row.requestedSalary > 0) {
+                                return "<a class='text-success me-2 btn btn-outline-primary m-1' href='#' data-bs-toggle='modal' data-target='#approveSalary' data-whatever='mdo' data-id='" + row.Id + "' data-reqSalary='" + row.requestedSalary + "' >Approve</a>";
                             } else {
-                                // If isApproved is true, render a disabled button
                                 return '<button type="button" class="btn btn-outline-primary" disabled>Approved</button>';
                             }
                         }

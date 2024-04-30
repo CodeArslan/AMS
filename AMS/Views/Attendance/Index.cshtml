@@ -185,10 +185,12 @@
                     {
                         "data": "timeOut",
                         "render": function (data) {
-                            if (data === "00:00:00") {
+                            if (data === '00:00:05') {
                                 return "--:--";
-                            } else {
+                            } else if (data) {
                                 return moment(data, 'HH:mm:ss').format('h:mm A');
+                            } else {
+                                return "--:--";
                             }
                         }
                     },

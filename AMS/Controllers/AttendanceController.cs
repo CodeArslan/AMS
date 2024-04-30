@@ -180,7 +180,7 @@ namespace AMS.Controllers
 
                     var currentDate = DateTime.Now.Date;
                     var existingAttendance = _dbContext.Attendance
-                        .Where(a => a.employeeId == employeeId && DbFunctions.TruncateTime(a.date) == currentDate )
+                        .Where(a => a.employeeId == employeeId && DbFunctions.TruncateTime(a.date) == currentDate)
                         .FirstOrDefault();
 
                     if (existingAttendance != null)
@@ -189,7 +189,17 @@ namespace AMS.Controllers
                         existingAttendance.timeOut = DateTime.Now.TimeOfDay;
 
                         // Calculate total worked hours
-                        TimeSpan workedHours = existingAttendance.timeOut - existingAttendance.timeIn;
+                        TimeSpan workedHours;
+                        if (existingAttendance.timeOut < existingAttendance.timeIn)
+                        {
+                            // Handle the case where time spans across two different days
+                            workedHours = TimeSpan.FromHours(24) - (existingAttendance.timeIn - existingAttendance.timeOut);
+                        }
+                        else
+                        {
+                            workedHours = existingAttendance.timeOut - existingAttendance.timeIn;
+                        }
+
                         // Calculate total worked hours and minutes
                         int totalWorkedHours = (int)workedHours.TotalHours;
                         int totalWorkedMinutes = workedHours.Minutes;
@@ -214,7 +224,7 @@ namespace AMS.Controllers
                             date = DateTime.Now.Date,
                             timeIn = DateTime.Now.TimeOfDay,
                             employeeId = employeeId,
-                            status="Present"
+                            status = "Present"
                         };
                         attendance.timeOut = TimeSpan.FromSeconds(5);
                         _dbContext.Attendance.Add(attendance);
@@ -234,6 +244,7 @@ namespace AMS.Controllers
 
         }
 
+
         private void CalculatePayroll(string employeeId)
         {
             // Get the current month and year
@@ -247,25 +258,29 @@ namespace AMS.Controllers
 
             // Initialize variables for total hours worked and total salary
             double totalHoursWorked = 0;
-            int totalMinutesWorked = 0;
             decimal totalSalary = 0;
 
             // Assuming hourly rate is $10 for simplicity
             decimal hourlyRate = _dbContext.Users.Where(e => e.Id == employeeId).Select(e => e.perHour).FirstOrDefault();
 
-            // Calculate total hours worked and total minutes worked
+            // Calculate total hours worked
             foreach (var attendance in attendances)
             {
                 // Calculate total time worked for this attendance record
-                TimeSpan workedTime = attendance.timeOut - attendance.timeIn;
+                TimeSpan workedTime;
+                if (attendance.timeOut < attendance.timeIn)
+                {
+                    // Handle the case where time spans across two different days
+                    workedTime = TimeSpan.FromHours(24) - (attendance.timeIn - attendance.timeOut);
+                }
+                else
+                {
+                    workedTime = attendance.timeOut - attendance.timeIn;
+                }
 
-                // Add total hours and minutes worked
+                // Add total hours worked
                 totalHoursWorked += workedTime.TotalHours;
-                totalMinutesWorked += workedTime.Minutes;
             }
-
-            // Convert total minutes to hours
-            totalHoursWorked += totalMinutesWorked / 60.0;
 
             // Calculate total salary based on total hours worked
             totalSalary = (decimal)totalHoursWorked * hourlyRate;
@@ -296,7 +311,7 @@ namespace AMS.Controllers
                     TotalHoursWorked = totalHoursWorked,
                     TotalSalary = totalSalary,
                     employeeId = employeeId,
-                    Bonus=0
+                    Bonus = 0
                 };
 
                 _dbContext.Payroll.Add(payroll);
@@ -318,25 +333,29 @@ namespace AMS.Controllers
 
             // Initialize variables for total hours worked and total salary
             double totalHoursWorked = 0;
-            int totalMinutesWorked = 0;
             decimal totalSalary = 0;
 
             // Assuming hourly rate is $10 for simplicity
             decimal hourlyRate = _dbContext.Labours.Where(e => e.Id == labourId).Select(e => e.perHour).FirstOrDefault();
 
-            // Calculate total hours worked and total minutes worked
+            // Calculate total hours worked
             foreach (var attendance in attendances)
             {
                 // Calculate total time worked for this attendance record
-                TimeSpan workedTime = attendance.timeOut - attendance.timeIn;
+                TimeSpan workedTime;
+                if (attendance.timeOut < attendance.timeIn)
+                {
+                    // Handle the case where time spans across two different days
+                    workedTime = TimeSpan.FromHours(24) - (attendance.timeIn - attendance.timeOut);
+                }
+                else
+                {
+                    workedTime = attendance.timeOut - attendance.timeIn;
+                }
 
-                // Add total hours and minutes worked
+                // Add total hours worked
                 totalHoursWorked += workedTime.TotalHours;
-                totalMinutesWorked += workedTime.Minutes;
             }
-
-            // Convert total minutes to hours
-            totalHoursWorked += totalMinutesWorked / 60.0;
 
             // Calculate total salary based on total hours worked
             totalSalary = (decimal)totalHoursWorked * hourlyRate;
@@ -367,7 +386,7 @@ namespace AMS.Controllers
                     TotalHoursWorked = totalHoursWorked,
                     TotalSalary = totalSalary,
                     labourId = labourId,
-                    Bonus=0
+                    Bonus = 0
                 };
 
                 _dbContext.Payroll.Add(payroll);
@@ -448,23 +467,32 @@ namespace AMS.Controllers
 
         public ActionResult UploadLabourAttendance(List<Attendance> attendances)
         {
-            foreach(var attendance in attendances)
+            foreach (var attendance in attendances)
             {
-                var existingLabour = _dbContext.Labours.Where(l => l.Id == attendance.Id).FirstOrDefault();
+                var existingLabour = _dbContext.Labours.FirstOrDefault(l => l.Id == attendance.Id);
                 if (existingLabour != null)
                 {
                     int labourId = existingLabour.Id;
                     var currentDate = DateTime.Now.Date;
                     var existingAttendance = _dbContext.Attendance
-                       .Where(a => a.labourId == labourId && DbFunctions.TruncateTime(a.date) == attendance.date)
-                       .FirstOrDefault();
+                       .FirstOrDefault(a => a.labourId == labourId && DbFunctions.TruncateTime(a.date) == attendance.date);
                     if (existingAttendance != null)
                     {
                         existingAttendance.timeIn = attendance.timeIn;
                         existingAttendance.timeOut = attendance.timeOut;
                         existingAttendance.status = "Present";
                         // Calculate total worked hours
-                        TimeSpan workedHours = existingAttendance.timeOut - existingAttendance.timeIn;
+                        TimeSpan workedHours;
+                        if (attendance.timeOut < attendance.timeIn)
+                        {
+                            // Handle the case where time spans across two different days
+                            workedHours = TimeSpan.FromHours(24) - (attendance.timeIn - attendance.timeOut);
+                        }
+                        else
+                        {
+                            workedHours = attendance.timeOut - attendance.timeIn;
+                        }
+
                         // Calculate total worked hours and minutes
                         int totalWorkedHours = (int)workedHours.TotalHours;
                         int totalWorkedMinutes = workedHours.Minutes;
@@ -476,34 +504,43 @@ namespace AMS.Controllers
                         existingAttendance.totalWorkedTime = formattedTotalWorkedTime;
                         _dbContext.SaveChanges();
                         CalculatePayrollforLabour(existingLabour.Id);
-
                     }
                     else
                     {
-                        TimeSpan workedHours = attendance.timeOut - attendance.timeIn;
+                        TimeSpan workedHours;
+                        if (attendance.timeOut < attendance.timeIn)
+                        {
+                            // Handle the case where time spans across two different days
+                            workedHours = TimeSpan.FromHours(24) - (attendance.timeIn - attendance.timeOut);
+                        }
+                        else
+                        {
+                            workedHours = attendance.timeOut - attendance.timeIn;
+                        }
+
                         // Calculate total worked hours and minutes
                         int totalWorkedHours = (int)workedHours.TotalHours;
                         int totalWorkedMinutes = workedHours.Minutes;
 
                         // Format the total worked hours and minutes
                         string formattedTotalWorkedTime = $"{totalWorkedHours} Hours {totalWorkedMinutes} Minutes";
+
                         // Employee is checking in for the first time today, mark time in
+                        DateTime dateTime = attendance.date.Date;
                         Attendance attendance1 = new Attendance
                         {
-                            date = attendance.date,
-                            timeIn =attendance.timeIn,
+                            date = dateTime,
+                            timeIn = attendance.timeIn,
                             timeOut = attendance.timeOut,
                             labourId = labourId,
-                            totalWorkedTime=formattedTotalWorkedTime,
-                            status="Present"
+                            totalWorkedTime = formattedTotalWorkedTime,
+                            status = "Present"
                         };
                         _dbContext.Attendance.Add(attendance1);
                         _dbContext.SaveChanges();
                         CalculatePayrollforLabour(labourId);
-
                     }
                 }
-
             }
             return Json(new { success = true, message = "Attendance Has Been Uploaded" });
         }
