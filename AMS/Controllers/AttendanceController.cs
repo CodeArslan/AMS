@@ -196,7 +196,7 @@ namespace AMS.Controllers
 
                         // Format the total worked hours and minutes
                         string formattedTotalWorkedTime = $"{totalWorkedHours} Hours {totalWorkedMinutes} Minutes";
-
+                        existingAttendance.status = "Present";
                         // Store the formatted total worked time in the database column
                         existingAttendance.totalWorkedTime = formattedTotalWorkedTime;
                         _dbContext.SaveChanges();
@@ -214,7 +214,9 @@ namespace AMS.Controllers
                             date = DateTime.Now.Date,
                             timeIn = DateTime.Now.TimeOfDay,
                             employeeId = employeeId,
+                            status="Present"
                         };
+                        attendance.timeOut = TimeSpan.FromSeconds(5);
                         _dbContext.Attendance.Add(attendance);
                         _dbContext.SaveChanges();
 

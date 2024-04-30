@@ -184,14 +184,17 @@
                         {
                             "data": "timeOut",
                             "render": function (data) {
-                                if (data) {
+                                if (data === '00:00:05') {
+                                    return "--:--";
+                                } else if (data) {
                                     return moment(data, 'HH:mm:ss').format('h:mm A');
                                 } else {
                                     return "--:--";
-
                                 }
                             }
                         },
+
+
                         {
                             "data": "totalWorkedTime",
                         },

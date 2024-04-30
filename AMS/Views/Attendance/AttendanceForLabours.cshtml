@@ -71,7 +71,7 @@
         </div>
         <div class="card-footer">
             <div style="text-align:center">
-                <a class="btn btn-primary" style="width:25%" href="#" id="upload">Upload</a>
+                <a class="btn btn-outline-primary" style="width:25%" href="#" id="upload">Upload</a>
             </div>
         </div>
     </div>
@@ -446,7 +446,17 @@
                     return; // Exit the function if an error occurred
                 }
 
-                // If no error occurred, proceed with AJAX request
+                // Check if dataToUpload array is empty
+                if (dataToUpload.length === 0) {
+                    // Display error message if no employee is selected
+                    $('#errorMessage').text('Please select at least one employee to add attendance.');
+                    $('#errorAlert').fadeIn();
+                    setTimeout(hideAlerts, 2000);
+
+                    return; // Exit the function
+                }
+
+                // If no error occurred and dataToUpload array is not empty, proceed with AJAX request
                 $.ajax({
                     url: '/Attendance/UploadLabourAttendance',
                     type: 'POST',
