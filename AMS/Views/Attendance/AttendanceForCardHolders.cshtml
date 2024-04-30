@@ -1,31 +1,18 @@
 ﻿
 @{
-    ViewBag.Title = "AttendanceForLabours";
+    ViewBag.Title = "AttendanceForCardHolders";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<style>
-    .dataTables_filter {
-        margin-bottom: 10px;
-    }
-    .present {
-        background-color: green !important;
-    }
-
-    .absent {
-        background-color: red !important;
-    }
-</style>
 <div class="main-content">
     <div class="breadcrumb">
         <ul>
             <li><a href="#">Attendance</a></li>
-            <li>Attendance For Labours</li>
+            <li>Add Attendance For Card Holders</li>
         </ul>
     </div>
     <div class="separator-breadcrumb border-top"></div>
 </div>
-
 <div class="col-md-12 mb-3">
     <div class="card text-start">
         <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
@@ -40,22 +27,21 @@
             <h3 class="text-mute">Add Attendance</h3>
         </div>
         <div class="card-body">
-            <h3>Search By Date</h3>
+            <h3>Search Employee</h3>
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group">
-                        <input class="form-control" type="date" id="filterAttendanceDate">
-                        <span class="text-danger" id="dateError"></span>
+                        <input class="form-control" type="text" autocomplete="off" id="cardCode" placeholder="Enter Employee's Card Code">
                     </div>
                 </div>
-            </div>
 
-            @*<h3 class="card-title mb-3">Add Attendance</h3>*@
+            </div>
             <div class="table-responsive">
-                <table class="table table-hover table-bordered table-striped" id="addLabourAttendanceTable">
+                <table class="table table-hover table-bordered table-striped" id="cardAttendance">
                     <thead class="table-dark">
                         <tr>
                             <th scope="col">Employee Name</th>
+                            <th scope="col">Date</th>
                             <th scope="col">Time In</th>
                             <th scope="col">Time Out</th>
                             <th scope="col">Status</th>
@@ -71,7 +57,7 @@
         </div>
         <div class="card-footer">
             <div style="text-align:center">
-                <a class="btn btn-primary" style="width:25%" href="#" id="upload">Upload</a>
+                <button class="btn btn-outline-primary" style="width:25%" href="#" id="upload" disabled>Upload</button>
             </div>
         </div>
     </div>
@@ -87,7 +73,7 @@
             <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <div class="card-header">
-            <h3 class="text-mute">Labour Attendance</h3>
+            <h3 class="text-mute">Employee Attendance<i class="fas fa-sync-alt float-end text-20 mr-5" id="reloadIcon" title="Press to Reload Employee Attendance Table"></i></h3>
         </div>
         <div class="card-body">
             <h3>Search By Date</h3>
@@ -100,7 +86,7 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover table-bordered table-striped" id="labourAttendance">
+                <table class="table table-hover table-bordered table-striped" id="employeeAttendance">
                     <thead class="table-dark">
                         <tr>
                             <th scope="col">Employee Name</th>
@@ -121,30 +107,39 @@
     </div>
 </div>
 
+
+
 @section scripts
 {
     <script>
         $(document).ready(function () {
-            $("#filterDate").on("change", function () {
-                // Call the fetchlabourAttendance() function when the date changes
-                fetchlabourAttendance();
+            $("#reloadIcon").tooltip({
+                placement: "left", // Set the tooltip placement to left
+                show: {
+                    effect: "slideDown",
+                    delay: 250
+                }
             });
-            $("#filterAttendanceDate").on("change", function () {
-                // Call the fetchlabourAttendance() function when the date changes
-                fetchLabours();
+            $("#reloadIcon").click(function () {
+                $(this).toggleClass('fa-spin');
+                fetchEmployeeAttendance();
             });
             var today = new Date().toISOString().slice(0, 10);
 
-            // Set the value of the input field to today's date
             $("#filterDate").val(today);
-            $("#filterAttendanceDate").val(today);
-            fetchlabourAttendance();
-            function fetchlabourAttendance() {
+            fetchEmployeeAttendance();
+            $("#filterDate").on("change", function () {
+                fetchEmployeeAttendance();
+            });
+            $('#cardCode').on('blur', function () {
+                fetchEmployeeByCard();
+            });
+            function fetchEmployeeAttendance() {
                 var selectedDate = $("#filterDate").val();
-                $('#labourAttendance').DataTable({
+                $('#employeeAttendance').DataTable({
                     "destroy": true,
                     "ajax": {
-                        "url": '/Attendance/GetLabourAttendance',
+                        "url": '/Attendance/GetEmployeeAttendance',
                         "type": "GET",
                         "datatype": "json",
                         "dataSrc": "",
@@ -159,7 +154,7 @@
                     "columns": [
                         {
                             "data": null, "render": function (data, type, row) {
-                                return row.Labour.FirstName + ' ' + row.Labour.LastName;
+                                return row.Employee.FirstName + ' ' + row.Employee.LastName;
                             }
                         },
                         {
@@ -198,7 +193,7 @@
                             }
                         },
                         {
-                            "data": "totalWorkedTime", 
+                            "data": "totalWorkedTime",
                         },
                         {
                             "data": "status",
@@ -213,7 +208,8 @@
 
                     ],
                     "initComplete": function (settings, json) {
-                        $('#labourAttendance tbody tr').each(function () {
+                        $("#reloadIcon").removeClass('fa-spin');
+                        $('#employeeAttendance tbody tr').each(function () {
                             var statusCell = $(this).find('td:eq(5)');
                             var status = statusCell.text();
                             if (status === "Present") {
@@ -254,19 +250,19 @@
                 });
 
             }
-            fetchLabours();
-            function fetchLabours() {
-                var selectedDate = $("#filterAttendanceDate").val();
-                $('#addLabourAttendanceTable').DataTable({
+
+            function fetchEmployeeByCard() {
+                var cardCode = $("#cardCode").val();
+                var table=$('#cardAttendance').DataTable({
                     "destroy": true,
                     "ajax": {
-                        "url": '/Attendance/GetLabourList',
+                        "url": '/Attendance/GetEmployeeByCard',
                         "type": "GET",
                         "datatype": "json",
-                        "data": {
-                            date: selectedDate // Pass the selected date as a parameter
-                        },
                         "dataSrc": "",
+                        "data": {
+                            cardCode: cardCode
+                        },
                         "contentType": 'application/json; charset=utf-8',
                         "beforeSend": function (xhr) {
                             hideSpinner();
@@ -280,44 +276,33 @@
                             }
                         },
                         {
+                            "data": null,
+                            "render": function (data, type, full, meta) {
+                                return '<input type="date" id="date' + full.Id + '" class="form-control">';
+                            }
+                        },
+
+                        {
                             "data": "TimeIn",
                             "render": function (data, type, full, meta) {
                                 if (data) {
-                                    return '<td><div class="input-group timepicker">' +
-                                        '<input type="time" class="form-control" id="startTime_' + full.Id + '" value="' + data.slice(0, 5) + '" data-id="' + full.Id + '" />' +
-                                        '</div>' +
-                                        '<span class="text-danger" id="timeInErrorMessage_' + full.Id + '"></span>' + // Span for error message
-                                        '</td>';
+                                    return '<td><div class="input-group timepicker"><input type="time" class="form-control" id="startTime_' + full.Id + '" value="' + data.slice(0, 5) + '" data-id="' + full.Id + '" /></div></td>';
                                 } else {
-                                    return '<td><div class="input-group timepicker">' +
-                                        '<input type="time" class="form-control" id="startTime_' + full.Id + '" value="" data-id="' + full.Id + '" />' +
-                                        '</div>' +
-                                        '<span class="text-danger" id="timeInErrorMessage_' + full.Id + '"></span>' + // Span for error message
-                                        '</td>';
+                                    return '<td><div class="input-group timepicker"><input type="time" class="form-control" id="startTime_' + full.Id + '" value="" data-id="' + full.Id + '" /></div></td>';
                                 }
                             }
                         },
+
                         {
                             "data": "TimeOut",
                             "render": function (data, type, full, meta) {
                                 if (data) {
-                                    return '<td><div class="input-group timepicker">' +
-                                        '<input type="time" class="form-control" id="endTime_' + full.Id + '" value="' + data.slice(0, 5) + '" />' +
-                                        '</div>' +
-                                        '<span class="text-danger" id="timeOutErrorMessage_' + full.Id + '"></span>' + // Span for error message
-                                        '</td>';
+                                    return '<td><div class="input-group timepicker"><input type="time" class="form-control" id="endTime_' + full.Id + '" value="' + data.slice(0, 5) + '" /></div></td>';
                                 } else {
-                                    return '<td><div class="input-group timepicker">' +
-                                        '<input type="time" class="form-control" id="endTime_' + full.Id + '" value="" />' +
-                                        '</div>' +
-                                        '<span class="text-danger" id="timeOutErrorMessage_' + full.Id + '"></span>' + // Span for error message
-                                        '</td>';
+                                    return '<td><div class="input-group timepicker"><input type="time" class="form-control" id="endTime_' + full.Id + '" value="" /></div></td>';
                                 }
                             }
                         },
-
-
-
 
 
 
@@ -361,104 +346,89 @@
                         $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
                         $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
                         $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+                    },
+                    "initComplete": function (settings, json) {
+                        // Check if there's at least one row
+                        if (table.rows().count() > 0) {
+                            // Enable the button by removing the disabled attribute
+                            $('#upload').removeAttr('disabled');
+                        }
+                        else {
+                            // Disable the button by adding the disabled attribute
+                            $('#upload').attr('disabled', 'disabled');
+                        }
                     }
                 });
+
             }
-            $(document).on('change', '.status-radio', function () {
-                var rowId = $(this).attr('id').split('_')[1]; // Extract the row ID from the radio button ID
-                var selectedValue = $(this).val(); // Get the value of the selected radio button
-
-                // Disable/enable input fields based on the selected radio button value
-                if (selectedValue === 'absent') {
-                    $('#startTime_' + rowId).prop('disabled', true);
-                    $('#endTime_' + rowId).prop('disabled', true);
-                } else {
-                    $('#startTime_' + rowId).prop('disabled', false);
-                    $('#endTime_' + rowId).prop('disabled', false);
-                }
-            });
-
-            // Disable input fields initially
-            $('input[value="absent"]').each(function () {
-                var rowId = $(this).attr('id').split('_')[1]; // Extract the row ID from the radio button ID
-                $('#startTime_' + rowId).prop('disabled', true);
-                $('#endTime_' + rowId).prop('disabled', true);
-            });
 
             $('#upload').on('click', function () {
-                var selectedDate = $('#filterAttendanceDate').val();
-
-                // Check if the date is empty
-                if (!selectedDate) {
-                    // Display the error message inside the span
-                    $('#dateError').text('Please select a date.');
-                    return; // Stop further processing
-                }
-
-                // Clear the error message if the date is not empty
-                $('#dateError').text('');
                 var dataToUpload = []; // Array to store data of rows marked as 'Present'
                 var errorOccurred = false; // Flag to track if any error occurred
 
                 // Iterate over each row in the DataTable
-                $('#addLabourAttendanceTable').find('tbody tr').each(function () {
+                $('#cardAttendance').find('tbody tr').each(function () {
                     var rowData = $(this).find('td'); // Get the columns of the current row
-                    var status = $(rowData[3]).find('input[type=radio]:checked').val(); // Get the value of the checked radio button (status)
-                    var id = $(rowData[1]).find('input[type=time]').data('id');
-                    var timeIn = $(rowData[1]).find('input[type=time]').val(); // Get TimeIn from the second column input
-                    var timeOut = $(rowData[2]).find('input[type=time]').val(); // Get TimeOut from the third column input
+                    var status = $(rowData[4]).find('input[type=radio]:checked').val(); // Get the value of the checked radio button (status)
+                    var date = $(rowData[1]).find('input[type=date]').val(); // Get the value of the date input
 
-                    // Check if status is 'Present' and timeIn or timeOut is empty
-                    if (status === 'present' && (timeIn === '' || timeOut === '')) {
-                        debugger;
-                        // Display error message below the empty input field
-                        if (timeIn === '') {
-                            $('#timeInErrorMessage_' + id).text('TimeIn is required').show();
-                        }
-                        if (timeOut === '') {
-                            $('#timeOutErrorMessage_' + id).text('TimeOut is required').show();
-                        }
-                        errorOccurred = true; // Set error flag to true
-                    } else if (status === 'present') {
-                        // Check if timeIn is greater than or equal to timeOut
-                        var timeInValue = new Date('1970-01-01T' + timeIn + ':00Z'); // Assuming seconds are always zero
-                        var timeOutValue = new Date('1970-01-02T' + timeOut + ':00Z'); // Assuming next day to handle timeOut as 00:00
+                    // Check if date is empty
+                    if (!date) {
+                        errorOccurred = true;
+                        $('#errorMessage').text('Please select a date for all employees.');
+                        $('#errorAlert').fadeIn();
+                        setTimeout(hideAlerts, 2000);
 
-                        if (timeInValue >= timeOutValue) {
-                            // Display error message below the timeIn input field
-                            $('#timeInErrorMessage_' + id).text('TimeIn must be earlier than TimeOut').show();
-                            errorOccurred = true; // Set error flag to true
-                        } else {
-                            // Clear any existing error message for timeIn input field
-                            $('#timeInErrorMessage_' + id).text('').hide();
-                            // Add the data to the array if no error occurred
-                            dataToUpload.push({ id: id, timeIn: timeIn, timeOut: timeOut });
+                        return false; // Exit the loop if error occurred
+                    }
+
+                    // If status is 'Present', extract ID, TimeIn, and TimeOut values
+                    if (status === 'present') {
+                        var id = $(rowData[2]).find('input[type=time]').data('id');
+                        var timeIn = $(rowData[2]).find('input[type=time]').val(); // Get TimeIn from the second column input
+                        var timeOut = $(rowData[3]).find('input[type=time]').val(); // Get TimeOut from the third column input
+
+                        // Check if timeIn or timeOut is empty
+                        if (!timeIn || !timeOut) {
+                            errorOccurred = true;
+                            $('#errorMessage').text('Please enter both Time In and Time Out for all present employees.');
+                            $('#errorAlert').fadeIn();
+                            setTimeout(hideAlerts, 2000);
+
+                            return false; // Exit the loop if error occurred
                         }
-                    } else {
-                        // Clear any existing error message for rows with status 'Absent'
-                        $('#timeInErrorMessage_' + id).text('').hide();
-                        $('#timeOutErrorMessage_' + id).text('').hide();
+
+                        // Check if timeIn is earlier than timeOut
+                        if (timeIn >= timeOut) {
+                            errorOccurred = true;
+                            $('#errorMessage').text('Time In should be earlier than Time Out.');
+                            $('#errorAlert').fadeIn();
+                            setTimeout(hideAlerts, 2000);
+
+                            return false; // Exit the loop if error occurred
+                        }
+
+                        // Add the data to the array
+                        dataToUpload.push({ employeeId: id, timeIn: timeIn, timeOut: timeOut, date: date });
                     }
                 });
 
-                // Check if any error occurred
+                // If error occurred, return
                 if (errorOccurred) {
-                    return; // Exit the function if an error occurred
+                    return;
                 }
 
-                // If no error occurred, proceed with AJAX request
+                // Proceed with AJAX request
                 $.ajax({
-                    url: '/Attendance/UploadLabourAttendance',
+                    url: '/Attendance/UploadEmployeeAttendance',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(dataToUpload),
                     success: function (response) {
-                        fetchlabourAttendance();
-                        fetchLabours();
-                        // Show success alert
+                        fetchEmployeeAttendance();
                         $('#successMessage').text(response.message);
                         $('#successAlert').fadeIn();
-
+                        $('#cardCode').val('').blur();
                         // Optional: Hide error alert if it's still visible
                         $('#errorAlert').hide();
 
@@ -469,6 +439,23 @@
                         // Handle error
                     }
                 });
+            });
+            $(document).on('change', '.status-radio', function () {
+                var rowId = $(this).attr('id').split('_')[1]; // Extract the row ID from the radio button ID
+                var selectedValue = $(this).val(); // Get the value of the selected radio button
+
+                // Disable/enable input fields based on the selected radio button value
+                if (selectedValue === 'absent') {
+                    $('#startTime_' + rowId).prop('disabled', true);
+                    $('#endTime_' + rowId).prop('disabled', true);
+                    $('#date' + rowId).prop('disabled', true);
+                    $('#upload').prop('disabled', true);
+                } else {
+                    $('#startTime_' + rowId).prop('disabled', false);
+                    $('#endTime_' + rowId).prop('disabled', false);
+                    $('#date' + rowId).prop('disabled', false);
+                    $('#upload').prop('disabled', false);
+                }
             });
         });
 
