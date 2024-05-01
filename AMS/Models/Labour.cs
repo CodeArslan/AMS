@@ -41,5 +41,7 @@ namespace AMS.Models
         [ForeignKey("Shift")]
         [Display(Name = "Shift")]
         public int? shiftId { get; set; }
+
+        public string labourNumber { get; set; }
     }
 }

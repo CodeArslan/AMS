@@ -48,6 +48,7 @@ namespace AMS.Models
         public string Gender { get; set; }
         public string Designation { get; set; }
         public string Role { get; set; }
+        public string employeeNumber { get; set; }
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
             

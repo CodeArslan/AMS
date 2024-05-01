@@ -45,14 +45,44 @@ namespace AMS.Controllers
 
             return Json(labour, JsonRequestBehavior.AllowGet);
         }
+        public int getEmployeeNumber()
+        {
+            // Retrieve the highest employee number from the database
+            var highestLabourNumber = _dbContext.Labours
+                .Select(u => u.labourNumber)
+                .OrderByDescending(en => en)
+                .FirstOrDefault();
 
+            int highestNumber;
+            if (highestLabourNumber != null && int.TryParse(highestLabourNumber.Replace("Cactus-LA-", ""), out highestNumber))
+            {
+                return highestNumber;
+            }
+            else
+            {
+                // If no employee number exists yet, return 0
+                return 0;
+            }
+        }
         public ActionResult LabourDetails(Labour labour)
         {
             try
             {
                 if (labour.Id == 0)
                 {
+                    int highestNumber = getEmployeeNumber();
+
+                    // Increment the highest number to ensure uniqueness
+                    highestNumber++;
+
+                    // Format the number as a four-digit string
+                    string uniqueNumber = highestNumber.ToString("D4");
+
+                    // Concatenate with "Cactus-EM-" to form the new employee number
+                    string newEmployeeNumber = "Cactus-LA-" + uniqueNumber;
+
                     // Adding a new labour
+                    labour.labourNumber = newEmployeeNumber;
                     _dbContext.Labours.Add(labour);
                     _dbContext.SaveChanges();
                     return Json(new { success = true, message = "Labour Added Successfully." });

@@ -200,7 +200,25 @@ namespace AMS.Controllers
             return View(viewModel);
         }
 
+        public int getEmployeeNumber()
+        {
+            // Retrieve the highest employee number from the database
+            var highestEmployeeNumber = _dbContext.Users
+                .Select(u => u.employeeNumber)
+                .OrderByDescending(en => en)
+                .FirstOrDefault();
 
+            int highestNumber;
+            if (highestEmployeeNumber != null && int.TryParse(highestEmployeeNumber.Replace("Cactus-EM-", ""), out highestNumber))
+            {
+                return highestNumber;
+            }
+            else
+            {
+                // If no employee number exists yet, return 0
+                return 0;
+            }
+        }
         //
         // POST: /Account/Register
         [HttpPost]
@@ -208,6 +226,7 @@ namespace AMS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Register(RegisterViewModel model)
         {
+            ModelState.Remove("employeeNumber");
             if (ModelState.IsValid)
             {
                 // Check if user exists for update
@@ -260,6 +279,18 @@ namespace AMS.Controllers
                 else
                 {
                     // New user registration logic
+                    int highestNumber = getEmployeeNumber();
+
+                    // Increment the highest number to ensure uniqueness
+                    highestNumber++;
+
+                    // Format the number as a four-digit string
+                    string uniqueNumber = highestNumber.ToString("D4");
+
+                    // Concatenate with "Cactus-EM-" to form the new employee number
+                    string newEmployeeNumber = "Cactus-EM-" + uniqueNumber;
+
+                    // Now assign this newEmployeeNumber to the employee being registered
                     var user = new ApplicationUser
                     {
                         UserName = model.Email,
@@ -274,9 +305,10 @@ namespace AMS.Controllers
                         Phone = model.Phone,
                         Address = model.Address,
                         leaveBalance = 2,
-                        Designation=model.Designation,
-                        Gender=model.Gender,
-                        Role=model.Role,
+                        Designation = model.Designation,
+                        Gender = model.Gender,
+                        Role = model.Role,
+                        employeeNumber = newEmployeeNumber // Assign the new employee number here
                     };
                     var result = await UserManager.CreateAsync(user, model.Password);
                     if (result.Succeeded)
@@ -298,6 +330,9 @@ namespace AMS.Controllers
             // Repopulate department list
             var departmentList = _dbContext.Departments.ToList();
             model.Department = departmentList;
+            model.Card = _dbContext.Cards
+     .Where(c => c.isActive && !_dbContext.Users.Any(u => u.CardId == c.Id))
+     .ToList();
             // If we got this far, something failed, redisplay form
             return View(model);
         }

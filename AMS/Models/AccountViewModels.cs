@@ -117,6 +117,8 @@ namespace AMS.Models
         public string Gender { get; set; }
         [Required]
         public string Role { get; set; }
+        [Required]
+        public string employeeNumber { get; set; }
 
     }
 
