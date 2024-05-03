@@ -21,6 +21,8 @@ namespace AMS.Models
         public DateTime? Date { get; set; } = DateTime.Now;
         public bool isRead {  get; set; }
         public string Decision { get; set; }
+        [Required]
+        public string Reason { get; set; }
         public Labour Labour { get; set; }
         [ForeignKey("Labour")]
         [Display(Name = "Labour")]

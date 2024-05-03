@@ -175,7 +175,8 @@ namespace AMS.Controllers
                                     From = emailData.Sender,
                                     Subject = emailData.Subject,
                                     Message = emailData.Body,
-                                    Name = name
+                                    Name = name,
+                                    Reason="No"
                                 };
                                 _dbContext.receivedLeaveRequests.Add(ReceivedEmailRequests);
                                 _dbContext.SaveChanges();
@@ -207,6 +208,10 @@ namespace AMS.Controllers
                         var leaveBalance = 0;
                         if(fromDate!= null&&toDate!=null) {
                             var days = (toDate.Value - fromDate.Value).Days;
+                            if (toDate.Value == fromDate.Value)
+                            {
+                                days = 1; // Sirf 1 count karein
+                            }
                             var employee = _dbContext.Users.Where(l => l.Email == Email.From).FirstOrDefault();
                             var labour=_dbContext.Labours.Where(l=>l.Email==Email.From).FirstOrDefault();
                             if(employee!=null)
@@ -214,6 +219,7 @@ namespace AMS.Controllers
                                 leaveBalance = employee.leaveBalance;
                                 employee.leaveBalance = employee.leaveBalance - days;
                                 Email.employeeId = employee.Id;
+                                Email.Reason = response.ReceivedLeaveRequests.Reason;
                                 _dbContext.SaveChanges();
                             }
                             else
@@ -221,6 +227,7 @@ namespace AMS.Controllers
                                 leaveBalance = labour.leaveBalance;
                                 labour.leaveBalance = labour.leaveBalance - days;
                                 Email.labourId = labour.Id;
+                                Email.Reason = response.ReceivedLeaveRequests.Reason;
                                 _dbContext.SaveChanges();
                             }
                            
@@ -228,7 +235,7 @@ namespace AMS.Controllers
                         sendLeaveEmail(fromDate, toDate, message, Email.From,decision, leaveBalance);
                         Email.Decision = response.Decision;
                         Email.isRead = true;
-
+                        response.ReceivedLeaveRequests = null;
                         _dbContext.LeaveResponses.Add(response);
                         _dbContext.SaveChanges();
                         return Json(new { success = true, message = "Leave Sent Successfully." });
@@ -357,6 +364,7 @@ namespace AMS.Controllers
                         Name = viewModel.ReceivedLeaveRequests.Name,
                         employeeId = employee != null ? employee.Id.ToString() : null,
                         labourId = labour != null ? labour.Id : (int?)null,
+                        Reason = viewModel.ReceivedLeaveRequests.Reason,
                     };
 
                     _dbContext.receivedLeaveRequests.Add(receivedleaveRequests);
@@ -377,7 +385,7 @@ namespace AMS.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Employee not registered!" });
+                    return Json(new { success = false, message = "Error Occured In Adding Leave" });
                 }
 
             }

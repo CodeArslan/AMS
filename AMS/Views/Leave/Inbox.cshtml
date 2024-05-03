@@ -7,6 +7,7 @@
     #badge-position {
         position: relative;
         left: 120%;
+        bottom:32px;
     }
 
     .active-chat {
@@ -142,7 +143,14 @@
             }, new { id = "leaveDecisionForm" }))
             {
                 <div class="modal-body">
-
+                    <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlertforResponseModal" style="display:none">
+                        <strong class="text-capitalize">Success!</strong> <span id="successMessageforResponseModal"></span>
+                        <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlertforResponseModal" style="display:none">
+                        <strong class="text-capitalize">Error!</strong> <span id="errorMessageforResponseModal"></span>
+                        <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
 
                     <div class="row">
                         <div class="col-md-12">
@@ -159,6 +167,28 @@
                                 @Html.LabelFor(model => model.To, new { @class = "col-form-label" })
                                 @Html.TextBoxFor(model => model.To, new { @class = "form-control", @id = "toDate", @type = "date", autocomplete = "off" })
                                 @Html.ValidationMessageFor(model => model.To, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.ReceivedLeaveRequests.Reason, new { @class = "col-form-label" })
+                                @Html.DropDownListFor(model => model.ReceivedLeaveRequests.Reason, new SelectList(
+                                    new List<Object>
+                                    {
+                                        new { value = "", text = "--Select--" },
+                                        new { value = "Health Issues", text = "Health Issues" },
+                                        new { value = "Family Responsibilities", text = "Family Responsibilities" },
+                                        new { value = "Vacation", text = "Vacation" },
+                                        new { value = "Legal Obligations", text = "Legal Obligations" },
+                                        new { value = "Emergency Situations", text = "Emergency Situations" },
+                                        new { value = "Other", text = "Other" }
+                                    },
+                                    "value",
+                                    "text"
+                                ), new { @class = "form-control", @id = "reason", autocomplete = "off" })
+                                @Html.ValidationMessageFor(model => model.ReceivedLeaveRequests.Reason, "", new { @class = "text-danger" })
                             </div>
                         </div>
                     </div>
@@ -186,17 +216,20 @@
 </div>
 @section scripts{
     <script>
-
+        function triggerReloadButton() {
+            $('#reloadIcon').click();
+        }
         $(document).ready(function () {
+
             $("#btnApprove").click(function () {
                 $("#verifyModalContent_title").text("Approve Message");
-                $("#fromDate, #toDate, #hiddenchatId").closest(".row").show();
+                $("#fromDate, #toDate, #hiddenchatId,#reason").closest(".row").show();
                 $("#hiddenDecision").val("Approved");
             });
 
             $("#btnReject").click(function () {
                 $("#verifyModalContent_title").text("Reject Message");
-                $("#fromDate, #toDate, #Message").closest(".row").hide();
+                $("#fromDate, #toDate, #Message,#reason").closest(".row").hide();
                 $("#hiddenDecision").val("Rejected");
 
             });
@@ -254,11 +287,11 @@
 
                 var badge = '';
                 if (chat.Decision === 'Approved') {
-                    badge = '<span class="badge rounded-pill bg-success text-white p-2 m-1" id="badge-position">Approved</span>';
+                    badge = '<span class="badge rounded-pill bg-success text-white p-2 m-1 float-end" id="badge-position">Approved</span>';
                 } else if (chat.Decision === 'Rejected') {
-                    badge = '<span class="badge rounded-pill bg-danger text-white p-2 m-1" id="badge-position">Rejected</span>';
+                    badge = '<span class="badge rounded-pill bg-danger text-white p-2 m-1 float-end" id="badge-position">Rejected</span>';
                 } else {
-                    badge = '<span class="badge rounded-pill bg-warning text-dark p-2 m-1" id="badge-position">Pending</span>';
+                    badge = '<span class="badge rounded-pill bg-warning text-dark p-2 m-1 float-end" id="badge-position">Pending</span>';
                 }
 
                 var html = '<div class="p-3 d-flex align-items-center border-bottom contact" data-chatid="' + chat.Id + '">';
@@ -283,10 +316,7 @@
         }
     });
             }
-            function triggerReloadButton() {
-                $('#reloadIcon').click();
-
-            }
+           
             function loadChatMessage(chatId) {
                 $.ajax({
                     url: '/Leave/GetChatMessage',
@@ -345,8 +375,22 @@
 
         });
         function onBegin() {
-            showSpinner();
+            debugger;
+            var fromDate = new Date($('#fromDate').val());
+            var toDate = new Date($('#toDate').val());
+
+            if (toDate < fromDate) {
+                $('#errorAlertforResponseModal').show();
+                $('#errorMessageforResponseModal').text('To date cannot be earlier than From date.');
+                return false; // Prevent form submission
+            } else {
+                $('#errorAlertforResponseModal').hide();
+                showSpinner();
+
+                return true; // Allow form submission
+            }
         }
+        
         function handleSuccessforLeave(data) {
             $("#responseModal").modal('hide');
             triggerReloadButton();
