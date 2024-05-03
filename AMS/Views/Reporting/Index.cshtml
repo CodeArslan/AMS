@@ -1,0 +1,1112 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row mb-4">
+    <div class="col-md-12 mb-4">
+        <div class="card text-start">
+            <div class="card-body">
+                <h4 class="card-title mb-3 text-primary">Reports</h4>
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="summary-basic-tab" data-bs-toggle="tab" href="#summaryBasic" role="tab" aria-controls="summaryBasic" aria-selected="false">Summary</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="attendance-basic-tab" data-bs-toggle="tab" href="#attendanceBasic" role="tab" aria-controls="attendanceBasic" aria-selected="false">Attendance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="leave-basic-tab" data-bs-toggle="tab" href="#leaveBasic" role="tab" aria-controls="leaveBasic" aria-selected="true">Leave</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="payroll-basic-tab" data-bs-toggle="tab" href="#payroll" role="tab" aria-controls="payroll" aria-selected="true">Payroll</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active"
+                         id="summaryBasic"
+                         role="tabpanel"
+                         aria-labelledby="summary-basic-tab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text" id="basic-addon-to">Employee Number:</span>
+                                        <span class="input-group-text">Cactus-</span>
+                                        <input type="text" class="form-control" id="employeeNumberSummary" aria-label="Employee Number" aria-describedby="basic-addon-to">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10">
+                                <canvas id="summaryLineChart"></canvas>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="separator-breadcrumb border-top"></div>
+                    </div>
+
+                    <div class="tab-pane fade"
+                         id="attendanceBasic"
+                         role="tabpanel"
+                         aria-labelledby="attendance-basic-tab">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <canvas id="attendanceLineChart" style="height: 300px"></canvas>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="separator-breadcrumb border-top"></div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text" id="basic-addon-to">Employee Number:</span>
+                                        <span class="input-group-text">Cactus-</span>
+                                        <input type="text" class="form-control" id="employeeNumber" aria-label="Employee Number" aria-describedby="basic-addon-to">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="attendanceHorizontalBarChart"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <canvas id="attendancePattern"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="leaveBasic" role="tabpanel" aria-labelledby="leave-basic-tab">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <canvas id="leaveLineChart" style="height:300px;"></canvas>
+                            </div>
+                        </div>
+                        <div class="separator-breadcrumb border-top"></div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text" id="basic-addon-to">Employee Number:</span>
+                                        <span class="input-group-text">Cactus-</span>
+                                        <input type="text" class="form-control" id="employeeNumberforLeave" aria-label="Employee Number" aria-describedby="basic-addon-to">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="leaveReasonHorizontalBarChart"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <canvas id="leavePattern"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="payroll" role="tabpanel" aria-labelledby="payroll-basic-tab">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <canvas id="payrollLineChart" style="height:300px;"></canvas>
+                            </div>
+                        </div>
+                        <div class="separator-breadcrumb border-top"></div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text" id="basic-addon-to">Employee Number:</span>
+                                        <span class="input-group-text">Cactus-</span>
+                                        <input type="text" class="form-control" id="employeeNumberforPayroll" aria-label="Employee Number" aria-describedby="basic-addon-to">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10" style="margin-right:1px">
+                                <canvas id="payrollMonthlyData"></canvas>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<button onclick="generatePDF()">Generate PDF</button>
+<div class="merged-charts" id="mergedCharts"></div>
+<table id="summaryTable"></table>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+
+
+@section scripts
+{
+    <script>
+        function generatePDF() {
+            var options = { day: '2-digit', month: 'short', year: 'numeric' };
+            var currentDate = new Date().toLocaleDateString('en-US', options); // Get current date in desired format
+            var companyName = "Cactus Gen. Transport Pvt Ltd";
+            var address = "Musaffah Abu-Dhabi";
+            var fax = "Fax - 02-5533-264";
+            var phone = "Phone - +971 2 5533260";
+            var reportType = "Summary Report";
+
+            var canvas = document.getElementById('summaryLineChart');
+            var imgData = canvas.toDataURL('image/png');
+
+            var docDefinition = {
+                content: [
+                    {
+                        columns: [
+                            { text: companyName, style: 'header', width: '*', alignment: 'left' },
+                            { text: address + '\n' + fax + '\n' + phone, style: 'header', width: '*', alignment: 'right' }
+                        ]
+                    },
+                    { canvas: [{ type: 'line', x1: -50, y1: 0, x2: 595, y2: 0, lineWidth: 1 }] }, // Divider line
+                    { text: '\n' },
+                    { text: 'Summary Report', fontSize: 18, bold: true },
+                    { text: 'Date: ' + currentDate },
+                    { image: imgData, width: 400, height: 200 },
+                    { text: '\nCreated By: Admin', alignment: 'right', fontSize: 10 }
+                ],
+                styles: {
+                    header: {
+                        fontSize: 12,
+                        color: '#663399'
+                    }
+                }
+            };
+
+            pdfMake.createPdf(docDefinition).download('summary_report.pdf');
+        }
+
+
+        function fetchSummaryData() {
+            var selectedEmployeeId = document.getElementById('employeeNumberSummary').value;
+            selectedEmployeeId = "Cactus-" + selectedEmployeeId;
+            $.ajax({
+                url: '/Reporting/GetSummaryByMonth', // Replace 'YourController' with your actual controller name
+                type: 'GET',
+                data: {
+                    employeeId: selectedEmployeeId
+                },
+                dataType: 'json',
+                success: function (response) {
+                    var employeeName = response[0].EmployeeName || "All Employees";
+                    var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+                    // Extract data from the response
+                    var months = response.map(data => monthNames[data.Month - 1]);
+                    var totalSalaries = response.map(data => data.TotalSalary);
+                    var totalBonuses = response.map(data => data.TotalBonus);
+                    var totalLeaves = response.map(data => data.TotalLeaves);
+                    var averageAttendanceRates = response.map(data => data.TotalAttendanceCount);
+
+                    // Create table data
+                    var tableData = [];
+                    tableData.push(['Datasets', ...months]);
+                    tableData.push(['Total Salary', ...totalSalaries]);
+                    tableData.push(['Total Bonus', ...totalBonuses]);
+                    tableData.push(['Total Leaves', ...totalLeaves]);
+                    tableData.push(['Attendance Rate', ...averageAttendanceRates]);
+
+                    // Create chart using Chart.js
+                    var canvas = document.getElementById('summaryLineChart');
+                    var ctx = canvas.getContext('2d');
+
+                    // Destroy existing chart instance if it exists
+                    if (canvas.chart) {
+                        canvas.chart.destroy();
+                    }
+
+                    // Create new chart instance
+                    var summaryChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: months,
+                            datasets: [{
+                                label: 'Total Salary',
+                                data: totalSalaries,
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderWidth: 1,
+                                fill: false
+                            },
+                            {
+                                label: 'Total Bonus',
+                                data: totalBonuses,
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderWidth: 1,
+                                fill: false
+                            },
+                            {
+                                label: 'Total Leaves',
+                                data: totalLeaves,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderWidth: 1,
+                                fill: false
+                            },
+                            {
+                                label: 'Attendance Rate',
+                                data: averageAttendanceRates,
+                                borderColor: 'rgba(255, 206, 86, 1)',
+                                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                                borderWidth: 1,
+                                fill: false
+                            }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Summary Data for ' + employeeName,
+                                    fontSize: 16,
+                                    fontStyle: 'bold',
+                                    padding: 20
+                                },
+                                legend: {
+                                    display: true,
+                                    position: 'bottom',
+                                    labels: {
+                                        fontColor: 'black',
+                                        fontSize: 14,
+                                        fontStyle: 'normal',
+                                        padding: 10
+                                    }
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    title: {
+                                        display: false,
+                                        text: 'Month',
+                                        color: 'black',
+                                        font: {
+                                            size: 14,
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Value'
+                                    }
+                                }
+                            }
+
+                        }
+                    });
+                    canvas.chart = summaryChart;
+
+                    // Create table
+                    createTable(tableData);
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                }
+            });
+        }
+
+        function createTable(data) {
+            var table = '<table border="1">';
+            for (var i = 0; i < data.length; i++) {
+                table += '<tr>';
+                for (var j = 0; j < data[i].length; j++) {
+                    table += '<td>' + data[i][j] + '</td>';
+                }
+                table += '</tr>';
+            }
+            table += '</table>';
+            document.getElementById('summaryTable').innerHTML = table;
+        }
+
+
+        function createTable(data) {
+            var table = '<table border="1">';
+            for (var i = 0; i < data.length; i++) {
+                table += '<tr>';
+                for (var j = 0; j < data[i].length; j++) {
+                    table += '<td>' + data[i][j] + '</td>';
+                }
+                table += '</tr>';
+            }
+            table += '</table>';
+            document.getElementById('summaryTable').innerHTML = table;
+        }
+
+
+        function drawAttendanceLineChart() {
+    $.ajax({
+        url: '@Url.Action("GetAttendanceData", "Reporting")',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            var labels = response.Months;
+            var data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Average Attendance Rate',
+                    data: response.AverageAttendanceRates,
+                    borderColor: '#663399', // Set line color to #663399
+                    fill: false // Don't fill area under the line
+                }]
+            };
+
+            var options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Attendance Trends Month-wise'
+                    },
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+
+                },
+
+                scales: {
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Month'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Average Attendance Rate'
+                        }
+                    }]
+                }
+            };
+
+            var canvas = document.getElementById('attendanceLineChart');
+            var ctx = canvas.getContext('2d');
+
+            // Destroy existing chart instance if it exists
+            if (canvas.chart) {
+                canvas.chart.destroy();
+            }
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: options
+            });
+            canvas.chart = chart;
+        },
+        error: function(xhr, status, error) {
+            console.error(error);
+        }
+    });
+}
+        function drawAttendanceHorizontalBarChart() {
+
+    var selectedEmployeeId = document.getElementById('employeeNumber').value;
+    selectedEmployeeId = "Cactus-" + selectedEmployeeId;
+
+    // Make an AJAX call to fetch attendance data for all 12 months
+    $.ajax({
+        url: '@Url.Action("GetAttendanceCountByMonth", "Reporting")',
+        type: 'GET',
+        dataType: 'json',
+        data: {
+            employeeId: selectedEmployeeId
+        },
+        success: function(response) {
+            var employeeName = response[0].EmployeeName;
+            if (employeeName == undefined) {
+                employeeName="All Employees"
+            }
+            var labels = [];
+            var maxAttendanceData = [];
+            var actualAttendanceData = [];
+
+            // Define the months array
+            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            // Extract data for each month
+            response.forEach(function(monthData) {
+                labels.push(months[monthData.Month - 1]); // Adjust index for zero-based array
+                maxAttendanceData.push(monthData.MaxWorkingDays);
+                actualAttendanceData.push(monthData.PresentCount);
+            });
+
+            // Create a bar chart canvas element
+            var canvas = document.getElementById('attendanceHorizontalBarChart');
+            var ctx = canvas.getContext('2d');
+
+            // Destroy existing chart instance if it exists
+            if (canvas.chart) {
+                canvas.chart.destroy();
+            }
+            // Create the bar chart
+            var chart = new Chart(ctx, {
+                type: 'bar', // Change chart type to horizontalBar
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Maximum Possible Attendance',
+                        data: maxAttendanceData,
+                        backgroundColor: '#663399' // Custom color for Maximum Possible Attendance bar
+                    }, {
+                        label: 'Actual Attendance',
+                        data: actualAttendanceData,
+                        backgroundColor: 'red'
+                    }]
+                },
+                options: {
+
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Month Wise Attendance of ' + employeeName,
+                            fontSize: 16,
+                            fontStyle: 'bold'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                boxWidth: 20
+                            }
+                        },
+
+                    },
+
+
+                }
+            });
+            canvas.chart = chart;
+        },
+        error: function(xhr, status, error) {
+            console.error(error);
+        }
+    });
+}
+        function drawAttendancePatternBarChart() {
+    var selectedEmployeeId = document.getElementById('employeeNumber').value;
+    selectedEmployeeId = "Cactus-" + selectedEmployeeId;
+
+    // Make an AJAX call to fetch late-ins and early exits data for all 12 months
+    $.ajax({
+        url: '@Url.Action("GetLateEarlyCountsByMonth", "Reporting")',
+        type: 'GET',
+        dataType: 'json',
+        data: {
+            employeeId: selectedEmployeeId
+        },
+        success: function(response) {
+            var employeeName = response[0].EmployeeName;
+            var xAxisData = [];
+            var lateInData = [];
+            var earlyExitData = [];
+
+            // Define the months array
+            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            // Extract data for each month
+            response.forEach(function(monthData) {
+                xAxisData.push(months[monthData.Month - 1]); // Adjust index for zero-based array
+                lateInData.push(monthData.LateInCount);
+                earlyExitData.push(monthData.EarlyExitCount);
+            });
+
+            var canvas = document.getElementById('attendancePattern');
+            var ctx = canvas.getContext('2d');
+
+            // Destroy existing chart instance if it exists
+            if (canvas.chart) {
+                canvas.chart.destroy();
+            }
+            // Create a bar chart using Chart.js
+
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: xAxisData,
+                    datasets: [{
+                            label: 'Late-ins',
+                            data: lateInData,
+                            backgroundColor: 'orange'
+                        },
+                        {
+                            label: 'Early Exits',
+                            data: earlyExitData,
+                            backgroundColor: 'red'
+                        }
+                    ]
+                },
+                options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Late-ins and Early Exits for ' + employeeName,
+                            fontSize: 16,
+                            fontStyle: 'bold'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                boxWidth: 20
+                            }
+                        },
+
+                    },
+
+
+                }
+            });
+            canvas.chart = myChart;
+        },
+
+        error: function(xhr, status, error) {
+            console.error(error);
+        }
+    });
+}
+
+
+
+        function drawLeaveLineChart() {
+    $.ajax({
+        url: '@Url.Action("LeavesByMonth", "Reporting")',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            var labels = response.Months;
+            var data = {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Total Leaves',
+                        data: response.TotalLeaveCounts,
+                        borderColor: '#663399', // Set line color to #FF6347
+                        fill: false // Don't fill area under the line
+                    },
+                    {
+                        label: 'Approved Leaves',
+                        data: response.ApprovedLeaveCounts,
+                        borderColor: '#32CD32', // Set line color to #32CD32 (green)
+                        fill: false // Don't fill area under the line
+                    },
+                    {
+                        label: 'Rejected Leaves',
+                        data: response.RejectedLeaveCounts,
+                        borderColor: '#FF0000', // Set line color to #FF0000 (red)
+                        fill: false // Don't fill area under the line
+                    }
+                ]
+            };
+
+            var options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Leave Trends Month-wise'
+                    },
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+
+                },
+
+                scales: {
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Month'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Number of Leaves'
+                        }
+                    }]
+                }
+            };
+
+            var canvas = document.getElementById('leaveLineChart');
+            var ctx = canvas.getContext('2d');
+
+            // Destroy existing chart instance if it exists
+            if (canvas.chart) {
+                canvas.chart.destroy();
+            }
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: options
+            });
+            canvas.chart = chart;
+        },
+        error: function(xhr, status, error) {
+            console.error(error);
+        }
+    });
+        }
+        function fetchLeaveReasonCounts() {
+            var selectedEmployeeId = document.getElementById('employeeNumberforLeave').value;
+            selectedEmployeeId = "Cactus-" + selectedEmployeeId;
+            $.ajax({
+                url: '/Reporting/GetLeaveReasonCounts', // Replace 'ControllerName' with your actual controller name
+                type: 'GET',
+                data: { employeeId: selectedEmployeeId },
+                dataType: 'json',
+                success: function (response) {
+                    // Check if response contains error
+                    if (response.error) {
+                        // Handle error, maybe display a message to the user
+                        console.error(response.error);
+                        return;
+                    }
+
+                    // Extract counts from the response
+                    var healthIssuesCount = response.HealthIssuesCount;
+                    var familyResponsibilitiesCount = response.FamilyResponsibilitiesCount;
+                    var vacationCount = response.VacationCount;
+                    var legalObligationsCount = response.LegalObligationsCount;
+                    var emergencySituationsCount = response.EmergencySituationsCount;
+                    var otherReasonsCount = response.OtherReasonsCount;
+
+                    // Get employee name from the response
+                    var employeeName = response.EmployeeName;
+
+                    // Create chart using any charting library (e.g., Chart.js)
+                    // Example using Chart.js
+                    var canvas = document.getElementById('leaveReasonHorizontalBarChart');
+                    var ctx = canvas.getContext('2d');
+
+                    // Destroy existing chart instance if it exists
+                    if (canvas.chart) {
+                        canvas.chart.destroy();
+                    }
+                    var myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Health', 'Family', 'Vacation', 'Legal', 'Emergency', 'Other'],
+
+                            datasets: [{
+                                label: 'Leave Reason Counts',
+                                data: [healthIssuesCount, familyResponsibilitiesCount, vacationCount, legalObligationsCount, emergencySituationsCount, otherReasonsCount],
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.2)',
+                                    'rgba(54, 162, 235, 0.2)',
+                                    'rgba(255, 206, 86, 0.2)',
+                                    'rgba(75, 192, 192, 0.2)',
+                                    'rgba(153, 102, 255, 0.2)',
+                                    'rgba(255, 159, 64, 0.2)'
+                                ],
+                                borderColor: [
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(54, 162, 235, 1)',
+                                    'rgba(255, 206, 86, 1)',
+                                    'rgba(75, 192, 192, 1)',
+                                    'rgba(153, 102, 255, 1)',
+                                    'rgba(255, 159, 64, 1)'
+                                ],
+                                borderWidth: 1,
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Leave Reason Counts for ' + employeeName, // Title text with employee name
+                                    fontSize: 16, // Title font size
+                                    fontStyle: 'bold', // Title font style
+                                    padding: 20 // Title padding
+                                },
+                                legend: {
+                                    display: true,
+                                    position: 'bottom', // Positioning the legend at the bottom
+                                    labels: {
+                                        fontColor: 'black', // Legend font color
+                                        fontSize: 14, // Legend font size
+                                        fontStyle: 'normal', // Legend font style
+                                        padding: 10 // Legend padding
+                                    }
+                                },
+                            },
+
+                            scales: {
+                                yAxes: [{
+
+                                }]
+                            }
+                        }
+                    });
+
+                    canvas.chart = myChart;
+                },
+                error: function (xhr, status, error) {
+                    // Handle error, maybe display a message to the user
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+        function drawLeavePatternChart() {
+    var selectedEmployeeId = document.getElementById('employeeNumberforLeave').value;
+    selectedEmployeeId = "Cactus-" + selectedEmployeeId;
+
+    // Make an AJAX call to fetch leave details for all 12 months
+    $.ajax({
+        url: '@Url.Action("GetLeaveDetailsByMonth", "Reporting")',
+        type: 'GET',
+        dataType: 'json',
+        data: {
+            employeeId: selectedEmployeeId
+        },
+        success: function (response) {
+            var employeeName = response[0].EmployeeName;
+            var labels = [];
+            var totalLeaveCounts = [];
+            var approvedLeaveCounts = [];
+            var rejectedLeaveCounts = [];
+            var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            // Iterate over each month data
+            for (var i = 0; i < response.length; i++) {
+                var monthData = response[i];
+
+                // Add month label (using monthNames array)
+                labels.push(monthNames[monthData.Month - 1]); // Adjust index for zero-based array
+
+                // Calculate total leave count for the month
+                totalLeaveCounts.push(monthData.TotalLeaves);
+
+                // Push counts for approved and rejected leaves
+                approvedLeaveCounts.push(monthData.ApprovedCount);
+                rejectedLeaveCounts.push(monthData.RejectedCount);
+
+            }
+            // Create a horizontal bar chart canvas element
+            var canvas = document.getElementById('leavePattern');
+            var ctx = canvas.getContext('2d');
+
+            // Destroy existing chart instance if it exists
+            if (canvas.chart) {
+                canvas.chart.destroy();
+            }
+
+            // Create the horizontal bar chart
+            var chart = new Chart(ctx, {
+                type: 'bar', // Chart type is horizontalBar
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Leave Count',
+                        data: totalLeaveCounts,
+                        backgroundColor: '#663399'
+                    }, {
+                        label: 'Approved Leave Count',
+                        data: approvedLeaveCounts,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                    }, {
+                        label: 'Rejected Leave Count',
+                        data: rejectedLeaveCounts,
+                        backgroundColor: 'rgba(255, 206, 86, 0.6)'
+                    }]
+                },
+                options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Leave Pattern for' + " " + employeeName,
+                            fontSize: 16,
+                            fontStyle: 'bold'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: false,
+                                text: 'Leave Count'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: false,
+                                text: 'Month'
+                            }
+                        }
+                    }
+                }
+            });
+            canvas.chart = chart;
+        },
+        error: function(xhr, status, error) {
+            console.error(error);
+        }
+    });
+}
+
+        function fetchPayrollData() {
+            $.ajax({
+                url: '/Reporting/GetPayrollData', // Replace with the actual URL for fetching payroll data
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    // Extract data from the response
+                    var months = response.Months;
+                    var years = response.Years;
+                    var totalSalaries = response.TotalSalaries;
+
+                    // Create chart data
+                    var data = {
+                        labels: months.map((month, index) => month + ' ' + years[index]),
+                        datasets: [{
+                            label: 'Total Salary',
+                            data: totalSalaries,
+                            borderColor: '#663399',
+                            borderWidth: 2,
+                            fill: false
+                        }]
+                    };
+
+                    // Create chart options
+                    var options = {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Payroll Overview',
+                                fontSize: 16,
+                                fontStyle: 'bold'
+                            },
+                            legend: {
+                                display: true,
+                                position: 'bottom'
+                            },
+
+                        },
+                        scales: {
+                            xAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Month-Year'
+                                }
+                            }],
+                            yAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Total Salary ($)'
+                                },
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
+                    };
+
+                    // Get canvas element
+                    var canvas = document.getElementById('payrollLineChart');
+                    var ctx = canvas.getContext('2d');
+
+                    // Destroy existing chart instance if it exists
+                    if (canvas.chart) {
+                        canvas.chart.destroy();
+                    }
+                    // Create line chart
+                    var payrollLineChart = new Chart(ctx, {
+                        type: 'line',
+                        data: data,
+                        options: options
+                    });
+                    canvas.chart = payrollLineChart;
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+        function fetchPayrollMonthlyData() {
+            var selectedEmployeeId = document.getElementById('employeeNumberforPayroll').value;
+            selectedEmployeeId = "Cactus-" + selectedEmployeeId;
+            $.ajax({
+                url: '/Reporting/GetPayrollByMonth',
+                type: 'GET',
+                data: {
+                    employeeId: selectedEmployeeId
+                },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.error) {
+                        console.error(response.error);
+                        return;
+                    }
+                    var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    var employeeName = response[0].EmployeeName;
+                    if (employeeName == undefined) {
+                        employeeName = "All Employees"
+                    }
+                    var months = response.map(data => monthNames[data.Month - 1]); // Map month numbers to month names
+                    var totalSalaries = response.map(data => data.TotalSalary);
+                    var totalBonuses = response.map(data => data.TotalBonus);
+
+                    var canvas = document.getElementById('payrollMonthlyData');
+                    var ctx = canvas.getContext('2d');
+
+                    if (canvas.chart) {
+                        canvas.chart.destroy();
+                    }
+
+                    var myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: months,
+                            datasets: [{
+                                label: 'Total Salary',
+                                data: totalSalaries,
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: '#663399',
+                                borderWidth: 1,
+                                fill: false
+                            }, {
+                                label: 'Total Bonus',
+                                data: totalBonuses,
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1,
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                height: 400,
+                                title: {
+                                    display: true,
+                                    text: 'Payroll Monthly Data for ' + employeeName,
+                                    fontSize: 16,
+                                    fontStyle: 'bold',
+                                    padding: 20
+                                },
+                                legend: {
+                                    display: true,
+                                    position: 'bottom',
+                                    labels: {
+                                        fontColor: 'black',
+                                        fontSize: 14,
+                                        fontStyle: 'normal',
+                                        padding: 10
+                                    }
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    title: {
+                                        display: false,
+                                        text: 'Month',
+                                        color: 'black',
+                                        font: {
+                                            size: 14,
+                                            weight: 'bold'
+                                        }
+                                    },
+                                    ticks: {
+                                        callback: function (value, index, values) {
+                                            var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                                            return monthNames[value];
+                                        }
+                                    }
+                                },
+                                y: {
+                                    ticks: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    canvas.chart = myChart;
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+
+
+
+
+
+
+        $(document).ready(function () {
+            $('#employeeNumber').on('blur', function () {
+                drawAttendanceHorizontalBarChart();
+                drawAttendancePatternBarChart();
+            });
+            $('#employeeNumberforLeave').on('blur', function () {
+                fetchLeaveReasonCounts();
+                drawLeavePatternChart();
+            });
+            $('#employeeNumberforPayroll').on('blur', function () {
+                fetchPayrollMonthlyData();
+
+            });
+            $('#employeeNumberSummary').on('blur', function () {
+                fetchSummaryData();
+
+            });
+            fetchSummaryData();
+            $('#leave-basic-tab').on('shown.bs.tab', function (e) {
+                // Agar "Leave" tab active hai, to drawLeaveLineChart function ko call karein
+                if ($(e.target).attr('id') === 'leave-basic-tab') {
+                    drawLeaveLineChart();
+                    fetchLeaveReasonCounts();
+                    drawLeavePatternChart();
+                }
+            });
+            $('#attendance-basic-tab').on('shown.bs.tab', function (e) {
+                // Agar "Leave" tab active hai, to drawLeaveLineChart function ko call karein
+                if ($(e.target).attr('id') === 'attendance-basic-tab') {
+                    drawAttendanceLineChart();
+                    drawAttendanceHorizontalBarChart();
+                    drawAttendancePatternBarChart();
+                }
+            });
+            $('#payroll-basic-tab').on('shown.bs.tab', function (e) {
+                // Agar "Leave" tab active hai, to drawLeaveLineChart function ko call karein
+                if ($(e.target).attr('id') === 'payroll-basic-tab') {
+                    fetchPayrollData();
+                    fetchPayrollMonthlyData();
+                }
+            });
+            $('#summary-basic-tab').on('shown.bs.tab', function (e) {
+                // Agar "Leave" tab active hai, to drawLeaveLineChart function ko call karein
+                if ($(e.target).attr('id') === 'summary-basic-tab') {
+                    fetchSummaryData();
+                }
+            });
+        });
+
+    </script>
+}
