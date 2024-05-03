@@ -44,8 +44,12 @@
                                 <canvas id="summaryLineChart"></canvas>
                             </div>
                         </div>
+                        <div id="summaryTableDiv" style="display:none"></div>
+                        <h2 id="employeeName" style="display:none"></h2>
                         <br />
                         <div class="separator-breadcrumb border-top"></div>
+                        <button class="btn btn-outline-primary float-end" onclick="generateSummaryPDF()" id="reportButtonSummary" disabled>Generate PDF</button>
+
                     </div>
 
                     <div class="tab-pane fade"
@@ -57,6 +61,8 @@
                                 <canvas id="attendanceLineChart" style="height: 300px"></canvas>
                             </div>
                         </div>
+
+
                         <br />
                         <div class="separator-breadcrumb border-top"></div>
                         <div class="row">
@@ -78,7 +84,12 @@
                                 <canvas id="attendancePattern"></canvas>
                             </div>
                         </div>
+                        <br />
+                        <div class="separator-breadcrumb border-top"></div>
+                        <button class="btn btn-outline-primary float-end" onclick="generateAttendancePDF()" id="reportAttendanceBtn" disabled>Generate PDF</button>
+                        <h2 id="employeeNameForAttendance" style="display:none"></h2>
                     </div>
+                   
                     <div class="tab-pane fade" id="leaveBasic" role="tabpanel" aria-labelledby="leave-basic-tab">
                         <div class="row">
                             <div class="col-md-12">
@@ -105,6 +116,10 @@
                                 <canvas id="leavePattern"></canvas>
                             </div>
                         </div>
+                        <br />
+                        <div class="separator-breadcrumb border-top"></div>
+                        <button class="btn btn-outline-primary float-end" onclick="generateLeavePDF()" id="reportLeaveBtn" disabled>Generate PDF</button>
+                        <h2 id="employeeNameForLeave" style="display:none"></h2>
                     </div>
                     <div class="tab-pane fade" id="payroll" role="tabpanel" aria-labelledby="payroll-basic-tab">
                         <div class="row">
@@ -131,6 +146,10 @@
                             </div>
 
                         </div>
+                        <br />
+                        <h2 id="employeeNameForPayroll" style="display:none"></h2>
+                        <div class="separator-breadcrumb border-top"></div>
+                        <button class="btn btn-outline-primary float-end" onclick="generatePayrollPDF()" id="reportPayrollBtn" disabled>Generate PDF</button>
                     </div>
 
                 </div>
@@ -140,19 +159,17 @@
         </div>
     </div>
 </div>
-<button onclick="generatePDF()">Generate PDF</button>
 <div class="merged-charts" id="mergedCharts"></div>
-<table id="summaryTable"></table>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
 
-
 @section scripts
 {
     <script>
-        function generatePDF() {
+        function generateSummaryPDF() {
+            var employeeName = $("#employeeName").val();
             var options = { day: '2-digit', month: 'short', year: 'numeric' };
             var currentDate = new Date().toLocaleDateString('en-US', options); // Get current date in desired format
             var companyName = "Cactus Gen. Transport Pvt Ltd";
@@ -164,21 +181,87 @@
             var canvas = document.getElementById('summaryLineChart');
             var imgData = canvas.toDataURL('image/png');
 
+            // Retrieve table data
+            var tableData = [];
+            var table = document.getElementById('summaryTable');
+            var rows = table.rows;
+            for (var i = 0; i < rows.length; i++) {
+                var rowData = [];
+                var cells = rows[i].cells;
+                for (var j = 0; j < cells.length; j++) {
+                    rowData.push(cells[j].textContent.trim());
+                }
+                tableData.push(rowData);
+            }
+           
+
+            // Convert the canvas to a data URL
             var docDefinition = {
+                pageSize: 'A4', // Specify page size
+                pageMargins: [40, 60, 40, 60], // Left, Top, Right, Bottom margins
                 content: [
                     {
+
                         columns: [
-                            { text: companyName, style: 'header', width: '*', alignment: 'left' },
-                            { text: address + '\n' + fax + '\n' + phone, style: 'header', width: '*', alignment: 'right' }
+                            [
+                                { text: '\n' }, // Add line break after the logo
+                                { text: companyName, style: 'header', alignment: 'left' },
+                                { text: address + '\n' + fax + '\n' + phone, style: 'header', alignment: 'right' }
+                            ]
                         ]
+
                     },
-                    { canvas: [{ type: 'line', x1: -50, y1: 0, x2: 595, y2: 0, lineWidth: 1 }] }, // Divider line
+                    { canvas: [{ type: 'line', x1: -50, y1: 0, x2: 595, y2: 0, lineWidth: 0.2 }] }, // Divider line
                     { text: '\n' },
                     { text: 'Summary Report', fontSize: 18, bold: true },
-                    { text: 'Date: ' + currentDate },
-                    { image: imgData, width: 400, height: 200 },
-                    { text: '\nCreated By: Admin', alignment: 'right', fontSize: 10 }
+                    { text: employeeName ? 'Summary Report for ' + employeeName : '', style: 'header', alignment: 'center' }, // Employee name
+                    {
+                        image: imgData,
+                        width: 400,
+                        height: 200,
+                        margin: [50, 30, 0, 0] // Add margin to the right side of the image
+                    },
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    {
+                        table: {
+                            body: tableData,
+                            headerRows: 1, // Make first row as header
+                        },
+                        layout: {
+                            fillColor: function (i, node) { return (i % 2 === 0) ? '#f2f2f2' : null; }, // Apply striping
+                            hLineWidth: function (i, node) { return 1; }, // Add border for all cells
+                            vLineWidth: function (i, node) { return 1; },
+                            hLineColor: function (i, node) { return '#ddd'; },
+                            vLineColor: function (i, node) { return '#ddd'; }
+                        },
+                        margin: [20, 0, 0, 0] // Add margin to the left side of the table
+                    },
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table { text: '\n' }, // Add space between image and table
+                   
+                    { canvas: [{ type: 'line', x1: -50, y1: 0, x2: 595, y2: 0, lineWidth: 0.2 }] }, // Divider line
+
+                    // Add table
                 ],
+                footer: {
+                    columns: [
+                        { text: 'Date: ' + currentDate, alignment: 'left', margin: [40, 0, 0, 0] }, // Date on the left
+                        { text: 'Created By: Admin', alignment: 'right', fontSize: 10, margin: [0, 0, 40, 0] } // "Created By: Admin" on the right
+                    ],
+                    margin: [0, 20, 0, 0] // Adjust top margin
+                },
                 styles: {
                     header: {
                         fontSize: 12,
@@ -187,11 +270,255 @@
                 }
             };
 
-            pdfMake.createPdf(docDefinition).download('summary_report.pdf');
+            pdfMake.createPdf(docDefinition).download(employeeName + '_Summary_' + currentDate + '.pdf');
         }
 
+        function generateAttendancePDF() {
+            var employeeName = $("#employeeNameForAttendance").val();
+            var options = { day: '2-digit', month: 'short', year: 'numeric' };
+            var currentDate = new Date().toLocaleDateString('en-US', options); // Get current date in desired format
+            var companyName = "Cactus Gen. Transport Pvt Ltd";
+            var address = "Musaffah Abu-Dhabi";
+            var fax = "Fax - 02-5533-264";
+            var phone = "Phone - +971 2 5533260";
+            var reportType = "Summary Report";
+
+            var canvas1 = document.getElementById('attendanceHorizontalBarChart');
+            var canvas2 = document.getElementById('attendancePattern');
+            var imgData1 = canvas1.toDataURL('image/png');
+            var imgData2 = canvas2.toDataURL('image/png');
+
+            var docDefinition = {
+                pageSize: 'A4', // Specify page size
+                pageMargins: [40, 60, 40, 60], // Left, Top, Right, Bottom margins
+                content: [
+                    {
+
+                        columns: [
+                            [
+                                { text: '\n' }, // Add line break after the logo
+                                { text: companyName, style: 'header', alignment: 'left' },
+                                { text: address + '\n' + fax + '\n' + phone, style: 'header', alignment: 'right' }
+                            ]
+                        ]
+
+                    },
+                    { canvas: [{ type: 'line', x1: -50, y1: 0, x2: 595, y2: 0, lineWidth: 0.2 }] }, // Divider line
+                    { text: '\n' },
+                    { text: 'Attendance Report', fontSize: 18, bold: true },
+                    { text: employeeName ? 'Attendance Report for ' + employeeName : '', style: 'header', alignment: 'center' }, // Employee name
+                    {
+                        image: imgData1,
+                        width: 400,
+                        height: 200,
+                        margin: [50, 30, 0, 0] // Add margin to the right side of the image
+                    },
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    {
+                        image: imgData2,
+                        width: 400,
+                        height: 200,
+                        margin: [50, 30, 0, 0] // Add margin to the right side of the image
+                    },
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+
+                    { canvas: [{ type: 'line', x1: -50, y1: 0, x2: 595, y2: 0, lineWidth: 0.2 }] }, // Divider line
+
+                    // Add table
+                ],
+                footer: {
+                    columns: [
+                        { text: 'Date: ' + currentDate, alignment: 'left', margin: [40, 0, 0, 0] }, // Date on the left
+                        { text: 'Created By: Admin', alignment: 'right', fontSize: 10, margin: [0, 0, 40, 0] } // "Created By: Admin" on the right
+                    ],
+                    margin: [0, 20, 0, 0] // Adjust top margin
+                },
+                styles: {
+                    header: {
+                        fontSize: 12,
+                        color: '#663399'
+                    }
+                }
+            };
+
+            pdfMake.createPdf(docDefinition).download(employeeName + '_Attendance_' + currentDate + '.pdf');
+        }
+
+        function generateLeavePDF() {
+            var employeeName = $("#employeeNameForLeave").val();
+            var options = { day: '2-digit', month: 'short', year: 'numeric' };
+            var currentDate = new Date().toLocaleDateString('en-US', options); // Get current date in desired format
+            var companyName = "Cactus Gen. Transport Pvt Ltd";
+            var address = "Musaffah Abu-Dhabi";
+            var fax = "Fax - 02-5533-264";
+            var phone = "Phone - +971 2 5533260";
+            var reportType = "Leave Report";
+
+            var canvas1 = document.getElementById('leaveReasonHorizontalBarChart');
+            var canvas2 = document.getElementById('leavePattern');
+            var imgData1 = canvas1.toDataURL('image/png');
+            var imgData2 = canvas2.toDataURL('image/png');
+
+            var docDefinition = {
+                pageSize: 'A4', // Specify page size
+                pageMargins: [40, 60, 40, 60], // Left, Top, Right, Bottom margins
+                content: [
+                    {
+
+                        columns: [
+                            [
+                                { text: '\n' }, // Add line break after the logo
+                                { text: companyName, style: 'header', alignment: 'left' },
+                                { text: address + '\n' + fax + '\n' + phone, style: 'header', alignment: 'right' }
+                            ]
+                        ]
+
+                    },
+                    { canvas: [{ type: 'line', x1: -50, y1: 0, x2: 595, y2: 0, lineWidth: 0.2 }] }, // Divider line
+                    { text: '\n' },
+                    { text: 'Leave Report', fontSize: 18, bold: true },
+                    { text: employeeName ? 'Leave Report for ' + employeeName : '', style: 'header', alignment: 'center' }, // Employee name
+                    {
+                        image: imgData1,
+                        width: 400,
+                        height: 200,
+                        margin: [50, 30, 0, 0] // Add margin to the right side of the image
+                    },
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    {
+                        image: imgData2,
+                        width: 400,
+                        height: 200,
+                        margin: [50, 30, 0, 0] // Add margin to the right side of the image
+                    },
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+
+                    { canvas: [{ type: 'line', x1: -50, y1: 0, x2: 595, y2: 0, lineWidth: 0.2 }] }, // Divider line
+
+                    // Add table
+                ],
+                footer: {
+                    columns: [
+                        { text: 'Date: ' + currentDate, alignment: 'left', margin: [40, 0, 0, 0] }, // Date on the left
+                        { text: 'Created By: Admin', alignment: 'right', fontSize: 10, margin: [0, 0, 40, 0] } // "Created By: Admin" on the right
+                    ],
+                    margin: [0, 20, 0, 0] // Adjust top margin
+                },
+                styles: {
+                    header: {
+                        fontSize: 12,
+                        color: '#663399'
+                    }
+                }
+            };
+
+            pdfMake.createPdf(docDefinition).download(employeeName + '_Leave_' + currentDate + '.pdf');
+        }
+
+        function generatePayrollPDF() {
+            var employeeName = $("#employeeNameForPayroll").text();
+            var options = { day: '2-digit', month: 'short', year: 'numeric' };
+            var currentDate = new Date().toLocaleDateString('en-US', options); // Get current date in desired format
+            var companyName = "Cactus Gen. Transport Pvt Ltd";
+            var address = "Musaffah Abu-Dhabi";
+            var fax = "Fax - 02-5533-264";
+            var phone = "Phone - +971 2 5533260";
+            var reportType = "Payroll Report";
+
+            var canvas1 = document.getElementById('payrollMonthlyData');
+            var imgData1 = canvas1.toDataURL('image/png');
+
+            var docDefinition = {
+                pageSize: 'A4', // Specify page size
+                pageMargins: [40, 60, 40, 60], // Left, Top, Right, Bottom margins
+                content: [
+                    {
+
+                        columns: [
+                            [
+                                { text: '\n' }, // Add line break after the logo
+                                { text: companyName, style: 'header', alignment: 'left' },
+                                { text: address + '\n' + fax + '\n' + phone, style: 'header', alignment: 'right' }
+                            ]
+                        ]
+
+                    },
+                    { canvas: [{ type: 'line', x1: -50, y1: 0, x2: 595, y2: 0, lineWidth: 0.2 }] }, // Divider line
+                    { text: '\n' },
+                    { text: 'Payroll Report', fontSize: 18, bold: true },
+                    { text: employeeName ? 'Payroll Report for ' + employeeName : '', style: 'header', alignment: 'center' }, // Employee name
+                    {
+                        image: imgData1,
+                        width: 400,
+                        height: 200,
+                        margin: [50, 30, 0, 0] // Add margin to the right side of the image
+                    },
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+                    { text: '\n' }, // Add space between image and table
+
+                    { canvas: [{ type: 'line', x1: -50, y1: 0, x2: 595, y2: 0, lineWidth: 0.2 }] }, // Divider line
+
+                    // Add table
+                ],
+                footer: {
+                    columns: [
+                        { text: 'Date: ' + currentDate, alignment: 'left', margin: [40, 0, 0, 0] }, // Date on the left
+                        { text: 'Created By: Admin', alignment: 'right', fontSize: 10, margin: [0, 0, 40, 0] } // "Created By: Admin" on the right
+                    ],
+                    margin: [0, 20, 0, 0] // Adjust top margin
+                },
+                styles: {
+                    header: {
+                        fontSize: 12,
+                        color: '#663399'
+                    }
+                }
+            };
+
+            pdfMake.createPdf(docDefinition).download(employeeName + '_Payroll_' + currentDate + '.pdf');
+        }
 
         function fetchSummaryData() {
+            $("#reportButtonSummary").prop("disabled", true);
             var selectedEmployeeId = document.getElementById('employeeNumberSummary').value;
             selectedEmployeeId = "Cactus-" + selectedEmployeeId;
             $.ajax({
@@ -203,6 +530,7 @@
                 dataType: 'json',
                 success: function (response) {
                     var employeeName = response[0].EmployeeName || "All Employees";
+                    $("#employeeName").val(employeeName);
                     var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
                     // Extract data from the response
@@ -214,7 +542,7 @@
 
                     // Create table data
                     var tableData = [];
-                    tableData.push(['Datasets', ...months]);
+                    tableData.push(['', ...months]);
                     tableData.push(['Total Salary', ...totalSalaries]);
                     tableData.push(['Total Bonus', ...totalBonuses]);
                     tableData.push(['Total Leaves', ...totalLeaves]);
@@ -316,6 +644,7 @@
 
                     // Create table
                     createTable(tableData);
+                    $("#reportButtonSummary").prop("disabled", false);
                 },
                 error: function (xhr, status, error) {
                     console.error(error);
@@ -324,34 +653,29 @@
         }
 
         function createTable(data) {
-            var table = '<table border="1">';
+            var table = '<table class="table table-hover table-bordered table-striped" id="summaryTable">';
             for (var i = 0; i < data.length; i++) {
                 table += '<tr>';
                 for (var j = 0; j < data[i].length; j++) {
-                    table += '<td>' + data[i][j] + '</td>';
+                    if (i === 0) { // Adding table header for the first row
+                        table += '<th scope="col">' + data[i][j] + '</th>';
+                    } else {
+                        table += '<td>' + data[i][j] + '</td>';
+                    }
                 }
                 table += '</tr>';
             }
             table += '</table>';
-            document.getElementById('summaryTable').innerHTML = table;
+            document.getElementById('summaryTableDiv').innerHTML = table;
         }
 
 
-        function createTable(data) {
-            var table = '<table border="1">';
-            for (var i = 0; i < data.length; i++) {
-                table += '<tr>';
-                for (var j = 0; j < data[i].length; j++) {
-                    table += '<td>' + data[i][j] + '</td>';
-                }
-                table += '</tr>';
-            }
-            table += '</table>';
-            document.getElementById('summaryTable').innerHTML = table;
-        }
+
 
 
         function drawAttendanceLineChart() {
+          
+
     $.ajax({
         url: '@Url.Action("GetAttendanceData", "Reporting")',
         type: 'GET',
@@ -412,6 +736,8 @@
                 options: options
             });
             canvas.chart = chart;
+            
+
         },
         error: function(xhr, status, error) {
             console.error(error);
@@ -419,7 +745,7 @@
     });
 }
         function drawAttendanceHorizontalBarChart() {
-
+            $("#reportAttendanceBtn").prop("disabled", true);
     var selectedEmployeeId = document.getElementById('employeeNumber').value;
     selectedEmployeeId = "Cactus-" + selectedEmployeeId;
 
@@ -436,6 +762,7 @@
             if (employeeName == undefined) {
                 employeeName="All Employees"
             }
+            $("#employeeNameForAttendance").val(employeeName);
             var labels = [];
             var maxAttendanceData = [];
             var actualAttendanceData = [];
@@ -496,6 +823,7 @@
                 }
             });
             canvas.chart = chart;
+            $("#reportAttendanceBtn").prop("disabled", false);
         },
         error: function(xhr, status, error) {
             console.error(error);
@@ -503,6 +831,7 @@
     });
 }
         function drawAttendancePatternBarChart() {
+            $("#reportAttendanceBtn").prop("disabled", true);
     var selectedEmployeeId = document.getElementById('employeeNumber').value;
     selectedEmployeeId = "Cactus-" + selectedEmployeeId;
 
@@ -577,6 +906,7 @@
                 }
             });
             canvas.chart = myChart;
+            $("#reportAttendanceBtn").prop("disabled", false);
         },
 
         error: function(xhr, status, error) {
@@ -669,6 +999,7 @@
     });
         }
         function fetchLeaveReasonCounts() {
+            $("#reportLeaveBtn").prop("disabled", true);
             var selectedEmployeeId = document.getElementById('employeeNumberforLeave').value;
             selectedEmployeeId = "Cactus-" + selectedEmployeeId;
             $.ajax({
@@ -694,7 +1025,7 @@
 
                     // Get employee name from the response
                     var employeeName = response.EmployeeName;
-
+                    $("#employeeNameforLeave").val(employeeName);
                     // Create chart using any charting library (e.g., Chart.js)
                     // Example using Chart.js
                     var canvas = document.getElementById('leaveReasonHorizontalBarChart');
@@ -761,6 +1092,8 @@
                     });
 
                     canvas.chart = myChart;
+                    $("#reportLeaveBtn").prop("disabled", false);
+
                 },
                 error: function (xhr, status, error) {
                     // Handle error, maybe display a message to the user
@@ -769,6 +1102,8 @@
             });
         }
         function drawLeavePatternChart() {
+            $("#reportLeaveBtn").prop("disabled", false);
+
     var selectedEmployeeId = document.getElementById('employeeNumberforLeave').value;
     selectedEmployeeId = "Cactus-" + selectedEmployeeId;
 
@@ -782,6 +1117,8 @@
         },
         success: function (response) {
             var employeeName = response[0].EmployeeName;
+            $("#employeeNameforLeave").val(employeeName);
+
             var labels = [];
             var totalLeaveCounts = [];
             var approvedLeaveCounts = [];
@@ -860,6 +1197,8 @@
                 }
             });
             canvas.chart = chart;
+            $("#reportLeaveBtn").prop("disabled", false);
+
         },
         error: function(xhr, status, error) {
             console.error(error);
@@ -948,6 +1287,8 @@
             });
         }
         function fetchPayrollMonthlyData() {
+            $("#reportPayrollBtn").prop("disabled", true);
+
             var selectedEmployeeId = document.getElementById('employeeNumberforPayroll').value;
             selectedEmployeeId = "Cactus-" + selectedEmployeeId;
             $.ajax({
@@ -967,6 +1308,7 @@
                     if (employeeName == undefined) {
                         employeeName = "All Employees"
                     }
+                    $("#employeeNameForPayroll").text(employeeName);
                     var months = response.map(data => monthNames[data.Month - 1]); // Map month numbers to month names
                     var totalSalaries = response.map(data => data.TotalSalary);
                     var totalBonuses = response.map(data => data.TotalBonus);
@@ -1047,6 +1389,8 @@
                         }
                     });
                     canvas.chart = myChart;
+                    $("#reportPayrollBtn").prop("disabled", false);
+
                 },
                 error: function (xhr, status, error) {
                     console.error(xhr.responseText);
