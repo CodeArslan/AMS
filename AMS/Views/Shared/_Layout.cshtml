@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNet.Identity
-@model AMS.Models.ResetPasswordViewModel
+@*@model AMS.Models.ResetPasswordViewModel*@
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -343,23 +343,23 @@
                         @Html.AntiForgeryToken()
                         <hr />
                         @Html.ValidationSummary("", new { @class = "text-danger" })
-                        @Html.HiddenFor(model => model.Code, new { @id = "codeReset" })
+                        <input type="hidden" id="codeReset" name="Code" />
                         <div class="row">
-                            @Html.LabelFor(m => m.Email, new { @class = "col-md-2 col-form-label" })
+                            <label for="emailReset" class="col-md-2 col-form-label">Email</label>
                             <div class="col-md-10">
-                                @Html.TextBoxFor(m => m.Email, new { @class = "form-control disableEmail", @id = "emailReset" })
+                                <input type="text" class="form-control disableEmail" id="emailReset" name="Email" />
                             </div>
                         </div>
                         <div class="row mt-2">
-                            @Html.LabelFor(m => m.Password, new { @class = "col-md-2 col-form-label" })
+                            <label for="password" class="col-md-2 col-form-label">Password</label>
                             <div class="col-md-10">
-                                @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                                <input type="password" class="form-control" id="password" name="Password" />
                             </div>
                         </div>
                         <div class="row mt-2">
-                            @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 col-form-label" })
+                            <label for="confirmPassword" class="col-md-2 col-form-label">Confirm Password</label>
                             <div class="col-md-10">
-                                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+                                <input type="password" class="form-control" id="confirmPassword" name="ConfirmPassword" />
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -367,6 +367,7 @@
                                 Reset
                             </button>
                         </div>
+
                     }
                 </div>
 
