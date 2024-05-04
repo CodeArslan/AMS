@@ -1,24 +1,24 @@
 ﻿
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "EmployeePayroll";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var currentYear = DateTime.Now.Year;
     var years = Enumerable.Range(currentYear - 9, 10).ToList();
     var months = new List<SelectListItem>
-    {
-        new SelectListItem { Text = "January", Value = "1" },
-        new SelectListItem { Text = "February", Value = "2" },
-        new SelectListItem { Text = "March", Value = "3" },
-        new SelectListItem { Text = "April", Value = "4" },
-        new SelectListItem { Text = "May", Value = "5" },
-        new SelectListItem { Text = "June", Value = "6" },
-        new SelectListItem { Text = "July", Value = "7" },
-        new SelectListItem { Text = "August", Value = "8" },
-        new SelectListItem { Text = "September", Value = "9" },
-        new SelectListItem { Text = "October", Value = "10" },
-        new SelectListItem { Text = "November", Value = "11" },
-        new SelectListItem { Text = "December", Value = "12" }
-    };
+{
+     new SelectListItem { Text = "January", Value = "1" },
+     new SelectListItem { Text = "February", Value = "2" },
+     new SelectListItem { Text = "March", Value = "3" },
+     new SelectListItem { Text = "April", Value = "4" },
+     new SelectListItem { Text = "May", Value = "5" },
+     new SelectListItem { Text = "June", Value = "6" },
+     new SelectListItem { Text = "July", Value = "7" },
+     new SelectListItem { Text = "August", Value = "8" },
+     new SelectListItem { Text = "September", Value = "9" },
+     new SelectListItem { Text = "October", Value = "10" },
+     new SelectListItem { Text = "November", Value = "11" },
+     new SelectListItem { Text = "December", Value = "12" }
+ };
 }
 
 <!DOCTYPE html>
@@ -59,7 +59,7 @@
                 <h3 class="text-muted">Filter By</h3>
                 <div class="row">
                     <div class="col-md-3">
-                        @Html.DropDownList("Year", new SelectList(years), "Select Year", new { @class = "form-control",@id="payrollDate" })
+                        @Html.DropDownList("Year", new SelectList(years), "Select Year", new { @class = "form-control", @id = "payrollDate" })
                     </div>
                     <div class="col-md-3">
                         @Html.DropDownList("Month", months, "Select Month", new { @class = "form-control", @id = "payrollMonth" })
@@ -69,7 +69,6 @@
                     <table class="table table-hover table-bordered table-striped" id="payrollTable">
                         <thead class="bg-gray-300">
                             <tr>
-                                <th scope="col"></th>
                                 <th scope="col">Employee Name</th>
                                 <th scope="col">Year</th>
                                 <th scope="col">Month</th>
@@ -79,14 +78,12 @@
                                 <th scope="col">Cumulative Salary</th>
                                 <th scope="col">Approved Salary</th>
                                 <th scope="col">Salary Left</th>
-                                <th scope="col">Send For Approval</th>
                             </tr>
                         </thead>
                     </table>
                 </div>
             </div>
             <div class="card-footer">
-                <button class="btn btn-warning float-end" id="sendForApproval" style="margin-right:2%">Send For Approval</button>
             </div>
         </div>
     </div>
@@ -123,28 +120,12 @@
                 var payrollTable = $('#payrollTable').DataTable({
                     destroy: true,
                     ajax: {
-                        url: '/Payroll/GetPayrollData', // Replace with your backend route
+                        url: '/Payroll/GetPayrollDataByUser', // Replace with your backend route
                         data: { year: year, month: month },
                         dataSrc: '',
                     },
                     columns: [
-                        {
-                            "data": null,
-                            "render": function (data, type, row) {
-                                // Calculate the difference between TotalSalary and salaryApproved
-                                var remainingAmount = parseFloat(row.TotalSalary - row.salaryApproved).toFixed(2);
-
-                                // Check if remaining amount is greater than 0
-                                if (remainingAmount > 0) {
-                                    // If remaining amount is greater than 0, return the checkbox
-                                    return '<label class="checkbox checkbox-primary"><input type="checkbox" class="row-checkbox" data-id="' + row.Id + '" /><span class="checkmark"></span></label>';
-                                } else {
-                                    // If remaining amount is not greater than 0, return an empty string
-                                    return '';
-                                }
-                            },
-                            width: '0px'
-                        },
+                        
                         {
                             "data": null,
                             "render": function (data, type, row) {
@@ -234,12 +215,7 @@
                             width: '45px'
 
                         },
-                        {
-                            "data": "isSendForApproval",
-                            "render": function (data) {
-                                return data ? 'Yes' : 'No';
-                            }
-                        }
+                        
                     ],
                     pagingType: 'full_numbers',
                     language: {
@@ -271,56 +247,6 @@
 
             fetchPayrollRecords();
 
-            $('#sendForApproval').on('click', function () {
-                var selectedIds = [];
-
-                // Iterate over each checked checkbox and retrieve its data-id attribute
-                $('.row-checkbox:checked').each(function () {
-                    selectedIds.push($(this).data('id'));
-                });
-
-                // Check if any IDs are selected
-                if (selectedIds.length > 0) {
-                    toastr.success(
-                        "Sending Report To HR Department For Approval",
-                        {
-                            "class": "btn w-100 btn-outline-success mb-2",
-                            "id": "toast-success",
-                            timeOut: 1000,
-                            progressBar: true,
-                            closeButton: true
-                        }
-                    );
-                    // Send the selected IDs to the server
-                    $.ajax({
-                        url: '/Payroll/sendForApproval', // Update the URL to match your controller and action method
-                        type: 'POST',
-                        "beforeSend": function (xhr) {
-                            hideSpinner();
-                        },// Assuming you're sending data via POST method
-                        data: { id: selectedIds }, // Send the selected IDs as data
-                        traditional: true, // This is needed to properly serialize the array in ASP.NET MVC
-                        success: function (response) {
-                            $('#successMessage').text('Report sent for approval successfully. Please Wait Until HR Approve the Salary'); // Set the success message text
-                            $('#successAlert').fadeIn();
-                            setInterval(hideAlerts, 2000);
-                            payrollTable.ajax.reload();
-                        },
-                        error: function (xhr, status, error) {
-                            $('#errorMessage').text('Failed to send report for approval. Please try again later.'); // Set the error message text
-                            $('#errorAlert').fadeIn();
-                            setInterval(hideAlerts, 2000);
-
-                        }
-                    });
-                } else {
-                    $('#errorMessage').text('Please Select Atleast One Row to Send For Approval'); // Set the error message text
-                    $('#errorAlert').fadeIn();
-                    setInterval(hideAlerts, 2000);
-
-                }
-
-            });
 
 
 

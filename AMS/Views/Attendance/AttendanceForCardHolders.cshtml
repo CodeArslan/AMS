@@ -31,7 +31,11 @@
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group">
-                        <input class="form-control" type="text" autocomplete="off" id="cardCode" placeholder="Enter Employee's Card Code">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="basic-addon-to">Employee Number:</span>
+                            <span class="input-group-text">Cactus-</span>
+                            <input type="text" class="form-control" id="cardCode" aria-label="Employee Number" aria-describedby="basic-addon-to">
+                        </div>
                     </div>
                 </div>
 
@@ -254,23 +258,168 @@
 
             }
 
+            //function fetchEmployeeByCard() {
+            //    var employeeNumber = $("#cardCode").val();
+            //    employeeNumber = "Cactus-" + employeeNumber;
+            //    var table=$('#cardAttendance').DataTable({
+            //        "destroy": true,
+            //        "ajax": {
+            //            "url": '/Attendance/GetEmployeeByCard',
+            //            "type": "GET",
+            //            "datatype": "json",
+            //            "dataSrc": function (data) {
+            //                // Check if data is empty
+            //                if (data.length === 0) {
+            //                    // Show error message
+            //                    $('#errorAlert').show();
+            //                    $('#errorMessage').text("Employee not found.");
+            //                    // Return empty array to DataTables
+            //                    return [];
+            //                } else {
+            //                    // Return data to DataTables
+            //                    return data;
+            //                }
+            //            },
+            //            "data": {
+            //                employeeNumber: employeeNumber
+            //            },
+            //            "contentType": 'application/json; charset=utf-8',
+            //            "beforeSend": function (xhr) {
+            //                hideSpinner();
+            //            }
+            //        },
+            //        "columns": [
+            //            {
+            //                "data": null,
+            //                "render": function (data, type, full, meta) {
+            //                    return full.FirstName + ' ' + full.LastName;
+            //                }
+            //            },
+            //            {
+            //                "data": null,
+            //                "render": function (data, type, full, meta) {
+            //                    return '<input type="date" id="date' + full.Id + '" class="form-control">';
+            //                }
+            //            },
+
+            //            {
+            //                "data": "TimeIn",
+            //                "render": function (data, type, full, meta) {
+            //                    if (data) {
+            //                        return '<td><div class="input-group timepicker"><input type="time" class="form-control" id="startTime_' + full.Id + '" value="' + data.slice(0, 5) + '" data-id="' + full.Id + '" /></div></td>';
+            //                    } else {
+            //                        return '<td><div class="input-group timepicker"><input type="time" class="form-control" id="startTime_' + full.Id + '" value="" data-id="' + full.Id + '" /></div></td>';
+            //                    }
+            //                }
+            //            },
+
+            //            {
+            //                "data": "TimeOut",
+            //                "render": function (data, type, full, meta) {
+            //                    if (data) {
+            //                        return '<td><div class="input-group timepicker"><input type="time" class="form-control" id="endTime_' + full.Id + '" value="' + data.slice(0, 5) + '" /></div></td>';
+            //                    } else {
+            //                        return '<td><div class="input-group timepicker"><input type="time" class="form-control" id="endTime_' + full.Id + '" value="" /></div></td>';
+            //                    }
+            //                }
+            //            },
+
+
+
+
+            //            {
+            //                "data": null,
+            //                "render": function (data, type, full, meta) {
+            //                    return '<td>' +
+            //                        '<div class="form-check form-check-inline">' +
+            //                        '<input class="form-check-input status-radio" type="radio" name="status_' + full.Id + '" id="status-present_' + full.Id + '" value="present" checked>' +
+            //                        '<label class="form-check-label" for="status-present_' + full.Id + '">Present</label>' +
+            //                        '</div>' +
+            //                        '<div class="form-check form-check-inline">' +
+            //                        '<input class="form-check-input status-radio" type="radio" name="status_' + full.Id + '" id="status-absent_' + full.Id + '" value="absent">' +
+            //                        '<label class="form-check-label" for="status-absent_' + full.Id + '">Absent</label>' +
+            //                        '</div>' +
+            //                        '</td>';
+            //                }
+            //            }
+
+
+            //        ],
+
+            //        pagingType: 'full_numbers',
+            //        language: {
+            //            paginate: {
+            //                first: 'First',
+            //                previous: '&lsaquo;',
+            //                next: '&rsaquo;',
+            //                last: 'Last'
+            //            },
+            //            searchPlaceholder: 'Min 3 Characters'
+            //        },
+            //        autoWidth: false, // Disable auto width calculation
+            //        columnDefs: [
+            //            { width: '100px', targets: '_all' } // Set a fixed width for all columns, adjust as needed
+            //        ],
+            //        drawCallback: function () {
+            //            // Override DataTables styles with Bootstrap styles after each draw
+            //            $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
+            //            $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
+            //            $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
+            //            $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+            //        },
+            //        "initComplete": function (settings, json) {
+            //            // Check if there's at least one row
+            //            if (table.rows().count() > 0) {
+            //                // Enable the button by removing the disabled attribute
+            //                $('#upload').removeAttr('disabled');
+            //            }
+            //            else {
+            //                // Disable the button by adding the disabled attribute
+            //                $('#upload').attr('disabled', 'disabled');
+            //            }
+            //        }
+            //    });
+
+            //}
             function fetchEmployeeByCard() {
-                var cardCode = $("#cardCode").val();
-                var table=$('#cardAttendance').DataTable({
-                    "destroy": true,
-                    "ajax": {
-                        "url": '/Attendance/GetEmployeeByCard',
-                        "type": "GET",
-                        "datatype": "json",
-                        "dataSrc": "",
-                        "data": {
-                            cardCode: cardCode
-                        },
-                        "contentType": 'application/json; charset=utf-8',
-                        "beforeSend": function (xhr) {
-                            hideSpinner();
+                var employeeNumber = $("#cardCode").val();
+                employeeNumber = "Cactus-" + employeeNumber;
+
+                $.ajax({
+                    url: '/Attendance/GetEmployeeByCard',
+                    type: 'GET',
+                    data: { employeeNumber: employeeNumber },
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        debugger;
+                        // Hide any previous error alerts
+                        $('#errorAlert').hide();
+
+                        // Check if data is empty
+                        if (data.error) {
+                            // Show error message
+                            $('#errorAlert').show();
+                            $('#errorMessage').text(data.error);
+                            setInterval(hideAlerts, 2000);
+                            initializeDataTable(data);
+
+                        } else {
+                            // Initialize DataTables
+                            initializeDataTable(data);
                         }
                     },
+                    error: function (xhr, status, error) {
+                        // Populate error message and show error alert
+                        $('#errorMessage').text(xhr.responseJSON.error);
+                        $('#errorAlert').show();
+                    }
+                });
+            }
+
+            function initializeDataTable(data) {
+                var table = $('#cardAttendance').DataTable({
+                    "destroy": true,
+                    "data": data,
                     "columns": [
                         {
                             "data": null,
@@ -328,7 +477,6 @@
 
 
                     ],
-
                     pagingType: 'full_numbers',
                     language: {
                         paginate: {
@@ -350,19 +498,17 @@
                         $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
                         $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
                     },
-                    "initComplete": function (settings, json) {
-                        // Check if there's at least one row
-                        if (table.rows().count() > 0) {
-                            // Enable the button by removing the disabled attribute
-                            $('#upload').removeAttr('disabled');
-                        }
-                        else {
-                            // Disable the button by adding the disabled attribute
-                            $('#upload').attr('disabled', 'disabled');
-                        }
-                    }
+                    // Other options...
                 });
 
+                // Check if there's at least one row
+                if (table.rows().count() > 0) {
+                    // Enable the button by removing the disabled attribute
+                    $('#upload').removeAttr('disabled');
+                } else {
+                    // Disable the button by adding the disabled attribute
+                    $('#upload').attr('disabled', 'disabled');
+                }
             }
 
             $('#upload').on('click', function () {

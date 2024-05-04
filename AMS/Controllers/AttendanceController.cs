@@ -45,13 +45,34 @@ namespace AMS.Controllers
             return View();
         }
         [HttpGet]
-        public ActionResult GetEmployeeByCard(string cardCode)
-        
+        public ActionResult GetEmployeeByCard(string employeeNumber)
         {
-            // Query the database to get employee by card code
-            var employee = _dbContext.Users.Where(e => e.Card.cardCode.Trim() == cardCode.Trim()).ToList();
-            // Return JSON data for DataTable
-            return Json(employee, JsonRequestBehavior.AllowGet);
+            var employeeIdParts = employeeNumber.Split('-');
+
+            // Check if the employeeId format is valid
+            if (employeeIdParts.Length != 3)
+            {
+                return Json(new { error = "Invalid Employee Number format" }, JsonRequestBehavior.AllowGet);
+            }
+
+            // Retrieving the employee from the database based on the type
+            var employeeType = employeeIdParts[1];
+            employeeType = employeeType.ToLower();
+            var employee = _dbContext.Users.Where(e => e.employeeNumber == employeeNumber && e.isActive).ToList();
+            // Check if either employee or labour is null
+            if (employee == null || employee.Count == 0)
+            {
+                // Return error message
+                return Json(new { error = "Employee not found" }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                // Return the employee data
+                return Json(employee, JsonRequestBehavior.AllowGet);
+            }
+
+
+
         }
         [HttpGet]
         public ActionResult GetLabourList(DateTime? date)

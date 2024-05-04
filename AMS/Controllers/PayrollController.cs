@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Data.Entity;
+using Microsoft.AspNet.Identity;
 namespace AMS.Controllers
 {
     public class PayrollController : Controller
@@ -25,13 +26,78 @@ namespace AMS.Controllers
         {
             return View();
         }
-        public ActionResult GetPayrollData()
+        [Authorize(Roles = "Employee")]
+
+        public ActionResult EmployeePayroll()
         {
-            var payrollList=_dbContext.Payroll.Include(c=>c.ApplicationUser).Include(c=>c.Labour).ToList();
+            return View();
+        }
+        public ActionResult GetPayrollData(int? year, int? month)
+        {
+            IQueryable<Payroll> payrollQuery = _dbContext.Payroll
+                                                .Include(c => c.ApplicationUser)
+                                                .Include(c => c.Labour);
+
+            if (!year.HasValue && !month.HasValue)
+            {
+                // Get current year and month
+                int currentYear = DateTime.Now.Year;
+                int currentMonth = DateTime.Now.Month;
+
+                // Filter by current year and month
+                payrollQuery = payrollQuery.Where(p => p.Year == currentYear && p.Month == currentMonth);
+            }
+            else
+            {
+                if (year.HasValue)
+                {
+                    payrollQuery = payrollQuery.Where(p => p.Year == year);
+                }
+
+                if (month.HasValue)
+                {
+                    payrollQuery = payrollQuery.Where(p => p.Month == month);
+                }
+            }
+
+            var payrollList = payrollQuery.ToList();
+            return Json(payrollList, JsonRequestBehavior.AllowGet);
+        }
+        
+        public ActionResult GetPayrollDataByUser(int? year, int? month)
+        {
+            var loggedInUser = User.Identity.GetUserId();
+            IQueryable<Payroll> payrollQuery = _dbContext.Payroll
+                                                .Include(c => c.ApplicationUser)
+                                                .Include(c => c.Labour).Where(e => e.employeeId == loggedInUser);
+
+            if (!year.HasValue && !month.HasValue)
+            {
+                // Get current year and month
+                int currentYear = DateTime.Now.Year;
+                int currentMonth = DateTime.Now.Month;
+
+                // Filter by current year and month
+                payrollQuery = payrollQuery.Where(p => p.Year == currentYear && p.Month == currentMonth);
+            }
+            else
+            {
+                if (year.HasValue)
+                {
+                    payrollQuery = payrollQuery.Where(p => p.Year == year);
+                }
+
+                if (month.HasValue)
+                {
+                    payrollQuery = payrollQuery.Where(p => p.Month == month);
+                }
+            }
+
+            var payrollList = payrollQuery.ToList();
             return Json(payrollList, JsonRequestBehavior.AllowGet);
         }
 
-       
+
 
         public ActionResult sendForApproval(int[] id)
         {

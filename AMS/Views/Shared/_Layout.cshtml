@@ -1,4 +1,5 @@
-﻿@model AMS.Models.ResetPasswordViewModel
+﻿@using Microsoft.AspNet.Identity
+@model AMS.Models.ResetPasswordViewModel
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,12 +62,35 @@
                 <!-- Full screen toggle -->
                 <i class="fa fa-expand header-icon d-none d-sm-inline-block"
                    data-fullscreen></i>
+                <div class="dropdown">
+                    <div class="user col align-self-end">
+                        <img src="~/dist-assets/images/faces/user_icon.png"
+                             id="userDropdown"
+                             alt=""
+                             data-bs-toggle="dropdown"
+                             aria-haspopup="true"
+                             aria-expanded="false" />
+                        <div class="dropdown-menu dropdown-menu-right"
+                             aria-labelledby="userDropdown">
+                            <div class="dropdown-header">
+                                <i class="fa fa-user"></i> @User.Identity.GetUserName()
+                            </div>
+                            <a class="dropdown-item" href="/Account/ForgotPassword">Forget Password</a>
+
+                            <form id="logoutForm" action="/Account/LogOff" method="post">
+                                @Html.AntiForgeryToken()
+                                <a class="dropdown-item" href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit()">Log Out</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
             </div>
+
+
         </div>
         @if (User.Identity.IsAuthenticated)
         {
-
-
             <div class="side-content-wrap">
                 <div class="sidebar-left open rtl-ps-none"
                      data-perfect-scrollbar=""
@@ -74,106 +98,110 @@
                     @if (User.IsInRole("Admin"))
                     {
                         <!-- Admin ke liye saare buttons -->
-                    <ul class="navigation-left">
-                        <!-- Yahan Admin ke buttons honge -->
-                        <li class="nav-item no-open" data-item="">
-                            <a class="nav-item-hold" href="/Home/Dashboard">
-                                <i class="fa fa-chart-bar fa-lg"></i><span class="nav-text">Dashboard</span>
-                            </a>
-                        </li>
-                        <li class="nav-item" data-item="attendance">
-                            <a class="nav-item-hold" href="#">
-                                <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
-                            </a>
-                            <div class="triangle"></div>
-                        </li>
-                        <li class="nav-item" data-item="manage">
-                            <a class="nav-item-hold" href="#">
-                                <i class="fa fa-sliders-h fa-lg"></i><span class="nav-text">Manage</span>
-                            </a>
-                            <div class="triangle"></div>
-                        </li>
-                        <li class="nav-item no-open" data-item="">
-                            <a class="nav-item-hold" href="/Payroll/Index">
-                                <i class="fas fa-money-check fa-lg"></i><span class="nav-text">Payroll</span>
-                            </a>
-                        </li>
-                        <li class="nav-item no-open" data-item="">
-                            <a class="nav-item-hold" href="/Leave/Inbox">
-                                <i class="fa fa-bed-alt fa-lg"></i><span class="nav-text">Leave Requests</span>
-                                <span class="badge badge-square badge-square-opacity-primary m-1" id="leaveRequestsBadge"></span>
-                            </a>
-                        </li>
-                        <li class="nav-item no-open" data-item="">
-                            <a class="nav-item-hold" href="/Leave/ComposeEmail">
-                                <i class="fas fa-mailbox fa-lg"></i><span class="nav-text">Compose Email</span>
-                            </a>
-                        </li>
-                        <li class="nav-item no-open" data-item="">
-                            <a class="nav-item-hold" href="/Shift/AssignShift">
-                                <i class="fas fa-exchange-alt fa-lg"></i><span class="nav-text">Assign Shift</span>
-                            </a>
-                        </li>
-                        <li class="nav-item no-open" data-item="">
-                            <a class="nav-item-hold" href="/Reporting/Index">
-                                <i class="fas fa-check-circle fa-lg"></i><span class="nav-text">Reporting</span>
-                            </a>
-                        </li>
-                        <li class="nav-item no-open" data-item="">
-                            <form id="logoutForm" action="/Account/LogOff" method="post">
-                                @Html.AntiForgeryToken()
-                                <a class="nav-item-hold" href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit()">
-                                    <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
+                        <ul class="navigation-left">
+                            <!-- Yahan Admin ke buttons honge -->
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Home/Dashboard">
+                                    <i class="fa fa-chart-bar fa-lg"></i><span class="nav-text">Dashboard</span>
                                 </a>
-                            </form>
-                        </li>
+                            </li>
+                            <li class="nav-item" data-item="attendance">
+                                <a class="nav-item-hold" href="#">
+                                    <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
+                                </a>
+                                <div class="triangle"></div>
+                            </li>
+                            <li class="nav-item" data-item="manage">
+                                <a class="nav-item-hold" href="#">
+                                    <i class="fa fa-sliders-h fa-lg"></i><span class="nav-text">Manage</span>
+                                </a>
+                                <div class="triangle"></div>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Payroll/Index">
+                                    <i class="fas fa-money-check fa-lg"></i><span class="nav-text">Payroll</span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Leave/Inbox">
+                                    <i class="fa fa-bed-alt fa-lg"></i><span class="nav-text">Leave Requests</span>
+                                    <span class="badge badge-square badge-square-opacity-primary m-1" id="leaveRequestsBadge"></span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Leave/ComposeEmail">
+                                    <i class="fas fa-mailbox fa-lg"></i><span class="nav-text">Compose Email</span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Shift/AssignShift">
+                                    <i class="fas fa-exchange-alt fa-lg"></i><span class="nav-text">Assign Shift</span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Reporting/Index">
+                                    <i class="fas fa-check-circle fa-lg"></i><span class="nav-text">Reporting</span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <form id="logoutForm" action="/Account/LogOff" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <a class="nav-item-hold" href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit()">
+                                        <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
+                                    </a>
+                                </form>
+                            </li>
 
-                    </ul>
+                        </ul>
                     }
                     else if (User.IsInRole("Employee"))
                     {
                         <!-- HR aur Employee ke liye sirf Attendance button -->
-                <ul class="navigation-left">
+                        <ul class="navigation-left">
 
-                    <li class="nav-item no-open" data-item="">
-                        <a class="nav-item-hold" href="/Attendance/EmployeeAttendance">
-                            <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-item no-open" data-item="">
-                        <form id="logoutForm" action="/Account/LogOff" method="post">
-                            @Html.AntiForgeryToken()
-                            <a class="nav-item-hold" href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit()">
-                                <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
-                            </a>
-                        </form>
-                    </li>
-                </ul>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Attendance/EmployeeAttendance">
+                                    <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Payroll/EmployeePayroll">
+                                    <i class="fas fa-money-check fa-lg"></i><span class="nav-text">Payroll</span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <form id="logoutForm" action="/Account/LogOff" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <a class="nav-item-hold" href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit()">
+                                        <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
+                                    </a>
+                                </form>
+                            </li>
+                        </ul>
                     }
                     else if (User.IsInRole("HR"))
                     {
-                <ul class="navigation-left">
-                    <li class="nav-item" data-item="attendance">
-                        <a class="nav-item-hold" href="#">
-                            <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
-                        </a>
-                        <div class="triangle"></div>
-                    </li>
-                    <li class="nav-item no-open" data-item="">
-                        <a class="nav-item-hold" href="/Payroll/RequestedSalaries">
-                            <i class="fas fa-money-check fa-lg"></i><span class="nav-text">Payroll</span>
-                        </a>
-                    </li>
-                    <li class="nav-item no-open" data-item="">
-                        <form id="logoutForm" action="/Account/LogOff" method="post">
-                            @Html.AntiForgeryToken()
-                            <a class="nav-item-hold" href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit()">
-                                <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
-                            </a>
-                        </form>
-                    </li>
-                </ul>
+                        <ul class="navigation-left">
+                            <li class="nav-item" data-item="attendance">
+                                <a class="nav-item-hold" href="#">
+                                    <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
+                                </a>
+                                <div class="triangle"></div>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Payroll/RequestedSalaries">
+                                    <i class="fas fa-money-check fa-lg"></i><span class="nav-text">Payroll</span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <form id="logoutForm" action="/Account/LogOff" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <a class="nav-item-hold" href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit()">
+                                        <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
+                                    </a>
+                                </form>
+                            </li>
+                        </ul>
                     }
                 </div>
                 <div class="sidebar-left-secondary rtl-ps-none" data-perfect-scrollbar="" data-suppress-scroll-x="true">
