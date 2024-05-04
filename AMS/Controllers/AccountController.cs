@@ -94,7 +94,7 @@ namespace AMS.Controllers
             }
 
             var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
-
+          
             switch (result)
             {
                 case SignInStatus.Success:
@@ -411,20 +411,39 @@ namespace AMS.Controllers
         {
             if (!ModelState.IsValid)
             {
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = "Invalid model state" });
+                }
                 return View(model);
             }
             var user = await UserManager.FindByNameAsync(model.Email);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = "User not found" });
+                }
                 return RedirectToAction("ResetPasswordConfirmation", "Account");
             }
             var result = await UserManager.ResetPasswordAsync(user.Id, model.Code, model.Password);
             if (result.Succeeded)
             {
+                if (Request.IsAjaxRequest())
+                {
+                    var appuser=_dbContext.Users.FirstOrDefault(x=> x.Email == model.Email);
+                    appuser.isPasswordChanged = true;
+                    _dbContext.SaveChanges();
+                    return Json(new { success = true, message = "Password reset successfully" });
+                }
                 return RedirectToAction("ResetPasswordConfirmation", "Account");
             }
             AddErrors(result);
+            if (Request.IsAjaxRequest())
+            {
+                return Json(new { success = false, message = "Password reset failed" });
+            }
             return View();
         }
 
@@ -586,6 +605,35 @@ namespace AMS.Controllers
             }
 
             base.Dispose(disposing);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> resetFirstTime()
+        {
+            if (ModelState.IsValid)
+            {
+                var userId = HttpContext.User.Identity.GetUserId();
+                ApplicationUser appuser = null ;
+                if (userId != null)
+                {
+                    appuser = _dbContext.Users.Where(u=>u.Id == userId).FirstOrDefault();
+                    if(appuser!=null)
+                    {
+                        if (appuser.isPasswordChanged == false)
+                        {
+                         
+                            string code = await UserManager.GeneratePasswordResetTokenAsync(appuser.Id);
+                            return Json(new { email = appuser.Email, code = code }, JsonRequestBehavior.AllowGet);
+                        }
+                       
+                    }
+                }
+
+               
+            }
+
+            // If we got this far, something failed, redisplay form
+            return Json(new { error = true }, JsonRequestBehavior.AllowGet);
         }
 
         #region Helpers

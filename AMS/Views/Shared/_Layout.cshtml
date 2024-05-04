@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@model AMS.Models.ResetPasswordViewModel
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -24,6 +25,17 @@
         .nav-item[data-parent] .childNav,
         .nav-item[data-item] .childNav {
             display: block;
+        }
+        .disableEmail{
+            pointer-events:none;
+            opacity:1;
+        }
+        .modal-top-right {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            margin: 0;
+            transform: translate(0, 0);
         }
     </style>
 </head>
@@ -125,7 +137,7 @@
                                 </a>
                                 <div class="triangle"></div>
                             </li>
-                           
+
                             <li class="nav-item no-open" data-item="">
                                 <a class="nav-item-hold" href="/Account/Login">
                                     <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
@@ -135,24 +147,24 @@
                     }
                     else if (User.IsInRole("HR"))
                     {
-                <ul class="navigation-left">
-                    <li class="nav-item" data-item="attendance">
-                        <a class="nav-item-hold" href="#">
-                            <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
-                        </a>
-                        <div class="triangle"></div>
-                    </li>
-                    <li class="nav-item no-open" data-item="">
-                        <a class="nav-item-hold" href="/Payroll/RequestedSalaries">
-                            <i class="fas fa-money-check fa-lg"></i><span class="nav-text">Payroll</span>
-                        </a>
-                    </li>
-                    <li class="nav-item no-open" data-item="">
-                        <a class="nav-item-hold" href="/Account/Login">
-                            <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
-                        </a>
-                    </li>
-                </ul>
+                        <ul class="navigation-left">
+                            <li class="nav-item" data-item="attendance">
+                                <a class="nav-item-hold" href="#">
+                                    <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
+                                </a>
+                                <div class="triangle"></div>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Payroll/RequestedSalaries">
+                                    <i class="fas fa-money-check fa-lg"></i><span class="nav-text">Payroll</span>
+                                </a>
+                            </li>
+                            <li class="nav-item no-open" data-item="">
+                                <a class="nav-item-hold" href="/Account/Login">
+                                    <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
+                                </a>
+                            </li>
+                        </ul>
                     }
                 </div>
                 <div class="sidebar-left-secondary rtl-ps-none" data-perfect-scrollbar="" data-suppress-scroll-x="true">
@@ -268,6 +280,52 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle-2" aria-hidden="true">
+        <div class="modal-dialog modal-top-right" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle-2">
+                        Reset Password
+                    </h5>
+
+                </div>
+                <div class="modal-body">
+                    <h4>Since You Have Logged In First Time. Change Password to Proceed</h4>
+                    @using (Ajax.BeginForm("ResetPassword", "Account", new AjaxOptions { HttpMethod = "POST", OnSuccess = "resetSuccess", OnFailure = "resetFailure" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <hr />
+                        @Html.ValidationSummary("", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.Code, new { @id = "codeReset" })
+                        <div class="row">
+                            @Html.LabelFor(m => m.Email, new { @class = "col-md-2 col-form-label" })
+                            <div class="col-md-10">
+                                @Html.TextBoxFor(m => m.Email, new { @class = "form-control disableEmail", @id = "emailReset" })
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            @Html.LabelFor(m => m.Password, new { @class = "col-md-2 col-form-label" })
+                            <div class="col-md-10">
+                                @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 col-form-label" })
+                            <div class="col-md-10">
+                                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" type="submit">
+                                Reset
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                </div>
+        </div>
+    </div>
 
     <script src="~/dist-assets/js/plugins/jquery-3.3.1.min.js"></script>
     <script src="~/dist-assets/js/scripts/dashboard.v1.script.min.js"></script>
@@ -295,6 +353,32 @@
 </html>
 
 <script>
+    checkPassword();
+    function checkPassword() {
+        $.ajax({
+            url: '/Account/resetFirstTime',
+            type: 'GET',
+            beforeSend: function () {
+                hideSpinner();
+            },
+            success: function (response) {
+                if (!response.error && response.email && response.code) {
+                    var email = response.email;
+                    var code = response.code;
+                    $("#codeReset").val(code);
+                    $("#emailReset").val(email);
+                    $('#exampleModalCenter').modal({
+                        backdrop: 'static', // Is se modal background click hone par band nahi hoga
+                        keyboard: false // Is se modal keyboard events se bhi band nahi hoga
+                    });                }  else {
+                    console.log('Password has already been changed.');
+                }
+            },
+            error: function () {
+                console.log('Error occurred while fetching password reset data.');
+            }
+        });
+    }
     getInboxCount();
     leaveBalanceRefresh();
     function getInboxCount() {
@@ -364,9 +448,30 @@
             hideSpinner();
         }
     });
+    function resetSuccess(response) {
+        $("#exampleModalCenter").modal('hide');
+        if (response.success) {
+            // Show success message
+            toastr.success(response.message);
+            // Redirect user if needed
+        } else {
+            // Show error message
+            toastr.error(response.message);
+            // Handle failure if needed
+        }
+    }
+
+    function resetFailure(xhr, status, error) {
+        $("#exampleModalCenter").modal('hide');
+        // Show error message
+        toastr.error("Error: " + error);
+        // Handle failure if needed
+    }
+
 
     // JavaScript code
     $(document).ready(function () {
+        
         // Jab bhi koi li element pe hover hota hai
         $(".no-open").hover(function () {
             // .sidebar-left-secondary element ke .open class ko remove karein

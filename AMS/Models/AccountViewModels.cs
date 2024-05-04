@@ -119,6 +119,7 @@ namespace AMS.Models
         public string Role { get; set; }
         [Required]
         public string employeeNumber { get; set; }
+        public bool isPasswordChanged { get; set; }
 
     }
 
