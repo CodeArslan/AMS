@@ -1,4 +1,5 @@
 ﻿using AMS.Models;
+using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -28,6 +29,13 @@ namespace AMS.Controllers
         {
             return View();
         }
+
+        [Authorize(Roles = "Employee")]
+        public ActionResult EmployeeAttendance()
+        {
+            return View();
+        }
+
         public ActionResult AttendanceForLabours()
         {
             return View();
@@ -113,6 +121,7 @@ namespace AMS.Controllers
             return Json(formattedAttList, JsonRequestBehavior.AllowGet);
         }
 
+       
 
         private void ListenForRFID()
         {
@@ -578,6 +587,36 @@ namespace AMS.Controllers
             // Use the provided date or default to current date if not provided
             var selectedDate = date ?? DateTime.Now.Date;
             var allEmployees = _dbContext.Users.Where(e=>e.isActive == true).ToList(); 
+            var presentEmployees = _dbContext.Attendance
+                .Include(a => a.ApplicationUser)
+                .Where(a => a.date == selectedDate && a.employeeId != null && a.status == "Present")
+                .OrderBy(att => att.date)
+                .AsNoTracking()
+                .ToList();
+
+            var formattedAttList = allEmployees.Select(employee =>
+            {
+                var attendance = presentEmployees.FirstOrDefault(att => att.employeeId == employee.Id);
+                return new
+                {
+                    Id = employee.Id,
+                    Employee = employee,
+                    date = attendance != null ? (DateTime?)attendance.date : null,
+                    timeIn = attendance != null ? (attendance.timeIn != null ? attendance.timeIn.ToString(@"hh\:mm\:ss") : null) : null, // Format as HH:mm:ss
+                    timeOut = attendance != null ? (attendance.timeOut != null ? attendance.timeOut.ToString(@"hh\:mm\:ss") : null) : null, // Format as HH:mm:ss
+                    totalWorkedTime = attendance != null ? attendance.totalWorkedTime : null,
+                    status = attendance != null ? "Present" : "Absent"
+                };
+            });
+
+            return Json(formattedAttList, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetEmployeeAttendanceByUser(DateTime? date)
+        {
+            // Use the provided date or default to current date if not provided
+            var selectedDate = date ?? DateTime.Now.Date;
+            var loggedInUser=User.Identity.GetUserId();
+            var allEmployees = _dbContext.Users.Where(e => e.Id==loggedInUser&&e.isActive==true).ToList();
             var presentEmployees = _dbContext.Attendance
                 .Include(a => a.ApplicationUser)
                 .Where(a => a.date == selectedDate && a.employeeId != null && a.status == "Present")

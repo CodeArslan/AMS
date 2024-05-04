@@ -1,0 +1,197 @@
+﻿
+@{
+    ViewBag.Title = "EmployeeAttendance";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-md-12 mb-3">
+    <div class="card text-start">
+        <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
+            <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
+            <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert" style="display:none">
+            <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
+            <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="card-header">
+            <h3 class="text-mute">Employee Attendance<i class="fas fa-sync-alt float-end text-20 mr-5" id="reloadIcon" title="Press to Reload Employee Attendance Table"></i></h3>
+        </div>
+        <div class="card-body">
+            <h3>Search By Date</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <input class="form-control" type="date" id="filterDate">
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered table-striped" id="employeeAttendance">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Employee Name</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Time In</th>
+                            <th scope="col">Time Out</th>
+                            <th scope="col">Total Worked Time</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="card-footer"></div>
+    </div>
+</div>
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+       
+        $("#reloadIcon").tooltip({
+            placement: "left", // Set the tooltip placement to left
+            show: {
+                effect: "slideDown",
+                delay: 250
+            }
+        });
+        $("#reloadIcon").click(function () {
+            $(this).toggleClass('fa-spin');
+            fetchEmployeeAttendanceByUser();
+        });
+        var today = new Date().toISOString().slice(0, 10);
+
+        $("#filterDate").val(today);
+        fetchEmployeeAttendanceByUser();
+        $("#filterDate").on("change", function () {
+             fetchEmployeeAttendanceByUser();
+
+        });
+        fetchEmployeeAttendanceByUser();
+        function fetchEmployeeAttendanceByUser() {
+            var selectedDate = $("#filterDate").val();
+            $('#employeeAttendance').DataTable({
+                "destroy": true,
+                "ajax": {
+                    "url": '/Attendance/GetEmployeeAttendanceByUser',
+                    "type": "GET",
+                    "datatype": "json",
+                    "dataSrc": "",
+                    "data": {
+                        date: selectedDate // Pass the selected date as a parameter
+                    },
+                    "contentType": 'application/json; charset=utf-8',
+                   
+                },
+                "columns": [
+                    {
+                        "data": null, "render": function (data, type, row) {
+                            return row.Employee.FirstName + ' ' + row.Employee.LastName;
+                        }
+                    },
+                    {
+                        "data": "date",
+                        "render": function (data, type, row) {
+                            if (data) {
+                                // Parse the date using Moment.js
+                                var parsedDate = moment(parseInt(data.substr(6)));
+                                // Format the date as "20 Mar, 2024"
+                                return parsedDate.format("DD MMM, YYYY");
+                            } else {
+                                return ""; // Return empty string if data is null or empty
+                            }
+                        }
+                    },
+                    {
+                        "data": "timeIn",
+                        "render": function (data) {
+                            if (data) {
+                                return moment(data, 'HH:mm:ss').format('h:mm A');
+                            } else {
+                                return "--:--";
+
+                            }
+                        }
+                    },
+                    {
+                        "data": "timeOut",
+                        "render": function (data) {
+                            if (data === '00:00:05') {
+                                return "--:--";
+                            } else if (data) {
+                                return moment(data, 'HH:mm:ss').format('h:mm A');
+                            } else {
+                                return "--:--";
+                            }
+                        }
+                    },
+
+
+                    {
+                        "data": "totalWorkedTime",
+                    },
+                    {
+                        "data": "status",
+                        "render": function (data, type, row) {
+                            if (data === "Present") {
+                                return '<td style="background-color: green !important;"><div>' + data + '</div></td>';
+                            } else {
+                                return '<td style="background-color: red !important;"><div>Absent</div></td>';
+                            }
+                        }
+                    }
+
+                ],
+                "initComplete": function (settings, json) {
+                    $("#reloadIcon").removeClass('fa-spin');
+                    $('#employeeAttendance tbody tr').each(function () {
+                        var statusCell = $(this).find('td:eq(5)');
+                        var status = statusCell.text();
+                        if (status === "Present") {
+                            statusCell.css({
+                                'background-color': 'forestgreen',
+                                'color': 'white',
+                                'text-align': 'center'
+                            });
+                        } else {
+                            statusCell.css({
+                                'background-color': 'red',
+                                'text-align': 'center'
+                            });
+                        }
+                    });
+                },
+                pagingType: 'full_numbers',
+                language: {
+                    paginate: {
+                        first: 'First',
+                        previous: '&lsaquo;',
+                        next: '&rsaquo;',
+                        last: 'Last'
+                    },
+                    searchPlaceholder: 'Min 3 Characters'
+                },
+                autoWidth: false, // Disable auto width calculation
+                columnDefs: [
+                    { width: '100px', targets: '_all' } // Set a fixed width for all columns, adjust as needed
+                ],
+                drawCallback: function () {
+                    // Override DataTables styles with Bootstrap styles after each draw
+                    $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
+                    $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
+                    $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
+                    $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+                }
+            });
+
+            }
+        });
+
+    </script>
+}
+
