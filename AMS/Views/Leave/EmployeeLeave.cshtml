@@ -1,0 +1,254 @@
+﻿
+@{
+    ViewBag.Title = "EmployeeLeave";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-2">
+        <div class="card" style="height:260px">
+            <div class="card-header">
+                <h2 class="card-title">Leave Balance</h2>
+            </div>
+            <div class="card-body">
+                <h3 class="text-muted" id="leaveBalance" style="display: inline;"></h3>
+                <span style="font-size: 12px;">Days</span>
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <div class="card" style="height:260px">
+            <div class="card-header">
+                <h5 class="card-title">Last Leave</h5>
+            </div>
+            <div class="card-body">
+
+
+                <span style="font-size: 12px; display: inline; " id="dateLeave"></span><div id="badgeDiv" style="display:inline;margin-left:5px"></div>
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <!-- Card Header -->
+            <div class="card-header">
+                <h5 class="card-title">Leave Pattern</h5>
+            </div>
+            <!-- Card Body -->
+            <div class="card-body">
+                <canvas id="lineChart"></canvas>
+            </div>
+            <!-- Card Footer -->
+            <div class="card-footer">
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="row mt-4">
+    <div class="col-md-12 mb-4">
+        <div class="card text-start">
+            <div class="card-body">
+                <h4 class="card-title mb-3 text-primary">Leave Details</h4>
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="summary-basic-tab" data-bs-toggle="tab" href="#summaryBasic" role="tab" aria-controls="summaryBasic" aria-selected="false">Leave Details</a>
+                    </li>
+
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active"
+                         id="summaryBasic"
+                         role="tabpanel"
+                         aria-labelledby="summary-basic-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered table-striped" id="LeaveTable">
+                                <thead class="bg-gray-300">
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Leave Name</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Read</th>
+                                    </tr>
+                                </thead>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+
+@section scripts
+{
+    <script>
+        getLeaveBalanceByUser();
+        getLastLeaveDetails();
+        function getLeaveBalanceByUser() {
+            $.ajax({
+                url: '/Leave/getLeaveBalanceByUser',
+                type: 'Get',
+                success: function (data) {
+                    $("#leaveBalance").text(data); // Corrected to access 'data' directly
+                },
+                error: function (xhr, status, error) {
+                    // Handle error if needed
+                }
+            });
+        }
+        function getLastLeaveDetails() {
+            $.ajax({
+                url: '/Leave/getLastLeaveDetails',
+                type: 'Get',
+                success: function (data) {
+                    // Checking if data exists
+                    if (data && data.Date) {
+                        // Formatting date
+                        var leaveDate = new Date(parseInt(data.Date.substr(6))); // Converting date string to date object
+                        var parsedDate = moment(leaveDate); // Using moment.js to format date
+
+                        // Updating HTML content
+                        $("#dateLeave").text(parsedDate.format("DD MMM, YYYY")); // Formatting date
+                        var badgeClass = data.Decision === 'Approved' ? 'bg-success' : 'bg-danger'; // Corrected 'accepted' to 'Approved'
+                        $("#badgeDiv").html('<span class="badge rounded-pill ' + badgeClass + ' text-white p-2 m-1">' + data.Decision + '</span>');
+
+                    } else {
+                        // Handle if no data received
+                        $("#badgeDiv").html('<p>No leave details available.</p>');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Handle error if needed
+                    console.error(error);
+                }
+            });
+        }
+        drawLeaveChart();
+        function drawLeaveChart() {
+            $.ajax({
+                url: '/Leave/LeavesByMonthByUser',
+                type: 'Get',
+                success: function (response) {
+                    console.log(response);
+                    // Extract data for chart
+                    var months = response.Months;
+                    var approvedLeaveCounts = response.ApprovedLeaveCounts;
+
+                    // Chart.js configuration
+                    var ctx = document.getElementById('lineChart').getContext('2d');
+                    var leaveChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: months,
+                            datasets: [
+                                {
+                                    label: 'Total Leaves',
+                                    data: response.TotalLeaveCounts,
+                                    borderColor: '#663399', // Set line color to #FF6347
+                                    fill: false // Don't fill area under the line
+                                },
+                                {
+                                    label: 'Approved Leaves',
+                                    data: response.ApprovedLeaveCounts,
+                                    borderColor: '#32CD32', // Set line color to #32CD32 (green)
+                                    fill: false // Don't fill area under the line
+                                },
+                                {
+                                    label: 'Rejected Leaves',
+                                    data: response.RejectedLeaveCounts,
+                                    borderColor: '#FF0000', // Set line color to #FF0000 (red)
+                                    fill: false // Don't fill area under the line
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position:"bottom",// Hide legend
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    ticks: {
+                                        display: true // Hides only the labels of the x-axis 
+                                    }
+
+                                },
+                                 y: {
+                                    ticks: {
+                                        display: true // Hides only the labels of the x-axis 
+                                    }
+                                }
+                            }
+                        }
+                    });
+                },
+                error: function (xhr, status, error) {
+                    // Handle error if needed
+                    console.error(error);
+                }
+            });
+        }
+
+
+
+        $(document).ready(function () {
+            $("#LeaveTable").DataTable({
+                ajax: {
+                    url: "/Leave/GetLeaveDataByUser",
+                    dataSrc: ""
+                },
+                columns: [
+                    {
+                        data: "Id",
+                        orderable: true, // Enable sorting for the first column
+                        searchable: true
+                    },
+                    {
+                        data: "Name",
+                        orderable: true, // Enable sorting for the second column
+                        searchable: true
+                    },
+                   
+                   
+
+                ],
+                pagingType: 'full_numbers',
+                language: {
+                    paginate: {
+                        first: 'First',
+                        previous: '&lsaquo;',
+                        next: '&rsaquo;',
+                        last: 'Last'
+                    },
+                    searchPlaceholder: 'Min 3 Characters'
+                },
+                autoWidth: false, // Disable auto width calculation
+                columnDefs: [
+                    { width: '100px', targets: '_all' } // Set a fixed width for all columns, adjust as needed
+                ],
+                drawCallback: function () {
+                    // Override DataTables styles with Bootstrap styles after each draw
+                    $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
+                    $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
+                    $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
+                    $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+                }
+            });
+
+        });
+
+    </script>
+}

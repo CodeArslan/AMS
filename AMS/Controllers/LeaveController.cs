@@ -17,6 +17,9 @@ using static System.Data.Entity.Infrastructure.Design.Executor;
 using System.Data.Entity;
 using System.Threading.Tasks;
 using AMS.ViewModels;
+using Microsoft.AspNet.Identity;
+using System.Web.Configuration;
+using System.Globalization;
 
 namespace AMS.Controllers
 {
@@ -40,7 +43,19 @@ namespace AMS.Controllers
         {
             return View();
         }
-        
+
+        [Authorize(Roles = "Employee")]
+        public ActionResult EmployeeLeave()
+        {
+            return View();
+        }
+        public ActionResult getLeaveBalanceByUser()
+        {
+            var loggedInUser = User.Identity.GetUserId();
+            var leaveCount = _dbContext.Users.Where(e => e.Id == loggedInUser).Select(e => e.leaveBalance).FirstOrDefault();
+            return Json(leaveCount, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpGet]
         public JsonResult GetLeaveBalance(string Email)
         {
@@ -61,6 +76,67 @@ namespace AMS.Controllers
                 return Json(new { success = false, message = "Employee not found." });
             }
         }
+
+        public ActionResult getLastLeaveDetails()
+        {
+            var loggedInUser = User.Identity.GetUserId();
+            var latestLeave = _dbContext.receivedLeaveRequests
+                                .Where(e => e.employeeId == loggedInUser && (e.Decision == "Approved" || e.Decision == "Rejected"))
+                                .OrderByDescending(e => e.Date)
+                                .FirstOrDefault();
+
+
+            // Create JSON object with all details
+            var leaveDetails = new
+            {
+                Date = latestLeave != null ? (DateTime?)latestLeave.Date : null,
+                Decision = latestLeave?.Decision, 
+            };
+
+            // Return leave details in JSON format
+            return Json(leaveDetails, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult LeavesByMonthByUser()
+        {
+            var loggedInUser = User.Identity.GetUserId();
+
+            var allMonths = Enumerable.Range(1, 12); // List of all months (1 to 12)
+
+            var leavesByMonth = _dbContext.receivedLeaveRequests
+                .Where(l => l.Date.HasValue && l.employeeId==loggedInUser) // Only consider leaves with a valid date
+                .GroupBy(l => new { l.Date.Value.Year, l.Date.Value.Month }) // Group by year and month
+                .Select(g => new
+                {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    ApprovedCount = g.Count(l => l.Decision == "Approved"), // Count approved leaves
+                    RejectedCount = g.Count(l => l.Decision == "Rejected"), // Count rejected leaves
+                    TotalCount = g.Count() // Total count of leaves for the month
+                })
+                .OrderBy(g => g.Year)
+                .ThenBy(g => g.Month)
+                .ToList();
+
+            var monthsWithData = leavesByMonth.Select(g => g.Month).ToList(); // Months with leave data
+            var monthsWithoutData = allMonths.Except(monthsWithData); // Months without leave data
+
+            // Create list of all months with corresponding leave counts (including 0 for months with no leaves)
+            var mergedData = leavesByMonth
+                .Concat(monthsWithoutData.Select(month => new { Year = DateTime.Now.Year, Month = month, ApprovedCount = 0, RejectedCount = 0, TotalCount = 0 }))
+                .OrderBy(g => g.Year)
+                .ThenBy(g => g.Month)
+                .ToList();
+
+            var months = mergedData.Select(g => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Month)).ToList(); // Using abbreviated month names
+            var approvedLeaveCounts = mergedData.Select(g => g.ApprovedCount).ToList();
+            var rejectedLeaveCounts = mergedData.Select(g => g.RejectedCount).ToList();
+            var totalLeaveCounts = mergedData.Select(g => g.TotalCount).ToList();
+
+            return Json(new { Months = months, ApprovedLeaveCounts = approvedLeaveCounts, RejectedLeaveCounts = rejectedLeaveCounts, TotalLeaveCounts = totalLeaveCounts, MergedData = mergedData }, JsonRequestBehavior.AllowGet);
+
+        }
+
         public ActionResult Inbox()
         {
             //ReceiveUnreadEmailsFromGmail();
