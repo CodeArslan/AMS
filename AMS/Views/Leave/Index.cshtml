@@ -171,7 +171,9 @@
                         <thead class="bg-gray-300">
                             <tr>
                                 <th scope="col">#</th>
-                                <th scope="col">Leave Name</th>
+                                <th scope="col">Employee Name</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Reason</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Read</th>
                             </tr>
@@ -311,14 +313,32 @@
                         searchable: true
                     },
                     {
+                        data: "Date",
+                        "render": function (data, type, row) {
+                            if (data) {
+                                // Parse the date using Moment.js
+                                var parsedDate = moment(parseInt(data.substr(6)));
+                                // Format the date as "20 Mar, 2024"
+                                return parsedDate.format("DD MMM, YYYY");
+                            } else {
+                                return ""; // Return empty string if data is null or empty
+                            }
+                        }
+                    },
+                    {
+                        data: "Reason",
+                        orderable: true, // Enable sorting for the second column
+                        searchable: true
+                    },
+                    {
                         data: "isRead",
                         render: function (data, type, row) {
                             if (type === 'display') {
-                                var status = data ? 'Active' : 'In-Active';
+                                var status = data ? 'Approved' : 'Reject';
                                 var badgeClass = data ? 'bg-success' : 'bg-danger';
                                 return '<span class="badge rounded-pill ' + badgeClass + ' text-white p-2 m-1">' + status + '</span>';
                             }
-                            return data ? 'Active' : 'In-Active';
+                            return data ? 'Approved' : 'Reject';
                         },
                         orderable: false, // Disable sorting for this column
                         searchable: false, // Disable searching for this column
@@ -332,6 +352,7 @@
                         orderable: false, // Disable sorting for this column
                         searchable: false // Disable searching for this column
                     },
+
 
                 ],
                 pagingType: 'full_numbers',

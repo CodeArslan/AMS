@@ -64,6 +64,7 @@
                     <table class="table table-hover table-bordered table-striped" id="empTable" style="width:auto !important; table-layout:auto !important">
                         <thead class="bg-gray-300">
                             <tr>
+                                <th scope="col">No.</th>
                                 <th scope="col">Name</th>
                                 <th scope="col">CNIC</th>
                                 <th scope="col">Address</th>
@@ -100,6 +101,11 @@
                 },
                 columns: [
                     {
+                        data: "employeeNumber",
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
                         data: null,
                         render: function (data, type, row) {
                             // Concatenate first and last names
@@ -114,6 +120,7 @@
                         orderable: true,
                         searchable: true
                     },
+                    
                     {
                         data: "Address",
                         orderable: true,

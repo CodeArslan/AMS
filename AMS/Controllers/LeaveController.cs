@@ -34,7 +34,8 @@ namespace AMS.Controllers
 
         public async Task<ActionResult> GetLeaveData()
         {
-            var leaveList = await _dbContext.receivedLeaveRequests.AsNoTracking().ToListAsync();
+            var leaveList = await _dbContext.receivedLeaveRequests.Include(l => l.Labour)
+                .Include(e => e.ApplicationUser).AsNoTracking().ToListAsync();
             return Json(leaveList, JsonRequestBehavior.AllowGet);
         }
 
@@ -240,27 +241,41 @@ namespace AMS.Controllers
                     if (subject.Contains(specificSubject))
                     {
                         var emailData = ParseEmail(message);
-                        if (emailData.Body != null) // Check if message body is not null
+                        if (emailData.Body != null) 
                         {
-                            var isEmailRegistered = _dbContext.Users.FirstOrDefault(c => c.Email == emailData.Sender);
-                            if (isEmailRegistered != null)
+                            var isEmailRegisteredInUsers = _dbContext.Users.FirstOrDefault(c => c.Email == emailData.Sender);
+                            var isEmailRegisteredInLabours = _dbContext.Labours.FirstOrDefault(c => c.Email == emailData.Sender);
+                            if (isEmailRegisteredInUsers != null || isEmailRegisteredInLabours != null)
                             {
-                                var name = isEmailRegistered.FirstName + " " + isEmailRegistered.LastName;
+                                string name = "";
+                                if (isEmailRegisteredInUsers != null)
+                                {
+                                    name = isEmailRegisteredInUsers.FirstName + " " + isEmailRegisteredInUsers.LastName;
+                                }
+                                else if (isEmailRegisteredInLabours != null)
+                                {
+                                    name = isEmailRegisteredInLabours.FirstName + " " + isEmailRegisteredInLabours.LastName;
+                                }
                                 var ReceivedEmailRequests = new ReceivedLeaveRequests
                                 {
                                     From = emailData.Sender,
                                     Subject = emailData.Subject,
                                     Message = emailData.Body,
                                     Name = name,
-                                    Reason="No"
+                                    Reason = "No"
                                 };
+
+                                // Add the object to the receivedLeaveRequests DbSet and save changes to the database
                                 _dbContext.receivedLeaveRequests.Add(ReceivedEmailRequests);
                                 _dbContext.SaveChanges();
+
+                                // Mark the email as seen
                                 inbox.AddFlags(uid, MessageFlags.Seen, true);
                             }
                         }
 
-                        
+
+
                     }
                 }
                 client.Disconnect(true);
