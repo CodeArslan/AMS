@@ -137,6 +137,26 @@ namespace AMS.Controllers
                 return Json(new { success = false, message = "An error occurred while deleting the Labour record" });
             }
         }
+        [HttpPost]
+        public JsonResult IsEmailAvailable(string email, int? id, bool isUpdate)
+        {
+            bool isEmailAvailable;
+
+            if (isUpdate && id.HasValue)
+            {
+                // For update, exclude the current email with the specified ID from both tables
+                isEmailAvailable = !_dbContext.Labours.AsNoTracking().Any(l => l.Email == email && l.Id != id.Value) &&
+                                   !_dbContext.Users.AsNoTracking().Any(u => u.Email == email);
+            }
+            else
+            {
+                // For add operation or if the ID is not provided, check for duplicates without exclusion
+                isEmailAvailable = !_dbContext.Labours.AsNoTracking().Any(l => l.Email == email) &&
+                                   !_dbContext.Users.AsNoTracking().Any(u => u.Email == email);
+            }
+
+            return Json(isEmailAvailable);
+        }
 
 
     }
