@@ -105,6 +105,8 @@
                                     @Html.LabelFor(model => model.Labour.Email, new { @class = "col-form-label" })
                                     @Html.TextBoxFor(model => model.Labour.Email, new { @class = "form-control", @id = "addEmail", placeholder = "Enter Email" })
                                     @Html.ValidationMessageFor(model => model.Labour.Email, "", new { @class = "text-danger" })
+                                    <div id="duplicateEmailforAdd" class="text-danger"></div>
+
                                 </div>
                             </div>
                         </div>
@@ -202,6 +204,8 @@
                                     @Html.LabelFor(model => model.Labour.Email, new { @class = "col-form-label" })
                                     @Html.TextBoxFor(model => model.Labour.Email, new { @class = "form-control", placeholder = "Email", id = "updateLabourEmail" })
                                     @Html.ValidationMessageFor(model => model.Labour.Email, "", new { @class = "text-danger" })
+                                    <div id="duplicateEmailforUpdate" class="text-danger"></div>
+
                                 </div>
                             </div>
                         </div>
@@ -265,7 +269,37 @@
 @section scripts
 {
     <script>
+        $('#addEmail, #updateLabourEmail').on('blur', function () {
+            var email = $(this).val();
+            var isUpdateForm = $(this).attr('id') === 'updateLabourEmail';
+            var labourId = isUpdateForm ? $('#hiddenId').val() : null;
 
+            if (email !== '') {
+                $.ajax({
+                    type: 'POST',
+                    url: '/Labour/IsEmailAvailable',
+                    data: {
+                        email: email,
+                        id: labourId,
+                        isUpdate: isUpdateForm
+                    },
+                    beforeSend: function () {
+                        hideSpinner();
+                    },
+                    success: function (data) {
+                        var duplicateNameMessageElement = isUpdateForm ? '#duplicateEmailforUpdate' : '#duplicateEmailforAdd';
+
+                        if (!data) {
+                            $(duplicateNameMessageElement).html('Email Already Registered!');
+                            $('#submitForm,#updateForm').prop('disabled', true);
+                        } else {
+                            $(duplicateNameMessageElement).html('');
+                            $('#submitForm,#updateForm').prop('disabled', false);
+                        }
+                    }
+                });
+            }
+        });
         $(document).ready(function () {
 
 
@@ -462,6 +496,7 @@
             });
 
         });
+
         // This function is used when adding a shift is successful, it will only trigger when adding a shift is successful
         function handleSuccessforAdd(response) {
             $("#addLabour").modal('hide');
