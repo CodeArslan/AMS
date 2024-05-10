@@ -22,47 +22,35 @@
                         <a class="nav-link" id="payroll-basic-tab" data-bs-toggle="tab" href="#payroll" role="tab" aria-controls="payroll" aria-selected="true">Payroll</a>
                     </li>
                 </ul>
-                
-                    <div class="tab-pane fade show active"id="summaryBasic"role="tabpanel"aria-labelledby="summary-basic-tab">
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active"
+                         id="summaryBasic"
+                         role="tabpanel"
+                         aria-labelledby="summary-basic-tab">
                         <div class="row">
-
-                            <div class="alert alert-dismissible fade show alert-card alert-success mt-3" role="alert" id="successAlert" style="display:none">
-                                <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
-                                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-
-                            <div class="alert alert-dismissible fade show alert-card alert-danger mt-3" role="alert" id="errorAlert" style="display:none">
-                                <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
-                                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-
                             <div class="col-md-6">
-
-                                <div class="tab-content" id="myTabContent">
-
-                                    <div class="form-group">
-
-                                        <div class="input-group mb-3">
-                                            <span class="input-group-text" id="basic-addon-to">Employee Number:</span>
-                                            <span class="input-group-text">Cactus-</span>
-                                            <input type="text" class="form-control" id="employeeNumberSummary" aria-label="Employee Number" aria-describedby="basic-addon-to">
-                                        </div>
+                                <div class="form-group">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text" id="basic-addon-to">Employee Number:</span>
+                                        <span class="input-group-text">Cactus-</span>
+                                        <input type="text" class="form-control" id="employeeNumberSummary" aria-label="Employee Number" aria-describedby="basic-addon-to">
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-1"></div>
-                                <div class="col-md-10">
-                                    <canvas id="summaryLineChart"></canvas>
-                                </div>
-                            </div>
-                            <div id="summaryTableDiv" style="display:none"></div>
-                            <h2 id="employeeName" style="display:none"></h2>
-                            <br />
-                            <div class="separator-breadcrumb border-top"></div>
-                            <button class="btn btn-outline-primary float-end" onclick="generateSummaryPDF()" id="reportButtonSummary" disabled>Generate PDF</button>
-
                         </div>
+                        <div class="row">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10">
+                                <canvas id="summaryLineChart"></canvas>
+                            </div>
+                        </div>
+                        <div id="summaryTableDiv" style="display:none"></div>
+                        <h2 id="employeeName" style="display:none"></h2>
+                        <br />
+                        <div class="separator-breadcrumb border-top"></div>
+                        <button class="btn btn-outline-primary float-end" onclick="generateSummaryPDF()" id="reportButtonSummary" disabled>Generate PDF</button>
+
+                    </div>
 
                     <div class="tab-pane fade"
                          id="attendanceBasic"
@@ -101,7 +89,7 @@
                         <button class="btn btn-outline-primary float-end" onclick="generateAttendancePDF()" id="reportAttendanceBtn" disabled>Generate PDF</button>
                         <h2 id="employeeNameForAttendance" style="display:none"></h2>
                     </div>
-
+                   
                     <div class="tab-pane fade" id="leaveBasic" role="tabpanel" aria-labelledby="leave-basic-tab">
                         <div class="row">
                             <div class="col-md-12">
@@ -541,141 +529,125 @@
                 },
                 dataType: 'json',
                 success: function (response) {
-                    // Hide any previous error alerts
-                    $('#errorAlert').hide();
+                    var employeeName = response[0].EmployeeName || "All Employees";
+                    $("#employeeName").val(employeeName);
+                    var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-                    // Check if response contains an error
-                    if (response.error) {
-                        // Show error message
-                        $('#errorAlert').show();
-                        $('#errorMessage').text(response.error);
-                        setInterval(hideAlerts, 2000);
+                    // Extract data from the response
+                    var months = response.map(data => monthNames[data.Month - 1]);
+                    var totalSalaries = response.map(data => data.TotalSalary);
+                    var totalBonuses = response.map(data => data.TotalBonus);
+                    var totalLeaves = response.map(data => data.TotalLeaves);
+                    var averageAttendanceRates = response.map(data => data.TotalAttendanceCount);
 
-                    } else {
-                        // Proceed with processing the response data
-                        var employeeName = response[0].EmployeeName || "All Employees";
-                        $("#employeeName").val(employeeName);
-                        var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    // Create table data
+                    var tableData = [];
+                    tableData.push(['', ...months]);
+                    tableData.push(['Total Salary', ...totalSalaries]);
+                    tableData.push(['Total Bonus', ...totalBonuses]);
+                    tableData.push(['Total Leaves', ...totalLeaves]);
+                    tableData.push(['Attendance Rate', ...averageAttendanceRates]);
 
-                        // Extract data from the response
-                        var months = response.map(data => monthNames[data.Month - 1]);
-                        var totalSalaries = response.map(data => data.TotalSalary);
-                        var totalBonuses = response.map(data => data.TotalBonus);
-                        var totalLeaves = response.map(data => data.TotalLeaves);
-                        var averageAttendanceRates = response.map(data => data.TotalAttendanceCount);
+                    // Create chart using Chart.js
+                    var canvas = document.getElementById('summaryLineChart');
+                    var ctx = canvas.getContext('2d');
 
-                        // Create table data
-                        var tableData = [];
-                        tableData.push(['', ...months]);
-                        tableData.push(['Total Salary', ...totalSalaries]);
-                        tableData.push(['Total Bonus', ...totalBonuses]);
-                        tableData.push(['Total Leaves', ...totalLeaves]);
-                        tableData.push(['Attendance Rate', ...averageAttendanceRates]);
+                    // Destroy existing chart instance if it exists
+                    if (canvas.chart) {
+                        canvas.chart.destroy();
+                    }
 
-                        // Create chart using Chart.js
-                        var canvas = document.getElementById('summaryLineChart');
-                        var ctx = canvas.getContext('2d');
-
-                        // Destroy existing chart instance if it exists
-                        if (canvas.chart) {
-                            canvas.chart.destroy();
-                        }
-
-                        // Create new chart instance
-                        var summaryChart = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: months,
-                                datasets: [{
-                                    label: 'Total Salary',
-                                    data: totalSalaries,
-                                    borderColor: 'rgba(54, 162, 235, 1)',
-                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                    borderWidth: 1,
-                                    fill: false
-                                },
-                                {
-                                    label: 'Total Bonus',
-                                    data: totalBonuses,
-                                    borderColor: 'rgba(255, 99, 132, 1)',
-                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                    borderWidth: 1,
-                                    fill: false
-                                },
-                                {
-                                    label: 'Total Leaves',
-                                    data: totalLeaves,
-                                    borderColor: 'rgba(75, 192, 192, 1)',
-                                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                                    borderWidth: 1,
-                                    fill: false
-                                },
-                                {
-                                    label: 'Attendance Rate',
-                                    data: averageAttendanceRates,
-                                    borderColor: 'rgba(255, 206, 86, 1)',
-                                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                                    borderWidth: 1,
-                                    fill: false
-                                }
-                                ]
+                    // Create new chart instance
+                    var summaryChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: months,
+                            datasets: [{
+                                label: 'Total Salary',
+                                data: totalSalaries,
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderWidth: 1,
+                                fill: false
                             },
-                            options: {
-                                responsive: true,
-                                plugins: {
+                            {
+                                label: 'Total Bonus',
+                                data: totalBonuses,
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderWidth: 1,
+                                fill: false
+                            },
+                            {
+                                label: 'Total Leaves',
+                                data: totalLeaves,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderWidth: 1,
+                                fill: false
+                            },
+                            {
+                                label: 'Attendance Rate',
+                                data: averageAttendanceRates,
+                                borderColor: 'rgba(255, 206, 86, 1)',
+                                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                                borderWidth: 1,
+                                fill: false
+                            }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Summary Data for ' + employeeName,
+                                    fontSize: 16,
+                                    fontStyle: 'bold',
+                                    padding: 20
+                                },
+                                legend: {
+                                    display: true,
+                                    position: 'bottom',
+                                    labels: {
+                                        fontColor: 'black',
+                                        fontSize: 14,
+                                        fontStyle: 'normal',
+                                        padding: 10
+                                    }
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    title: {
+                                        display: false,
+                                        text: 'Month',
+                                        color: 'black',
+                                        font: {
+                                            size: 14,
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                y: {
                                     title: {
                                         display: true,
-                                        text: 'Summary Data for ' + employeeName,
-                                        fontSize: 16,
-                                        fontStyle: 'bold',
-                                        padding: 20
-                                    },
-                                    legend: {
-                                        display: true,
-                                        position: 'bottom',
-                                        labels: {
-                                            fontColor: 'black',
-                                            fontSize: 14,
-                                            fontStyle: 'normal',
-                                            padding: 10
-                                        }
-                                    },
-                                },
-                                scales: {
-                                    x: {
-                                        display: true,
-                                        title: {
-                                            display: false,
-                                            text: 'Month',
-                                            color: 'black',
-                                            font: {
-                                                size: 14,
-                                                weight: 'bold'
-                                            }
-                                        }
-                                    },
-                                    y: {
-                                        title: {
-                                            display: true,
-                                            text: 'Value'
-                                        }
+                                        text: 'Value'
                                     }
                                 }
                             }
-                        });
-                        canvas.chart = summaryChart;
 
-                        // Create table
-                        createTable(tableData);
-                    }
-                    // Enable report button
+                        }
+                    });
+                    canvas.chart = summaryChart;
+
+                    // Create table
+                    createTable(tableData);
                     $("#reportButtonSummary").prop("disabled", false);
                 },
-
                 error: function (xhr, status, error) {
-                    // Populate error message and show error alert
-                    $('#errorMessage').text(xhr.responseJSON.error);
-                    $('#errorAlert').show();
+                    console.error(error);
                 }
             });
         }
@@ -937,10 +909,8 @@
             $("#reportAttendanceBtn").prop("disabled", false);
         },
 
-        error: function (xhr, status, error) {
-            // Populate error message and show error alert
-            $('#errorMessage').text(xhr.responseJSON.error);
-            $('#errorAlert').show();
+        error: function(xhr, status, error) {
+            console.error(error);
         }
     });
 }

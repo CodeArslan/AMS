@@ -471,10 +471,9 @@ namespace AMS.Controllers
                 var jsonResult = Json(monthlyData, JsonRequestBehavior.AllowGet);
 
                 // Return JSON result
-                return Json(new { error = "Invalid Employee Number" }, JsonRequestBehavior.AllowGet);
-
+                return jsonResult;
             }
-
+            
         }
 
         public ActionResult LeavesByMonth()
