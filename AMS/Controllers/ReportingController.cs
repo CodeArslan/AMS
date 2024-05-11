@@ -155,11 +155,11 @@ namespace AMS.Controllers
         public ActionResult GetAttendanceCountByMonth(string employeeId = null)
         {
             // Check if employeeId is null or contains "cactus-"
-            if (string.IsNullOrEmpty(employeeId) || employeeId=="Cactus-")
+            if (string.IsNullOrEmpty(employeeId) || employeeId == "Cactus-")
             {
                 // Fetch all records
                 var allEmployees = _dbContext.Users.Where(e => e.isActive).ToList();
-                var allLabours = _dbContext.Labours.Where(e => e.isActive && e.shiftId!=null).ToList();
+                var allLabours = _dbContext.Users.Where(e => e.isActive && e.shiftId != null&&e.isLabour==true).ToList();
 
                 var monthlyData = new List<object>();
 
@@ -211,7 +211,7 @@ namespace AMS.Controllers
             else
             {
                 //Splitting the employeeId to get the type
-                   var employeeIdParts = employeeId.Split('-');
+                var employeeIdParts = employeeId.Split('-');
 
                 // Check if the employeeId format is valid
                 if (employeeIdParts.Length != 3)
@@ -223,10 +223,10 @@ namespace AMS.Controllers
                 var employeeType = employeeIdParts[1];
                 employeeType = employeeType.ToLower();
                 ApplicationUser employee = null;
-                Labour labour = null;
+                ApplicationUser labour = null;
                 if (employeeType == "la")
                 {
-                    labour = _dbContext.Labours.FirstOrDefault(e => e.labourNumber == employeeId && e.isActive);
+                    labour = _dbContext.Users.FirstOrDefault(e => e.employeeNumber == employeeId && e.isActive&&e.isLabour==true);
                 }
                 else if (employeeType == "em")
                 {
@@ -306,7 +306,7 @@ namespace AMS.Controllers
             return (presentCount, maxWorkingDays);
         }
 
-        private (int PresentCount, int MaxWorkingDays) GetMonthlyDataForLabour(int labourId, int month)
+        private (int PresentCount, int MaxWorkingDays) GetMonthlyDataForLabour(string labourId, int month)
         {
             // Get the number of days in the selected month
             var daysInMonth = DateTime.DaysInMonth(DateTime.Now.Year, month);
@@ -366,7 +366,8 @@ namespace AMS.Controllers
                 // Return JSON result
                 return jsonResult;
             }
-            else {
+            else
+            {
                 // Splitting the employeeId to get the type
                 var employeeIdParts = employeeId.Split('-');
 
@@ -380,10 +381,10 @@ namespace AMS.Controllers
                 var employeeType = employeeIdParts[1];
                 employeeType = employeeType.ToLower();
                 ApplicationUser employee = null;
-                Labour labour = null;
+                ApplicationUser labour = null;
                 if (employeeType == "la")
                 {
-                    labour = _dbContext.Labours.FirstOrDefault(e => e.labourNumber == employeeId && e.isActive);
+                    labour = _dbContext.Users.FirstOrDefault(e => e.employeeNumber == employeeId && e.isActive&&e.isLabour==true);
                 }
                 else if (employeeType == "em")
                 {
@@ -427,7 +428,7 @@ namespace AMS.Controllers
                     }
                     else if (labour != null)
                     {
-                        var laborShift = _dbContext.Labours.Where(l => l.Id == labour.Id).Select(l => l.Shift).FirstOrDefault();
+                        var laborShift = _dbContext.Users.Where(l => l.Id == labour.Id).Select(l => l.Shift).FirstOrDefault();
 
                         if (laborShift != null)
                         {
@@ -473,7 +474,7 @@ namespace AMS.Controllers
                 // Return JSON result
                 return jsonResult;
             }
-            
+
         }
 
         public ActionResult LeavesByMonth()
@@ -587,7 +588,7 @@ namespace AMS.Controllers
         //}
         public ActionResult GetLeaveDetailsByMonth(string employeeId)
         {
-            if (string.IsNullOrEmpty(employeeId)|| employeeId == "Cactus-")
+            if (string.IsNullOrEmpty(employeeId) || employeeId == "Cactus-")
             {
                 // Get leave details for all employees for each month
                 var monthlyData = new List<object>();
@@ -647,10 +648,10 @@ namespace AMS.Controllers
                 var employeeType = employeeIdParts[1];
                 employeeType = employeeType.ToLower();
                 ApplicationUser employee = null;
-                Labour labour = null;
+                ApplicationUser labour = null;
                 if (employeeType == "la")
                 {
-                    labour = _dbContext.Labours.FirstOrDefault(e => e.labourNumber == employeeId && e.isActive);
+                    labour = _dbContext.Users.FirstOrDefault(e => e.employeeNumber == employeeId && e.isActive && e.isLabour==true );
                 }
                 else if (employeeType == "em")
                 {
@@ -665,7 +666,7 @@ namespace AMS.Controllers
 
                 var monthlyData = new List<object>();
                 var employeesId = (employee != null) ? employee.Id : null;
-                int? labourId = (labour != null) ? labour.Id : (int?)null;
+                var labourId = (labour != null) ? labour.Id :null;
                 for (int month = 1; month <= 12; month++)
                 {
                     // Get the leave data for the employee/labour in the current month
@@ -675,11 +676,11 @@ namespace AMS.Controllers
 
                     // Get the leave data for the employee/labour in the current month
                     var leaveDataForMonth = _dbContext.receivedLeaveRequests
-                        .Where(l =>
-                            ((currentEmployeesId != null && l.employeeId == currentEmployeesId) ||
-                            (currentLabourId.HasValue && l.labourId == currentLabourId.Value))
-                            && l.Date != null && l.Date.Value.Month == currentMonth)
-                        .ToList();
+     .Where(l =>
+         ((currentEmployeesId != null && l.employeeId == currentEmployeesId) ||
+         (!string.IsNullOrEmpty(currentLabourId) && l.labourId == currentLabourId))
+         && l.Date != null && l.Date.Value.Month == currentMonth)
+     .ToList();
 
                     // Count the number of approved, rejected, and total leaves for the month
                     var approvedCount = leaveDataForMonth.Count(l => l.Decision == "Approved");
@@ -715,13 +716,13 @@ namespace AMS.Controllers
                 // Return JSON result
                 return jsonResult;
             }
-           
+
         }
 
 
         public ActionResult GetLeaveReasonCounts(string employeeId)
         {
-            if (string.IsNullOrEmpty(employeeId)||employeeId=="Cactus-")
+            if (string.IsNullOrEmpty(employeeId) || employeeId == "Cactus-")
             {
                 // Get leave reason counts for all employees
                 var leaveReasonCounts = _dbContext.receivedLeaveRequests
@@ -770,10 +771,10 @@ namespace AMS.Controllers
                 var employeeType = employeeIdParts[1];
                 employeeType = employeeType.ToLower();
                 ApplicationUser employee = null;
-                Labour labour = null;
+                ApplicationUser labour = null;
                 if (employeeType == "la")
                 {
-                    labour = _dbContext.Labours.FirstOrDefault(e => e.labourNumber == employeeId && e.isActive);
+                    labour = _dbContext.Users.FirstOrDefault(e => e.employeeNumber == employeeId && e.isActive&&e.isLabour==true);
                 }
                 else if (employeeType == "em")
                 {
@@ -788,20 +789,21 @@ namespace AMS.Controllers
 
                 // Get the leave reasons for the employee/labour along with their counts
                 var employeesId = (employee != null) ? employee.Id : null;
-                var labourId = (labour != null) ? labour.Id : (int?)null;
+                var labourId = (labour != null) ? labour.Id : null;
 
                 var leaveReasonCounts = _dbContext.receivedLeaveRequests
-                    .Where(l =>
-                        ((employeesId != null && l.employeeId == employeesId) ||
-                        (labourId.HasValue && l.labourId == labourId.Value)))
-                    .ToList() // Execute the query to retrieve all matching records
-                    .GroupBy(l => l.Reason)
-                    .Select(group => new
-                    {
-                        Reason = group.Key,
-                        Count = group.Count()
-                    })
-                    .ToList();
+     .Where(l =>
+         ((employeesId != null && l.employeeId == employeesId) ||
+         (!string.IsNullOrEmpty(labourId) && l.labourId == labourId)))
+     .ToList() // Execute the query to retrieve all matching records
+     .GroupBy(l => l.Reason)
+     .Select(group => new
+     {
+         Reason = group.Key,
+         Count = group.Count()
+     })
+     .ToList();
+
 
                 // Extract counts for specific reasons
                 var healthIssuesCount = leaveReasonCounts.FirstOrDefault(r => r.Reason == "Health Issues")?.Count ?? 0;
@@ -914,10 +916,10 @@ namespace AMS.Controllers
                 var employeeType = employeeIdParts[1];
                 employeeType = employeeType.ToLower();
                 ApplicationUser employee = null;
-                Labour labour = null;
+                ApplicationUser labour = null;
                 if (employeeType == "la")
                 {
-                    labour = _dbContext.Labours.FirstOrDefault(e => e.labourNumber == employeeId && e.isActive);
+                    labour = _dbContext.Users.FirstOrDefault(e => e.employeeNumber == employeeId && e.isActive&&e.isLabour==true);
                 }
                 else if (employeeType == "em")
                 {
@@ -932,7 +934,7 @@ namespace AMS.Controllers
 
                 var monthlyData = new List<object>();
                 var employeesId = (employee != null) ? employee.Id : null;
-                int? labourId = (labour != null) ? labour.Id : (int?)null;
+                var labourId = (labour != null) ? labour.Id : null;
                 for (int month = 1; month <= 12; month++)
                 {
                     // Get the payroll data for the employee/labour in the current month
@@ -942,11 +944,12 @@ namespace AMS.Controllers
 
                     // Get the payroll data for the employee/labour in the current month
                     var payrollDataForMonth = _dbContext.Payroll
-                        .Where(p =>
-                            ((currentEmployeesId != null && p.employeeId == currentEmployeesId) ||
-                            (currentLabourId.HasValue && p.labourId == currentLabourId.Value))
-                            && p.Month == currentMonth)
-                        .ToList();
+     .Where(p =>
+         ((currentEmployeesId != null && p.employeeId == currentEmployeesId) ||
+         (!string.IsNullOrEmpty(currentLabourId) && p.labourId == currentLabourId))
+         && p.Month == currentMonth)
+     .ToList();
+
 
                     // Calculate total salary and bonus for the month
                     decimal totalSalary = payrollDataForMonth.Sum(p => p.TotalSalary);
@@ -1049,10 +1052,10 @@ namespace AMS.Controllers
                 var employeeType = employeeIdParts[1];
                 employeeType = employeeType.ToLower();
                 ApplicationUser employee = null;
-                Labour labour = null;
+                ApplicationUser labour = null;
                 if (employeeType == "la")
                 {
-                    labour = _dbContext.Labours.FirstOrDefault(e => e.labourNumber == employeeId && e.isActive);
+                    labour = _dbContext.Users.FirstOrDefault(e => e.employeeNumber == employeeId && e.isActive&&e.isLabour==true);
                 }
                 else if (employeeType == "em")
                 {
@@ -1069,7 +1072,7 @@ namespace AMS.Controllers
                 var monthlySummary = new List<object>();
 
                 var employeesId = (employee != null) ? employee.Id : null;
-                int? labourId = (labour != null) ? labour.Id : (int?)null;
+                var labourId = (labour != null) ? labour.Id : null;
 
                 // Iterate over each month
                 for (int month = 1; month <= 12; month++)
@@ -1081,25 +1084,28 @@ namespace AMS.Controllers
 
                     // Get the payroll data for the month
                     var payrollDataForMonth = _dbContext.Payroll
-                        .Where(p =>
-                            ((currentEmployeesId != null && p.employeeId == currentEmployeesId) ||
-                            (currentLabourId.HasValue && p.labourId == currentLabourId.Value))
-                            && p.Month == currentMonth)
-                        .ToList();
+     .Where(p =>
+         ((currentEmployeesId != null && p.employeeId == currentEmployeesId) ||
+         (!string.IsNullOrEmpty(currentLabourId) && p.labourId == currentLabourId))
+         && p.Month == currentMonth)
+     .ToList();
+
 
                     // Get the leave data for the employee/labour in the current month
                     var leaveDataForMonth = _dbContext.receivedLeaveRequests
-                        .Where(l =>
-                            ((currentEmployeesId != null && l.employeeId == currentEmployeesId) ||
-                            (currentLabourId.HasValue && l.labourId == currentLabourId.Value))
-                            && l.Date != null && l.Date.Value.Month == currentMonth)
-                        .ToList();
+        .Where(l =>
+            ((currentEmployeesId != null && l.employeeId == currentEmployeesId) ||
+            (!string.IsNullOrEmpty(currentLabourId) && l.labourId == currentLabourId))
+            && l.Date != null && l.Date.Value.Month == currentMonth)
+        .ToList();
+
+
 
                     // Get the attendance data for the employee/labour in the current month (assuming there's a corresponding model)
                     var attendanceDataForMonth = _dbContext.Attendance
                         .Where(a =>
                             ((currentEmployeesId != null && a.employeeId == currentEmployeesId) ||
-                            (currentLabourId.HasValue && a.labourId == currentLabourId.Value))
+                            (!string.IsNullOrEmpty(currentLabourId) && a.labourId == currentLabourId))
                             && a.date != null && a.date.Month == currentMonth)
                         .ToList();
 

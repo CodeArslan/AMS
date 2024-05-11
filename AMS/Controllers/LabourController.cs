@@ -279,7 +279,7 @@ namespace AMS.Controllers
                 _dbContext.SaveChanges();
                 return Json(new { success = true, message = "Labour Successfully Deleted" });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log the exception or handle it appropriately
                 return Json(new { success = false, message = "An error occurred while deleting the Labour record" });

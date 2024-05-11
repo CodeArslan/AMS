@@ -304,7 +304,7 @@ namespace AMS.Controllers
                                 days = 1; // Sirf 1 count karein
                             }
                             var employee = _dbContext.Users.Where(l => l.Email == Email.From).FirstOrDefault();
-                            var labour=_dbContext.Labours.Where(l=>l.Email==Email.From).FirstOrDefault();
+                            var labour=_dbContext.Users.Where(l=>l.Email==Email.From).FirstOrDefault();
                             if(employee!=null)
                             {
                                 leaveBalance = employee.leaveBalance;
@@ -454,7 +454,7 @@ namespace AMS.Controllers
                         Message = viewModel.ReceivedLeaveRequests.Message,
                         Name = viewModel.ReceivedLeaveRequests.Name,
                         employeeId = employee != null ? employee.Id.ToString() : null,
-                        labourId = labour != null ? labour.Id : (int?)null,
+                        labourId = labour != null ? labour.Id.ToString() : null,
                         Reason = viewModel.ReceivedLeaveRequests.Reason,
                     };
 

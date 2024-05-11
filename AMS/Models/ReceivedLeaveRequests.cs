@@ -23,10 +23,10 @@ namespace AMS.Models
         public string Decision { get; set; }
         [Required]
         public string Reason { get; set; }
-        public Labour Labour { get; set; }
+        public ApplicationUser Labour { get; set; }
         [ForeignKey("Labour")]
         [Display(Name = "Labour")]
-        public int? labourId { get; set; }
+        public string labourId { get; set; }
         public ApplicationUser ApplicationUser { get; set; }
         [ForeignKey("ApplicationUser")]
         [Display(Name = "Employee")]

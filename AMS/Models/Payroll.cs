@@ -31,9 +31,9 @@ namespace AMS.Models
         [ForeignKey("ApplicationUser")]
         [Display(Name = "Employee")]
         public string employeeId { get; set; }
-        public Labour Labour { get; set; }
+        public ApplicationUser Labour { get; set; }
         [ForeignKey("Labour")]
         [Display(Name = "Labour")]
-        public int? labourId { get; set; }
+        public string labourId { get; set; }
     }
 }
