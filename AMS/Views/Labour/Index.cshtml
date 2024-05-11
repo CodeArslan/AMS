@@ -1,4 +1,4 @@
-﻿@model AMS.ViewModels.LabourViewModel
+﻿@model AMS.Models.RegisterViewModel
 @{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -10,6 +10,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        .requiredstar::after {
+            content: "*";
+            color: red;
+        }
+    </style>
 </head>
 
 <body>
@@ -75,83 +81,156 @@
                     <button class="btn btn-close" type="button" data-bs-dismiss="modal" id="modal-close" aria-label="Close"></button>
                 </div>
 
-                @using (Ajax.BeginForm("LabourDetails", "Labour", new AjaxOptions
+              
+                @using (Ajax.BeginForm("Register", "Labour", new AjaxOptions
                 {
                     HttpMethod = "POST",
+                    OnBegin= "onBeginforAdd",
                     OnSuccess = "handleSuccessforAdd",
                     OnFailure = "handleFailureforAdd",
-                }, new { id = "addLabourForm" }))
+                }, new { id = "addLabourForm", role = "form" }))
                 {
-                    @Html.AntiForgeryToken()
 
                     <div class="modal-body">
+                        @Html.AntiForgeryToken()
+                        <hr />
+                        @Html.ValidationSummary("", new { @class = "text-danger",@id="validationSummaryForAdd" })
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.FirstName, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.Labour.FirstName, new { @class = "form-control", @id = "addFirstName", placeholder = "Enter First Name" })
-                                    @Html.ValidationMessageFor(model => model.Labour.FirstName, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.FirstName, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @id = "firstName", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.LastName, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.Labour.LastName, new { @class = "form-control", @id = "addLastName", placeholder = "Enter Last Name" })
-                                    @Html.ValidationMessageFor(model => model.Labour.LastName, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.LastName, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.LastName, new { @class = "form-control", @id = "lastName", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.Email, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.Labour.Email, new { @class = "form-control", @id = "addEmail", placeholder = "Enter Email" })
-                                    @Html.ValidationMessageFor(model => model.Labour.Email, "", new { @class = "text-danger" })
-                                    <div id="duplicateEmailforAdd" class="text-danger"></div>
-
+                                    @Html.LabelFor(model => model.Email, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @id = "email", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                         </div>
-
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.CNIC, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.Labour.CNIC, new { @class = "form-control", @id = "addCNIC", placeholder = "Enter CNIC" })
-                                    @Html.ValidationMessageFor(model => model.Labour.CNIC, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.Password, new { @class = "col-form-label requiredstar" })
+                                    <div class="input-group">
+                                        @Html.TextBoxFor(model => model.Password, new { @class = "form-control", @id = "password", autocomplete = "off", type = "password" })
+                                        <span class="input-group-text" id="togglePassword">
+                                            <i class="fa fa-eye-slash"></i>
+                                        </span>
+                                    </div>
+                                    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.perHour, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.Labour.perHour, new { @class = "form-control", @id = "addPerHour", placeholder = "Enter Per Hour Wage" })
-                                    @Html.ValidationMessageFor(model => model.Labour.perHour, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.ConfirmPassword, new { @class = "col-form-label" })
+                                    <div class="input-group">
+                                        @Html.TextBoxFor(model => model.ConfirmPassword, new { @class = "form-control", @id = "confirmPassword", autocomplete = "off", type = "password" })
+                                        <span class="input-group-text" id="toggleConfirmPassword">
+                                            <i class="fa fa-eye-slash"></i>
+                                        </span>
+                                    </div>
+                                    @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.totalPay, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.Labour.totalPay, new { @class = "form-control", @id = "addTotalPay", placeholder = "Enter Total Pay" })
-                                    @Html.ValidationMessageFor(model => model.Labour.totalPay, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(m => m.DepartmentId, new { @class = "col-form-label requiredstar" })
+                                    @Html.DropDownListFor(m => m.DepartmentId, new SelectList(Model.Department, "Id", "deptName"), " --Select--", new { @class = "form-control", @id = "departmentId" })
+                                    @Html.ValidationMessageFor(m => m.DepartmentId, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                         </div>
-
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.departmentId, new { @class = "col-form-label" })
-                                    @Html.DropDownListFor(model => model.Labour.departmentId, new SelectList(Model.Department, "Id", "deptName"), " --Select--", new { @class = "form-control" })
-                                    @Html.ValidationMessageFor(model => model.Labour.departmentId, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.perHour, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.perHour, new { @class = "form-control", @id = "perHour", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.perHour, "", new { @class = "text-danger" })
                                 </div>
                             </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.CNIC, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.CNIC, new { @class = "form-control", @id = "cnic", autocomplete = "off" })
+                                    <span class="text-danger" id="cnic-validation" style="display: none;">Please enter a valid CNIC (e.g., 12345-1234567-1)</span>
+                                    @Html.ValidationMessageFor(model => model.CNIC, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Address, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.Address, new { @class = "form-control", @id = "address", autocomplete = "off", placeholder = "Building/Street/Area, City, UAE" })
+                                    @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Phone, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.Phone, new { @class = "form-control", @id = "phone", autocomplete = "off" })
+                                    <span class="text-danger" id="phone-validation" style="display: none;">Please enter a valid phone number (e.g., +971-45-1234567)</span>
+                                    @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Designation, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.Designation, new { @class = "form-control", @id = "designation", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.Designation, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                @Html.LabelFor(model => model.Role, new { @class = "col-form-label requiredstar" })
+                                @Html.DropDownListFor(model => model.Role, new SelectList(new[]
+          {
+              new SelectListItem { Text = "Select Role" },
+              new SelectListItem { Text = "Labour", Value = "Labour" }
+          }, "Value", "Text"), new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.Role, "", new { @class = "text-danger" })
+
+                            </div>
+                        </div>
+                        <div class="row">
+                           
                             <div class="col-md-4">
                                 <div class="form-check">
                                     <br />
                                     <br />
-                                    @Html.CheckBoxFor(model => model.Labour.isActive, new { @class = "form-check-input" })
-                                    @Html.LabelFor(model => model.Labour.isActive, new { @class = "form-check-label" })
-                                    @Html.ValidationMessageFor(model => model.Labour.isActive, "", new { @class = "text-danger" })
+                                    @Html.CheckBoxFor(model => model.isActive, new { @class = "form-check-input" })
+                                    @Html.LabelFor(model => model.isActive, new { @class = "form-check-label" })
+                                    @Html.ValidationMessageFor(model => model.isActive, "", new { @class = "text-danger" })
                                 </div>
                             </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Gender, new { @class = "col-form-label requiredstar" })
+                                    <div>
+                                        <label class="radio-inline">
+                                            @Html.RadioButtonFor(model => model.Gender, "Male", new { id = "genderMale" })
+                                            Male
+                                        </label>
+                                        <label class="radio-inline">
+                                            @Html.RadioButtonFor(model => model.Gender, "Female", new { id = "genderFemale" })
+                                            Female
+                                        </label>
+                                    </div>
+                                    @Html.ValidationMessageFor(model => model.Gender, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
@@ -174,89 +253,135 @@
                     <button class="btn btn-close" type="button" data-bs-dismiss="modal" id="modal-close" aria-label="Close"></button>
                 </div>
 
-                @using (Ajax.BeginForm("LabourDetails", "Labour", new AjaxOptions
+                @using (Ajax.BeginForm("Register", "Labour", new AjaxOptions
                 {
                     HttpMethod = "POST",
+                    OnBegin= "onBeginForUpdate",
                     OnSuccess = "handleSuccessforUpdate",
                     OnFailure = "handleFailureforUpdate",
                 }, new { id = "updateLabourForm" }))
                 {
-                    @Html.AntiForgeryToken()
 
                     <div class="modal-body">
+                        @Html.AntiForgeryToken()
+                        <hr />
+                        @Html.ValidationSummary("", new { @class = "text-danger", @id = "validationSummaryForUpdate" })
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.FirstName, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.Labour.FirstName, new { @class = "form-control", placeholder = "First Name", id = "updateLabourFirstName" })
-                                    @Html.ValidationMessageFor(model => model.Labour.FirstName, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.FirstName, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @id = "firstNameUpdate", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.LastName, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.Labour.LastName, new { @class = "form-control", placeholder = "Last Name", id = "updateLabourLastName" })
-                                    @Html.ValidationMessageFor(model => model.Labour.LastName, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.LastName, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.LastName, new { @class = "form-control", @id = "lastNameUpdate", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.Email, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.Labour.Email, new { @class = "form-control", placeholder = "Email", id = "updateLabourEmail" })
-                                    @Html.ValidationMessageFor(model => model.Labour.Email, "", new { @class = "text-danger" })
-                                    <div id="duplicateEmailforUpdate" class="text-danger"></div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.CNIC, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.Labour.CNIC, new { @class = "form-control", placeholder = "CNIC", id = "updateLabourCNIC" })
-                                    @Html.ValidationMessageFor(model => model.Labour.CNIC, "", new { @class = "text-danger" })
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.perHour, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.Labour.perHour, new { @class = "form-control", placeholder = "Per Hour Wage", id = "updateLabourPerHour" })
-                                    @Html.ValidationMessageFor(model => model.Labour.perHour, "", new { @class = "text-danger" })
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.totalPay, new { @class = "col-form-label" })
-                                    @Html.TextBoxFor(model => model.Labour.totalPay, new { @class = "form-control", placeholder = "Total Pay", id = "updateLabourTotalPay" })
-                                    @Html.ValidationMessageFor(model => model.Labour.totalPay, "", new { @class = "text-danger" })
+                                    @Html.LabelFor(model => model.Email, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @id = "emailUpdate", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.Labour.departmentId, new { @class = "col-form-label" })
-                                    @Html.DropDownListFor(model => model.Labour.departmentId, new SelectList(Model.Department, "Id", "deptName"), " --Select--", new { @class = "form-control", id = "updateLabourDepartmentId" })
-                                    @Html.ValidationMessageFor(model => model.Labour.departmentId, "", new { @class = "text-danger" })
-                                    @Html.HiddenFor(model => model.Labour.Id, new { @id = "updateLabourId" });
+                                    @Html.LabelFor(m => m.DepartmentId, new { @class = "col-form-label requiredstar" })
+                                    @Html.DropDownListFor(m => m.DepartmentId, new SelectList(Model.Department, "Id", "deptName"), " --Select--", new { @class = "form-control", @id = "departmentIdUpdate" })
+                                    @Html.ValidationMessageFor(m => m.DepartmentId, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                    <div class="form-check">
-                                        <br />
-                                        <br />
-                                        @Html.CheckBoxFor(model => model.Labour.isActive, new { @class = "form-check-input" })
-                                        @Html.LabelFor(model => model.Labour.isActive, new { @class = "form-check-label",@id="labouractiveCheck" })
-                                        @Html.ValidationMessageFor(model => model.Labour.isActive, "", new { @class = "text-danger" })
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.perHour, new { @class = "col-form-label" })
+                                    @Html.TextBoxFor(model => model.perHour, new { @class = "form-control", @id = "perHourUpdate", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.perHour, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.CNIC, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.CNIC, new { @class = "form-control", @id = "cnicUpdate", autocomplete = "off" })
+                                    <span class="text-danger" id="cnic-update-validation" style="display: none;">Please enter a valid CNIC (e.g., 12345-1234567-1)</span>
+                                    @Html.ValidationMessageFor(model => model.CNIC, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Address, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.Address, new { @class = "form-control", @id = "addressUpdate", autocomplete = "off", placeholder = "Building/Street/Area, City, UAE" })
+                                    @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Phone, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.Phone, new { @class = "form-control", @id = "phoneUpdate", autocomplete = "off" })
+                                    <span class="text-danger" id="phone-update-validation" style="display: none;">Please enter a valid phone number (e.g., +971-45-1234567)</span>
+                                    @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Designation, new { @class = "col-form-label requiredstar" })
+                                    @Html.TextBoxFor(model => model.Designation, new { @class = "form-control", @id = "designationUpdate", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(model => model.Designation, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+
+                            <div class="col-md-4">
+                                @Html.LabelFor(model => model.Role, new { @class = "col-form-label requiredstar" })
+                                @Html.DropDownListFor(model => model.Role, new SelectList(new[]
+          {
+              new SelectListItem { Text = "Select Role" },
+              new SelectListItem { Text = "Labour", Value = "Labour" }
+          }, "Value", "Text"), new { @class = "form-control", @id = "roleUpdate" })
+                                @Html.ValidationMessageFor(model => model.Role, "", new { @class = "text-danger" })
+
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <br />
+                                    <br />
+                                    @Html.CheckBoxFor(model => model.isActive, new { @class = "form-check-input", @id = "isActiveUpdate" })
+                                    @Html.LabelFor(model => model.isActive, new { @class = "form-check-label" })
+                                    @Html.ValidationMessageFor(model => model.isActive, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Gender, new { @class = "col-form-label requiredstar" })
+                                    <div>
+                                        <label class="radio-inline">
+                                            @Html.RadioButtonFor(model => model.Gender, "Male", new { id = "genderMaleUpdate" })
+                                            Male
+                                        </label>
+                                        <label class="radio-inline">
+                                            @Html.RadioButtonFor(model => model.Gender, "Female", new { id = "genderFemaleUpdate" })
+                                            Female
+                                        </label>
                                     </div>
+                                    @Html.ValidationMessageFor(model => model.Gender, "", new { @class = "text-danger" })
+                                </div>
                             </div>
                         </div>
-
                     </div>
 
 
                     <div class="modal-footer">
+                        @Html.HiddenFor(d => d.Id, new { @id = "hiddenId" })
                         <button class="btn btn-secondary" type="button" id="updateCancel" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="updateForm">Update</button>
                     </div>
@@ -269,39 +394,90 @@
 @section scripts
 {
     <script>
-        $('#addEmail, #updateLabourEmail').on('blur', function () {
-            var email = $(this).val();
-            var isUpdateForm = $(this).attr('id') === 'updateLabourEmail';
-            var labourId = isUpdateForm ? $('#hiddenId').val() : null;
-
-            if (email !== '') {
-                $.ajax({
-                    type: 'POST',
-                    url: '/Labour/IsEmailAvailable',
-                    data: {
-                        email: email,
-                        id: labourId,
-                        isUpdate: isUpdateForm
-                    },
-                    beforeSend: function () {
-                        hideSpinner();
-                    },
-                    success: function (data) {
-                        var duplicateNameMessageElement = isUpdateForm ? '#duplicateEmailforUpdate' : '#duplicateEmailforAdd';
-
-                        if (!data) {
-                            $(duplicateNameMessageElement).html('Email Already Registered!');
-                            $('#submitForm,#updateForm').prop('disabled', true);
-                        } else {
-                            $(duplicateNameMessageElement).html('');
-                            $('#submitForm,#updateForm').prop('disabled', false);
-                        }
-                    }
-                });
-            }
-        });
         $(document).ready(function () {
+            $('#addLabour').on('hidden.bs.modal', function () {
+                $('.text-danger').html('');
+                // Reset the form
+                $('#addLabourForm')[0].reset();
+                // Clear any error messages
+                $('#validationSummaryForAdd').html('');
+            });
+            $('#updateLabour').on('hidden.bs.modal', function () {
+                $('.text-danger').html('');
+                // Reset the form
+                $('#updateLabourForm')[0].reset();
+                // Clear any error messages
+                $('#validationSummaryForUpdate').html('');
+            });
+            $('#cnic').inputmask('99999-9999999-9');
+            $('#cnicUpdate').inputmask('99999-9999999-9');
+            $('#phone').inputmask("+971-99-9999999", { placeholder: "+971-xx-xxxxxxx" });
+            $('#phoneUpdate').inputmask("+971-99-9999999", { placeholder: "+971-xx-xxxxxxx" });
+            $('#cnic').blur(function () {
+                var cnic = $("#cnic").val().replace(/-/g, '');
+                var cnicDigitsOnly = cnic.replace(/\D/g, '');
+                if (cnicDigitsOnly.length !== 13) {
+                    $("#cnic-validation").html("Please enter a valid CNIC (e.g., 12345-1234567-1)").show();
+                } else {
+                    $("##cnic-validation").hide();
+                }
+            });
+            $('#cnicUpdate').blur(function () {
+                var cnic = $("#cnicUpdate").val().replace(/-/g, '');
+                var cnicDigitsOnly = cnic.replace(/\D/g, '');
+                if (cnicDigitsOnly.length !== 13) {
+                    $("#cnic-update-validation").html("Please enter a valid CNIC (e.g., 12345-1234567-1)").show();
+                } else {
+                    $("#cnic-update-validation").hide();
+                }
+            });
+            $('#phone').blur(function () {
+                var phone = $("#phone").val();
+                if (!phone.match(/^\+971-\d{2}-\d{7}$/)) {
+                    $("#phone-validation").html("Please enter a valid phone number (e.g., +971-45-1234567)").show();
+                } else {
+                    $("#phone-validation").hide();
+                }
+            });
+            $("#phoneUpdate").blur(function () {
+                var phone = $("#phoneUpdate").val();
 
+                if (!phone.match(/^\+971-\d{2}-\d{7}$/)) {
+                    $("#phone-update-validation").html("Please enter a valid phone number (e.g., +971-45-1234567)").show();
+                } else {
+                    $("#phone-update-validation").hide();
+                }
+            });
+            $('#togglePassword').click(function () {
+                event.preventDefault();
+                var passwordField = $('#password');
+                var passwordFieldType = passwordField.attr('type');
+                if (passwordFieldType === 'password') {
+                    passwordField.attr('type', 'text');
+                    $('#togglePassword i').removeClass('fa-eye-slash');
+                    $('#togglePassword i').addClass('fa-eye');
+                } else {
+                    passwordField.attr('type', 'password');
+                    $('#togglePassword i').removeClass('fa-eye');
+                    $('#togglePassword i').addClass('fa-eye-slash');
+                }
+            });
+
+            // Function to toggle confirm password visibility
+            $('#toggleConfirmPassword').click(function () {
+                event.preventDefault();
+                var confirmPasswordField = $('#confirmPassword');
+                var confirmPasswordFieldType = confirmPasswordField.attr('type');
+                if (confirmPasswordFieldType === 'password') {
+                    confirmPasswordField.attr('type', 'text');
+                    $('#toggleConfirmPassword i').removeClass('fa-eye-slash');
+                    $('#toggleConfirmPassword i').addClass('fa-eye');
+                } else {
+                    confirmPasswordField.attr('type', 'password');
+                    $('#toggleConfirmPassword i').removeClass('fa-eye');
+                    $('#toggleConfirmPassword i').addClass('fa-eye-slash');
+                }
+            });
 
             $("#labourTable").DataTable({
                 ajax: {
@@ -310,7 +486,7 @@
                 },
                 columns: [
                     {
-                        data: "labourNumber",
+                        data: "employeeNumber",
                         width: '11px'
                     },
                     {
@@ -391,15 +567,20 @@
                     type: 'GET',
                     dataType: 'json',
                     success: function (labour) {
-                        $('#updateLabourFirstName').val(labour.FirstName);
-                        $('#updateLabourLastName').val(labour.LastName);
-                        $('#updateLabourEmail').val(labour.Email);
-                        $('#updateLabourCNIC').val(labour.CNIC);
-                        $('#updateLabourPerHour').val(labour.perHour);
-                        $('#updateLabourTotalPay').val(labour.totalPay);
-                        $('#updateLabourDepartmentId').val(labour.departmentId);
-                        $('#updateLabourId').val(labour.Id);
-                        $('#labouractiveCheck').prop('checked', labour.isActive);
+                        $('#hiddenId').val(labour.Id);
+                        $('#firstNameUpdate').val(labour.FirstName);
+                        $('#lastNameUpdate').val(labour.LastName);
+                        $('#emailUpdate').val(labour.Email);
+                        $('#cnicUpdate').val(labour.CNIC);
+                        $('#perHourUpdate').val(labour.perHour);
+                        $('#departmentIdUpdate').val(labour.DepartmentId);
+                        $('#addressUpdate').val(labour.Address);
+                        $('#phoneUpdate').val(labour.Phone);
+                        $('#designationUpdate').val(labour.Designation);
+                        $('#roleUpdate').val(labour.Role);
+                        $('#isActiveUpdate').prop('checked', labour.isActive==true);
+                        $('#genderMaleUpdate').prop('checked', labour.Gender === 'Male');
+                        $('#genderFemaleUpdate').prop('checked', labour.Gender === 'Female');
                         $('#updateLabour').modal('show');
                     },
                     error: function (xhr, status, error) {
@@ -496,11 +677,53 @@
             });
 
         });
+        function onBeginforAdd() {
+            var isValid = true;
+
+            var cnic = document.getElementById('cnic').value.replace(/-/g, '');
+            var cnicDigitsOnly = cnic.replace(/\D/g, ''); // Remove non-digit characters
+            if (cnicDigitsOnly.length !== 13) {
+                $("#cnic-validation").html("Please enter a valid CNIC (e.g., 12345-1234567-1)").show();
+                isValid = false;
+
+            }
+            var phone = document.getElementById('phone').value;
+            if (!phone.match(/^\+971-\d{2}-\d{7}$/)) {
+                $("#phone-validation").html("Please enter a valid phone number (e.g., +971-45-1234567)").show();                isValid = false;
+
+            }
+            if (isValid == true) {
+                showSpinner();
+            }
+            return isValid;
+
+        }
+        function onBeginForUpdate() {
+
+            var isValid = true;
+            var cnic = document.getElementById('cnicUpdate').value.replace(/-/g, ''); // Remove hyphens
+            var cnicDigitsOnly = cnic.replace(/\D/g, ''); // Remove non-digit characters
+            if (cnicDigitsOnly.length !== 13) {
+                $("#cnic-update-validation").html("Please enter a valid CNIC (e.g., 12345-1234567-1)").show();
+                isValid = false;
+            }
+            var phone = document.getElementById('phoneUpdate').value;
+            if (!phone.match(/^\+971-\d{2}-\d{7}$/)) {
+                $("#phone-update-validation").html("Please enter a valid phone number (e.g., +971-45-1234567)").show();                event.preventDefault(); // Prevent form submission
+                isValid = false;
+            }
+            if (isValid == true) {
+                showSpinner();
+            }
+            return isValid;
+        }
 
         // This function is used when adding a shift is successful, it will only trigger when adding a shift is successful
         function handleSuccessforAdd(response) {
-            $("#addLabour").modal('hide');
+            hideSpinner();
             if (response.success) {
+                $("#addLabour").modal('hide');
+
                 $('#successMessage').text(response.message);
                 $('#successAlert').show();
 
@@ -524,21 +747,23 @@
                 // Hide alerts after a delay
                 setTimeout(hideAlerts, 1000);
             } else {
-                $("#addLabour").modal('hide');
-                // Show error alert
-                $('#errorMessage').text(response.message);
-                $('#errorAlert').show();
+                //$("#addLabour").modal('hide');
+                var errors = response.errors;
+                if (errors && errors.length > 0) {
+                    var errorMessage = "<ul>";
+                    errors.forEach(function (error) {
+                        errorMessage += "<li>" + error + "</li>";
+                    });
+                    errorMessage += "</ul>";
+                    $('#validationSummaryForAdd').html(errorMessage);
+                }
 
-                // Optional: Hide success alert if it's still visible
-                $('#successAlert').hide();
-
-                // Hide alerts after a delay
-                setTimeout(hideAlerts, 1000);
             }
         }
 
         // This function is used when adding a shift is failed, it will only trigger when adding a shift is failed
-        function handleFailureforAdd() {
+        function handleFailureforAdd(xhr, status, error) {
+            hideSpinner();
             $("#addLabour").modal('hide');
             // Show error alert for AJAX failure
             $('#errorMessage').text("An Error Occurred While Adding Shift");
@@ -547,11 +772,11 @@
             // Optional: Hide success alert if it's still visible
             $('#successAlert').hide();
 
-            // Hide alerts after a delay
             setTimeout(hideAlerts, 1000);
         }
         // Function to handle success when updating shift is successful
         function handleSuccessforUpdate(response) {
+            hideSpinner();
             if (response.success) {
                 // Show success alert
                 $('#successMessage').text(response.message);
@@ -566,18 +791,21 @@
                 $("#updateLabour").modal('hide');
                 setTimeout(hideAlerts, 2000);
             } else {
-                // Show error alert
-                $('#errorMessage').text(response.message);
-                $('#errorAlert').fadeIn();
-
-                // Optional: Hide success alert if it's still visible
-                $('#successAlert').hide();
-                setTimeout(hideAlerts, 2000);
+                var errors = response.errors;
+                if (errors && errors.length > 0) {
+                    var errorMessage = "<ul>";
+                    errors.forEach(function (error) {
+                        errorMessage += "<li>" + error + "</li>";
+                    });
+                    errorMessage += "</ul>";
+                    $('#validationSummaryForUpdate').html(errorMessage);
+                }
             }
         }
 
         // Function to handle failure when updating shift fails
         function handleFailureforUpdate() {
+            hideSpinner();
             // Show error alert for AJAX failure
             $('#errorMessage').text("An Error Occurred While Updating Shift");
             $('#errorAlert').fadeIn();

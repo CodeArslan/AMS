@@ -34,7 +34,7 @@ namespace AMS.Controllers
         }
         public async Task<ActionResult> GetEmployeeData()
         {
-            var empList = await _dbContext.Users
+            var empList = await _dbContext.Users.Where(e=>e.isLabour==false)
                 .Include(u => u.Department)
                 .Include(u => u.Card) 
                 .AsNoTracking()
