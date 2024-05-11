@@ -85,10 +85,10 @@ namespace AMS.Controllers
                 .ToList();
 
             // Get the list of labours excluding those for whom attendance has been marked today
-            var labourList = _dbContext.Labours
+            var labourList = _dbContext.Users
                 .Include(l => l.Shift)
                 .AsNoTracking()
-                .Where(l => l.shiftId != null && !attendedLaboursToday.Contains(l.Id))
+                .Where(l =>l.isLabour==true && l.shiftId != null && !attendedLaboursToday.Contains(l.Id))
                 .ToList();
 
             // Format the labour list
@@ -350,7 +350,7 @@ namespace AMS.Controllers
             _dbContext.SaveChanges();
         }
 
-        private void CalculatePayrollforLabour(int labourId)
+        private void CalculatePayrollforLabour(string labourId)
         {
             // Get the current month and year
             int currentMonth = DateTime.Now.Month;
@@ -366,7 +366,7 @@ namespace AMS.Controllers
             decimal totalSalary = 0;
 
             // Assuming hourly rate is $10 for simplicity
-            decimal hourlyRate = _dbContext.Labours.Where(e => e.Id == labourId).Select(e => e.perHour).FirstOrDefault();
+            decimal hourlyRate = _dbContext.Users.Where(e => e.Id == labourId).Select(e => e.perHour).FirstOrDefault();
 
             // Calculate total hours worked
             foreach (var attendance in attendances)
@@ -499,10 +499,10 @@ namespace AMS.Controllers
         {
             foreach (var attendance in attendances)
             {
-                var existingLabour = _dbContext.Labours.FirstOrDefault(l => l.Id == attendance.Id);
+                var existingLabour = _dbContext.Users.FirstOrDefault(l => l.Id == attendance.labourId);
                 if (existingLabour != null)
                 {
-                    int labourId = existingLabour.Id;
+                    string labourId = existingLabour.Id;
                     var currentDate = DateTime.Now.Date;
                     var existingAttendance = _dbContext.Attendance
                        .FirstOrDefault(a => a.labourId == labourId && DbFunctions.TruncateTime(a.date) == attendance.date);
@@ -578,7 +578,7 @@ namespace AMS.Controllers
         {
             // Use the provided date or default to current date if not provided
             var selectedDate = date ?? DateTime.Now.Date;
-            var allLabours = _dbContext.Labours.Where(l=>l.shiftId!=null&&l.isActive==true).ToList(); // Assuming you have a Labour table in your database
+            var allLabours = _dbContext.Users.Where(l=>l.shiftId!=null&&l.isActive==true&&l.isLabour==true).ToList(); // Assuming you have a Labour table in your database
             var presentLabours = _dbContext.Attendance
                 .Include(a => a.Labour)
                 .Where(a => a.date == selectedDate && a.labourId != null && a.status == "present")

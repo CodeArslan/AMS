@@ -14,10 +14,10 @@ namespace AMS.Models
         public DateTime date { get; set; }
         public TimeSpan timeIn { get; set; }
         public TimeSpan timeOut { get; set; }
-        public Labour Labour { get; set; }
+        public ApplicationUser Labour { get; set; }
         [ForeignKey("Labour")]
         [Display(Name = "Labour")]
-        public int? labourId { get; set; }
+        public string labourId { get; set; }
         public ApplicationUser ApplicationUser { get; set; }
         [ForeignKey("ApplicationUser")]
         [Display(Name = "Employee")]

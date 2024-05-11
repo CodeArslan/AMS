@@ -432,7 +432,7 @@
                             // Clear any existing error message for timeIn input field
                             $('#timeInErrorMessage_' + id).text('').hide();
                             // Add the data to the array if no error occurred
-                            dataToUpload.push({ id: id, timeIn: timeIn, timeOut: timeOut, date: selectedDate });
+                            dataToUpload.push({ labourId: id, timeIn: timeIn, timeOut: timeOut, date: selectedDate });
                         }
                     } else {
                         // Clear any existing error message for rows with status 'Absent'
