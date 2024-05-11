@@ -42,7 +42,7 @@ namespace AMS.Models
         public Card Card { get; set; }
         [ForeignKey("Card")]
         [Display(Name = "Card Code:")]
-        public int CardId { get; set; }
+        public int? CardId { get; set; }
 
         public bool isActive { get; set; }
         public string Gender { get; set; }

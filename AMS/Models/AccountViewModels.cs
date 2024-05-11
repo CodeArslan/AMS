@@ -109,7 +109,7 @@ namespace AMS.Models
         public List<Card> Card { get; set; }
         [ForeignKey("Card")]
         [Display(Name = "Card Code:")]
-        public int CardId { get; set; }
+        public int? CardId { get; set; }
 
         public bool isActive { get; set; }
         public int leaveBalance { get; set; }   
@@ -121,7 +121,7 @@ namespace AMS.Models
         public string employeeNumber { get; set; }
         public bool isPasswordChanged { get; set; }
         public bool? isLabour { get; set; }
-        public Shift Shift { get; set; }
+        public List<Shift> Shift { get; set; }
         [ForeignKey("Shift")]
         [Display(Name = "Shift")]
         public int? shiftId { get; set; }

@@ -184,6 +184,7 @@ namespace AMS.Controllers
                     viewModel.Gender = existingUser.Gender;
                     viewModel.isActive=existingUser.isActive;
                     viewModel.CardId= existingUser.CardId;
+                    viewModel.Role = existingUser.Role;
                     // Existing user ka card add karen
                     var existingCard = _dbContext.Cards.FirstOrDefault(c => c.Id == existingUser.CardId);
                     if (existingCard != null)
@@ -205,6 +206,7 @@ namespace AMS.Controllers
             // Retrieve the highest employee number from the database
             var highestEmployeeNumber = _dbContext.Users
                 .Select(u => u.employeeNumber)
+                .Where(en => en.StartsWith("Cactus-EM-"))
                 .OrderByDescending(en => en)
                 .FirstOrDefault();
 
@@ -236,7 +238,7 @@ namespace AMS.Controllers
                     if (existingUser != null)
                     {
                         // Update user properties
-                        existingUser.UserName = model.Email;
+                        existingUser.UserName = model.FirstName+existingUser.employeeNumber.Replace("Cactus-EM-", "");
                         existingUser.Email = model.Email;
                         existingUser.CNIC = model.CNIC;
                         existingUser.DepartmentId = model.DepartmentId;
@@ -293,7 +295,7 @@ namespace AMS.Controllers
                     // Now assign this newEmployeeNumber to the employee being registered
                     var user = new ApplicationUser
                     {
-                        UserName = model.Email,
+                        UserName = model.FirstName+uniqueNumber,
                         Email = model.Email,
                         CNIC = model.CNIC,
                         DepartmentId = model.DepartmentId,
@@ -308,18 +310,20 @@ namespace AMS.Controllers
                         Designation = model.Designation,
                         Gender = model.Gender,
                         Role = model.Role,
+                        isLabour=false,
                         employeeNumber = newEmployeeNumber // Assign the new employee number here
                     };
                     var result = await UserManager.CreateAsync(user, model.Password);
                     if (result.Succeeded)
                     {
                         await UserManager.AddToRoleAsync(user.Id, model.Role);
-                        //var roleStore = new RoleStore<IdentityRole>(new ApplicationDbContext());
-                        //var roleManager=new RoleManager<IdentityRole>(roleStore);
+                        var roleStore = new RoleStore<IdentityRole>(new ApplicationDbContext());
+                        var roleManager = new RoleManager<IdentityRole>(roleStore);
                         //await roleManager.CreateAsync(new IdentityRole("Admin"));
                         //await roleManager.CreateAsync(new IdentityRole("Employee"));
                         //await roleManager.CreateAsync(new IdentityRole("HR"));
-                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                        //await roleManager.CreateAsync(new IdentityRole("Labour"));
+                        //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                         TempData["SuccessMessage"] = "Registration successful.";
                         return RedirectToAction("Register", "Account");
                     }
