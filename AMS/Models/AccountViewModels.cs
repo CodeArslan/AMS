@@ -120,6 +120,11 @@ namespace AMS.Models
         [Required]
         public string employeeNumber { get; set; }
         public bool isPasswordChanged { get; set; }
+        public bool? isLabour { get; set; }
+        public Shift Shift { get; set; }
+        [ForeignKey("Shift")]
+        [Display(Name = "Shift")]
+        public int? shiftId { get; set; }
 
     }
 

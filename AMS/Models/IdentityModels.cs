@@ -50,6 +50,11 @@ namespace AMS.Models
         public string Role { get; set; }
         public string employeeNumber { get; set; }
         public bool isPasswordChanged { get; set; }
+        public bool? isLabour { get; set; }
+        public Shift Shift { get; set; }
+        [ForeignKey("Shift")]
+        [Display(Name = "Shift")]
+        public int? shiftId { get; set; }
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
             

@@ -150,13 +150,11 @@ namespace AMS.Controllers
         }
         public ActionResult GetLabourList()
         {
-            var labourList = _dbContext.Labours
-                               .Where(a => a.shiftId == null)
-                               .Select(a => new {
-                                   FullName = a.FirstName + " " + a.LastName,
-                                   Id=a.Id
-                               })
-                               .ToList();
+           
+            var labourList=_dbContext.Users.Where(l=>l.isLabour==true && l.isActive==true && l.shiftId==null).Select(a => new {
+                FullName = a.FirstName + " " + a.LastName,
+                Id = a.Id
+            }).ToList();
             return Json(labourList, JsonRequestBehavior.AllowGet);
         }
         public ActionResult GetTimeValues(int shiftId)
@@ -169,7 +167,7 @@ namespace AMS.Controllers
         }
 
         [HttpPost]
-        public ActionResult AssignShiftToLabours(List<int> assignedLabourIds, int shiftId)
+        public ActionResult AssignShiftToLabours(List<string> assignedLabourIds, int shiftId)
         {
             try
             {
@@ -184,7 +182,7 @@ namespace AMS.Controllers
                 // Assign shift to labours
                 foreach (var labourId in assignedLabourIds)
                 {
-                    var labourInDb = _dbContext.Labours.SingleOrDefault(l => l.Id == labourId);
+                    var labourInDb = _dbContext.Users.SingleOrDefault(l => l.Id == labourId);
 
                     if (labourInDb != null)
                     {
@@ -207,7 +205,7 @@ namespace AMS.Controllers
         {
             try
             {
-                var assignedShiftData = await _dbContext.Labours
+                var assignedShiftData = await _dbContext.Users
                     .Where(l => !shiftId.HasValue || l.shiftId == shiftId)
                     .Join(_dbContext.Shifts,
                         labour => labour.shiftId,
@@ -234,13 +232,13 @@ namespace AMS.Controllers
         }
 
 
-        public ActionResult withdrawLabourFromShift(int[] ids)
+        public ActionResult withdrawLabourFromShift(string[] ids)
         {
             try
             {
-                foreach (int id in ids)
+                foreach (string id in ids)
                 {
-                    var labourInDb = _dbContext.Labours.SingleOrDefault(l => l.Id == id);
+                    var labourInDb = _dbContext.Users.SingleOrDefault(l => l.Id == id);
 
                     if (labourInDb != null)
                     {
