@@ -607,7 +607,7 @@ namespace AMS.Controllers
         {
             // Use the provided date or default to current date if not provided
             var selectedDate = date ?? DateTime.Now.Date;
-            var allEmployees = _dbContext.Users.Where(e=>e.isActive == true).ToList(); 
+            var allEmployees = _dbContext.Users.Where(e=>e.isActive == true&&e.isLabour==false).ToList(); 
             var presentEmployees = _dbContext.Attendance
                 .Include(a => a.ApplicationUser)
                 .Where(a => a.date == selectedDate && a.employeeId != null && a.status == "Present")

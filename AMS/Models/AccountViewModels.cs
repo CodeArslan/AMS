@@ -84,6 +84,7 @@ namespace AMS.Models
         public string Phone { get; set; }
         [Required]
         [Display(Name = "Per Hour Wage")]
+        [Range(1, int.MaxValue, ErrorMessage = "The {0} must be greater than 0.")]
         public int perHour { get; set; }
         public int totalPay { get; set; }
         public List<Department> Department { get; set; }

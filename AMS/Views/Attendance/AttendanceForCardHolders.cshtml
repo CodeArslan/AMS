@@ -34,7 +34,7 @@
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="basic-addon-to">Employee Number:</span>
                             <span class="input-group-text">Cactus-</span>
-                            <input type="text" class="form-control" id="cardCode" aria-label="Employee Number" aria-describedby="basic-addon-to">
+                            <input type="text" class="form-control" id="cardCode" autocomplete="off" aria-label="Employee Number" aria-describedby="basic-addon-to">
                         </div>
                     </div>
                 </div>
@@ -383,8 +383,18 @@
             //}
             function fetchEmployeeByCard() {
                 var employeeNumber = $("#cardCode").val();
+                if (!employeeNumber.trim()) {
+                    return;
+                }
                 employeeNumber = "Cactus-" + employeeNumber;
-
+                var regex = /^Cactus-EM-\d{4}$/i;
+                if (!regex.test(employeeNumber)) {
+                    table.clear().draw();
+                    $('#errorAlert').show();
+                    $('#errorMessage').text('Employee number must follow the format Cactus-EM-XXXX.');
+                    setInterval(hideAlerts, 2000);
+                    return;
+                }
                 $.ajax({
                     url: '/Attendance/GetEmployeeByCard',
                     type: 'GET',
@@ -415,9 +425,9 @@
                     }
                 });
             }
-
+            var table;
             function initializeDataTable(data) {
-                var table = $('#cardAttendance').DataTable({
+                 table = $('#cardAttendance').DataTable({
                     "destroy": true,
                     "data": data,
                     "columns": [

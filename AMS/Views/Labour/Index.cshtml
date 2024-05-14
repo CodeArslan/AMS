@@ -58,7 +58,6 @@
                                     <th scope="col">Email</th>
                                     <th scope="col">CNIC</th>
                                     <th scope="col">Per Hour Wage</th>
-                                    <th scope="col">Total Pay</th>
                                     <th scope="col">Department</th>
                                     <th scope="col">isActive</th>
                                     <th scope="col">Action</th>
@@ -396,18 +395,19 @@
     <script>
         $(document).ready(function () {
             $('#addLabour').on('hidden.bs.modal', function () {
-                $('.text-danger').html('');
+                $('#addLabour .text-danger').html('');
                 // Reset the form
                 $('#addLabourForm')[0].reset();
                 // Clear any error messages
                 $('#validationSummaryForAdd').html('');
             });
             $('#updateLabour').on('hidden.bs.modal', function () {
-                $('.text-danger').html('');
+                $('#updateLabour .text-danger').html('');
                 // Reset the form
                 $('#updateLabourForm')[0].reset();
                 // Clear any error messages
                 $('#validationSummaryForUpdate').html('');
+                
             });
             $('#cnic').inputmask('99999-9999999-9');
             $('#cnicUpdate').inputmask('99999-9999999-9');
@@ -419,7 +419,7 @@
                 if (cnicDigitsOnly.length !== 13) {
                     $("#cnic-validation").html("Please enter a valid CNIC (e.g., 12345-1234567-1)").show();
                 } else {
-                    $("##cnic-validation").hide();
+                    $("#cnic-validation").hide();
                 }
             });
             $('#cnicUpdate').blur(function () {
@@ -505,9 +505,6 @@
                     },
                     {
                         data: "perHour",
-                    },
-                    {
-                        data: "totalPay",
                     },
                     {
                         data: "Department.deptName", // Assuming Department is an object with a property you want to display
@@ -663,18 +660,6 @@
                     }
                 });
             });
-            $("#updateCancel").click(function () {
-                toastr.warning(
-                    "Updation Cancelled",
-                    {
-                        "class": "btn w-100 btn-outline-danger mb-2",
-                        "id": "toast-danger",
-                        progressBar: true,
-                        closeButton: true,
-                        timeOut: 1000
-                    }
-                );
-            });
 
         });
         function onBeginforAdd() {
@@ -687,9 +672,17 @@
                 isValid = false;
 
             }
+            else {
+                $("#cnic-validation").html("").show();
+
+            }
             var phone = document.getElementById('phone').value;
             if (!phone.match(/^\+971-\d{2}-\d{7}$/)) {
-                $("#phone-validation").html("Please enter a valid phone number (e.g., +971-45-1234567)").show();                isValid = false;
+                $("#phone-validation").html("Please enter a valid phone number (e.g., +971-45-1234567)").show();
+                isValid = false;
+            }
+            else {
+                $("#phone-validation").html("").show();
 
             }
             if (isValid == true) {
