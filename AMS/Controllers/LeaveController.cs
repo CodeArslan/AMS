@@ -61,15 +61,10 @@ namespace AMS.Controllers
         public JsonResult GetLeaveBalance(string Email)
         {
             var user = _dbContext.Users.Where(u => u.Email == Email).FirstOrDefault();
-            var labour=_dbContext.Labours.Where(l=>l.Email == Email).FirstOrDefault();
             if (user != null)
             {
                 // Employee found, return their data
                 return Json(new { success = true, user=user },JsonRequestBehavior.AllowGet);
-            }
-            else if (labour!=null)
-            {
-                return Json(new { success = true, user = labour }, JsonRequestBehavior.AllowGet);
             }
             else
             {
@@ -223,7 +218,8 @@ namespace AMS.Controllers
             using (var client = new ImapClient())
             {
                 client.Connect("imap.gmail.com", 993, SecureSocketOptions.SslOnConnect);
-
+                var emailClient = ConfigurationManager.AppSettings["Email"].ToString();
+                var passClient = ConfigurationManager.AppSettings["Password"].ToString();
                 client.Authenticate(ConfigurationManager.AppSettings["Email"].ToString(), ConfigurationManager.AppSettings["Password"].ToString());
 
                 var inbox = client.Inbox;
@@ -244,17 +240,10 @@ namespace AMS.Controllers
                         if (emailData.Body != null) 
                         {
                             var isEmailRegisteredInUsers = _dbContext.Users.FirstOrDefault(c => c.Email == emailData.Sender);
-                            var isEmailRegisteredInLabours = _dbContext.Labours.FirstOrDefault(c => c.Email == emailData.Sender);
-                            if (isEmailRegisteredInUsers != null || isEmailRegisteredInLabours != null)
-                            {
                                 string name = "";
                                 if (isEmailRegisteredInUsers != null)
                                 {
                                     name = isEmailRegisteredInUsers.FirstName + " " + isEmailRegisteredInUsers.LastName;
-                                }
-                                else if (isEmailRegisteredInLabours != null)
-                                {
-                                    name = isEmailRegisteredInLabours.FirstName + " " + isEmailRegisteredInLabours.LastName;
                                 }
                                 var ReceivedEmailRequests = new ReceivedLeaveRequests
                                 {
@@ -271,7 +260,7 @@ namespace AMS.Controllers
 
                                 // Mark the email as seen
                                 inbox.AddFlags(uid, MessageFlags.Seen, true);
-                            }
+                            
                         }
 
 
@@ -410,14 +399,9 @@ namespace AMS.Controllers
             if(DateTime.Today.Day==1)
             {
                 var users =  _dbContext.Users.ToList();
-                var labours=_dbContext.Labours.ToList();
                 foreach (var user in users)
                 {
                     user.leaveBalance += 2;
-                }
-                foreach(var labour in labours)
-                {
-                    labour.leaveBalance += 2;
                 }
                 _dbContext.SaveChanges();
             }
@@ -443,7 +427,7 @@ namespace AMS.Controllers
             try
             {
                 var employee = _dbContext.Users.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From);
-                var labour = _dbContext.Labours.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From);
+                var labour = _dbContext.Users.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From);
 
                 if (employee != null || labour != null)
                 {

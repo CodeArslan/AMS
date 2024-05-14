@@ -127,7 +127,7 @@ namespace AMS.Controllers
             }
 
             // Find all Labour records associated with this Shift
-            var laboursWithShiftId = _dbContext.Labours.Where(l => l.shiftId == id);
+            var laboursWithShiftId = _dbContext.Users.Where(l => l.shiftId == id&&l.isLabour==true);
 
             // Remove the ShiftId association from Labour records
             foreach (var labour in laboursWithShiftId)
