@@ -218,8 +218,6 @@ namespace AMS.Controllers
             using (var client = new ImapClient())
             {
                 client.Connect("imap.gmail.com", 993, SecureSocketOptions.SslOnConnect);
-                var emailClient = ConfigurationManager.AppSettings["Email"].ToString();
-                var passClient = ConfigurationManager.AppSettings["Password"].ToString();
                 client.Authenticate(ConfigurationManager.AppSettings["Email"].ToString(), ConfigurationManager.AppSettings["Password"].ToString());
 
                 var inbox = client.Inbox;
@@ -278,8 +276,8 @@ namespace AMS.Controllers
                 {
                     if (response.Id == 0)
                     {
-                        var fromDate = response.From;
-                        var toDate = response.To;
+                        var fromDate = response.FromDate;
+                        var toDate = response.ToDate;
 
                        
                         var message = response.Message;
@@ -292,8 +290,8 @@ namespace AMS.Controllers
                             {
                                 days = 1; // Sirf 1 count karein
                             }
-                            var employee = _dbContext.Users.Where(l => l.Email == Email.From).FirstOrDefault();
-                            var labour=_dbContext.Users.Where(l=>l.Email==Email.From).FirstOrDefault();
+                            var employee = _dbContext.Users.Where(l => l.Email == Email.From &&l.isLabour==false).FirstOrDefault();
+                            var labour=_dbContext.Users.Where(l=>l.Email==Email.From&&l.isLabour==true).FirstOrDefault();
                             if(employee!=null)
                             {
                                 leaveBalance = employee.leaveBalance;
@@ -448,8 +446,8 @@ namespace AMS.Controllers
 
                     var leaveResponse = new LeaveResponse()
                     {
-                        To = viewModel.LeaveResponse.To,
-                        From = viewModel.LeaveResponse.From,
+                        ToDate = viewModel.LeaveResponse.ToDate,
+                        FromDate = viewModel.LeaveResponse.FromDate,
                         Decision = "Approved",
                         rlrId = fkrlr,
                     };

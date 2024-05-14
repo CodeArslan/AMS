@@ -15,10 +15,10 @@ namespace AMS.Models
         public string Message {  get; set; }
         [DisplayName("From Date")]
 
-        public DateTime? From { get; set; }
+        public DateTime? FromDate { get; set; }
         [DisplayName("To Date")]
 
-        public DateTime? To { get; set; }
+        public DateTime? ToDate { get; set; }
         public ReceivedLeaveRequests ReceivedLeaveRequests { get; set; }
         [ForeignKey("ReceivedLeaveRequests")]
         public int rlrId { get; set; }

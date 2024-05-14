@@ -12,7 +12,6 @@ namespace AMS.Controllers
 {
     public class EmailsController : Controller
     {
-        private object _dbContext;
 
         // GET: Emails
         public ActionResult Index()
@@ -60,7 +59,7 @@ namespace AMS.Controllers
 
                     return Json(new { success = true, message = "Email sent successfully." });
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return Json(new { success = false, message = "Error sending email" });
                 }

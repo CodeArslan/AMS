@@ -155,18 +155,18 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                @Html.LabelFor(model => model.From, new { @class = "col-form-label" })
-                                @Html.TextBoxFor(model => model.From, new { @class = "form-control", @id = "fromDate", @type = "date", autocomplete = "off" })
-                                @Html.ValidationMessageFor(model => model.From, "", new { @class = "text-danger" })
+                                @Html.LabelFor(model => model.FromDate, new { @class = "col-form-label" })
+                                @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control", @id = "fromDate", @type = "date", autocomplete = "off" })
+                                @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger", @id = "fromDateError" })
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                @Html.LabelFor(model => model.To, new { @class = "col-form-label" })
-                                @Html.TextBoxFor(model => model.To, new { @class = "form-control", @id = "toDate", @type = "date", autocomplete = "off" })
-                                @Html.ValidationMessageFor(model => model.To, "", new { @class = "text-danger" })
+                                @Html.LabelFor(model => model.ToDate, new { @class = "col-form-label" })
+                                @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control", @id = "toDate", @type = "date", autocomplete = "off" })
+                                @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger",@id="toDateError" })
                             </div>
                         </div>
                     </div>
@@ -375,21 +375,45 @@
 
         });
         function onBegin() {
-            debugger;
-            var fromDate = new Date($('#fromDate').val());
-            var toDate = new Date($('#toDate').val());
+            var isValid = true;
+            var fromDate = $('#fromDate').val();
+            var toDate = $('#toDate').val();
 
-            if (toDate < fromDate) {
+            // Check if fromDate is empty
+            if (!fromDate && !toDate) {
+                $('#fromDateError').text('From date is required.');
+                isValid = false;
+            } else {
+                $('#fromDateError').text(''); // Clear error message
+            }
+
+            // Check if toDate is empty
+            if (!toDate) {
+                $('#toDateError').text('To date is required.');
+                isValid = false;
+            } else {
+                $('#toDateError').text(''); 
+            }
+
+            // Check if toDate is earlier than fromDate
+            var fromDateObj = new Date(fromDate);
+            var toDateObj = new Date(toDate);
+            if (toDateObj < fromDateObj) {
                 $('#errorAlertforResponseModal').show();
                 $('#errorMessageforResponseModal').text('To date cannot be earlier than From date.');
-                return false; // Prevent form submission
+                isValid = false;
+
             } else {
-                $('#errorAlertforResponseModal').hide();
+                $('#errorAlertforResponseModal').hide(); // Hide error alert
+            }
+            if (isValid == true) {
                 showSpinner();
 
-                return true; // Allow form submission
             }
+            // If all validations pass, allow form submission
+            return isValid;
         }
+
         
         function handleSuccessforLeave(data) {
             $("#responseModal").modal('hide');

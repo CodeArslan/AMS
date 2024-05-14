@@ -223,7 +223,7 @@ namespace AMS.Controllers
                 // Return the JSON result
                 return Json(assignedShiftData, JsonRequestBehavior.AllowGet);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log the exception for debugging purposes
                 // logger.LogError(ex, "Error occurred while fetching assigned shift data.");
@@ -255,7 +255,7 @@ namespace AMS.Controllers
 
                 return Json(new { success = true });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log the exception for debugging purposes
                 // logger.LogError(ex, "Error occurred while withdrawing labour from shift.");
