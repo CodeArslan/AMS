@@ -424,8 +424,8 @@ namespace AMS.Controllers
         {
             try
             {
-                var employee = _dbContext.Users.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From);
-                var labour = _dbContext.Users.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From);
+                var employee = _dbContext.Users.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From&&u.isLabour==false);
+                var labour = _dbContext.Users.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From && u.isLabour==true);
 
                 if (employee != null || labour != null)
                 {

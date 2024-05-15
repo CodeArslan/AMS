@@ -3,7 +3,13 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
+<style>
+    .disabled-input {
+        pointer-events: none;
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,17 +107,30 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         @Html.LabelFor(model => model.ReceivedLeaveRequests.Name, new { @class = "col-form-label" })
-                                        @Html.TextBoxFor(model => model.ReceivedLeaveRequests.Name, new { @class = "form-control disabled", @id = "EmployeeName", autocomplete = "off" })
+                                        <input type="text" class="form-control" disabled id="EmployeeName" autocomplete="off"/>
                                         @Html.ValidationMessageFor(model => model.ReceivedLeaveRequests.Name, "", new { @class = "text-danger" })
+                                        @Html.HiddenFor(model => model.ReceivedLeaveRequests.Name, new { @id = "HiddenEmployeeName" })
                                     </div>
 
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        @Html.LabelFor(model => model.ReceivedLeaveRequests.Message, new { @class = "col-form-label" })
-                                        @Html.TextBoxFor(model => model.ReceivedLeaveRequests.Message, new { @class = "form-control", @id = "leaveReason", autocomplete = "off" })
-                                        @Html.ValidationMessageFor(model => model.ReceivedLeaveRequests.Message, "", new { @class = "text-danger", @id = "errorForMessage" })
-
+                                        @Html.LabelFor(model => model.ReceivedLeaveRequests.Reason, new { @class = "col-form-label" })
+                                        @Html.DropDownListFor(model => model.ReceivedLeaveRequests.Reason, new SelectList(
+                                            new List<Object>
+                                            {
+                                                new { value = "", text = "--Select--" },
+                                                new { value = "Health Issues", text = "Health Issues" },
+                                                new { value = "Family Responsibilities", text = "Family Responsibilities" },
+                                                new { value = "Vacation", text = "Vacation" },
+                                                new { value = "Legal Obligations", text = "Legal Obligations" },
+                                                new { value = "Emergency Situations", text = "Emergency Situations" },
+                                                new { value = "Other", text = "Other" }
+                                            },
+                                            "value",
+                                            "text"
+                                        ), new { @class = "form-control", @id = "leaveReason", autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.ReceivedLeaveRequests.Reason, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
                             </div>
@@ -119,17 +138,17 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        @Html.LabelFor(model => model.LeaveResponse.From, new { @class = "col-form-label" })
-                                        @Html.TextBoxFor(model => model.LeaveResponse.From, "{0:yyyy-MM-dd}", new { @class = "form-control", @id = "DateFrom", @type = "date", autocomplete = "off" })
-                                        @Html.ValidationMessageFor(model => model.LeaveResponse.From, "", new { @class = "text-danger", @id = "FromDate" })
+                                        @Html.LabelFor(model => model.LeaveResponse.FromDate, new { @class = "col-form-label" })
+                                        @Html.TextBoxFor(model => model.LeaveResponse.FromDate, "{0:yyyy-MM-dd}", new { @class = "form-control", @id = "DateFrom", @type = "date", autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.LeaveResponse.FromDate, "", new { @class = "text-danger", @id = "FromDate" })
                                     </div>
 
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        @Html.LabelFor(model => model.LeaveResponse.To, new { @class = "col-form-label" })
-                                        @Html.TextBoxFor(model => model.LeaveResponse.To, "{0:yyyy-MM-dd}", new { @class = "form-control", @id = "DateTo", @type = "date", autocomplete = "off" })
-                                        @Html.ValidationMessageFor(model => model.LeaveResponse.To, "", new { @class = "text-danger", @id = "ToDate" })
+                                        @Html.LabelFor(model => model.LeaveResponse.ToDate, new { @class = "col-form-label" })
+                                        @Html.TextBoxFor(model => model.LeaveResponse.ToDate, "{0:yyyy-MM-dd}", new { @class = "form-control", @id = "DateTo", @type = "date", autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.LeaveResponse.ToDate, "", new { @class = "text-danger", @id = "ToDate" })
                                     </div>
 
                                 </div>
@@ -196,6 +215,7 @@
 {
     <script>
         function validateForm() {
+            debugger;
             //showSpinner();
             var message = $("#leaveReason").val();
             var email = $("#EmployeeEmail").val();
@@ -499,6 +519,7 @@
                 if (response.success)
                 {
                     $("#EmployeeName").val(response.user.FirstName + " " + response.user.LastName);
+                    $("#HiddenEmployeeName").val(response.user.FirstName + " " + response.user.LastName);
                 }
                 else
                 {
