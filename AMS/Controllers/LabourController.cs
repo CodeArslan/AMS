@@ -117,7 +117,7 @@ namespace AMS.Controllers
                     var existingUser = await UserManager.FindByIdAsync(model.Id);
                     if (existingUser != null)
                     {
-                        existingUser.Email = model.FirstName+existingUser.employeeNumber.Replace("Cactus-LA-", "");
+                        existingUser.UserName = model.FirstName+existingUser.employeeNumber.Replace("Cactus-LA-", "");
                         existingUser.Email = model.Email;
                         existingUser.CNIC = model.CNIC;
                         existingUser.DepartmentId = model.DepartmentId;
