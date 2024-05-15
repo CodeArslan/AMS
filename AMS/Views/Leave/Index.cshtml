@@ -189,9 +189,11 @@
                     <table class="table table-hover table-bordered table-striped" id="LeaveTable">
                         <thead class="bg-gray-300">
                             <tr>
-                                <th scope="col">#</th>
+                                <th scope="col">Employee Number</th>
                                 <th scope="col">Employee Name</th>
                                 <th scope="col">Date</th>
+                                <th scope="col">From Date</th>
+                                <th scope="col">To Date</th>
                                 <th scope="col">Reason</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Read</th>
@@ -323,57 +325,101 @@
                 },
                 columns: [
                     {
-                        data: "Id",
-                        orderable: true, // Enable sorting for the first column
-                        searchable: true
+                        data: function (row) {
+                            if (row.ReceivedLeaveRequests.ApplicationUser) {
+                                return row.ReceivedLeaveRequests.ApplicationUser.employeeNumber;
+                            } else if (row.ReceivedLeaveRequests.Labour) {
+                                return row.ReceivedLeaveRequests.Labour.employeeNumber;
+                            } else {
+                                return "";
+                            }
+                        },
+                        orderable: true,
+                        searchable: true,
+                        width: "80px"
                     },
                     {
-                        data: "Name",
-                        orderable: true, // Enable sorting for the second column
+                        data: function (row) {
+                            if (row.ReceivedLeaveRequests.ApplicationUser) {
+                                return row.ReceivedLeaveRequests.ApplicationUser.FirstName + " " + row.ReceivedLeaveRequests.ApplicationUser.LastName;
+                            } else if (row.ReceivedLeaveRequests.Labour) {
+                                return row.ReceivedLeaveRequests.Labour.FirstName + " " + row.ReceivedLeaveRequests.Labour.LastName;
+                            } else {
+                                return "";
+                            }
+                        },
+                        orderable: true,
                         searchable: true
                     },
+
                     {
-                        data: "Date",
-                        "render": function (data, type, row) {
+                        data: "ReceivedLeaveRequests.Date",
+                        render: function (data, type, row) {
                             if (data) {
                                 // Parse the date using Moment.js
-                                var parsedDate = moment(parseInt(data.substr(6)));
+                                var parsedDate = moment(data);
                                 // Format the date as "20 Mar, 2024"
                                 return parsedDate.format("DD MMM, YYYY");
                             } else {
                                 return ""; // Return empty string if data is null or empty
                             }
-                        }
+                        },
+                        width: "50px"
                     },
                     {
-                        data: "Reason",
-                        orderable: true, // Enable sorting for the second column
+                        data: "FromDate",
+                        render: function (data, type, row) {
+                            if (data) {
+                                // Parse the date using Moment.js
+                                var parsedDate = moment(data);
+                                // Format the date as "20 Mar, 2024"
+                                return parsedDate.format("DD MMM, YYYY");
+                            } else {
+                                return ""; // Return empty string if data is null or empty
+                            }
+                        },
+                        width: "50px"
+                    },
+                    {
+                        data: "ToDate",
+                        render: function (data, type, row) {
+                            if (data) {
+                                // Parse the date using Moment.js
+                                var parsedDate = moment(data);
+                                // Format the date as "20 Mar, 2024"
+                                return parsedDate.format("DD MMM, YYYY");
+                            } else {
+                                return ""; // Return empty string if data is null or empty
+                            }
+                        },
+                        width: "50px"
+                    },
+                    {
+                        data: "ReceivedLeaveRequests.Reason",
+                        orderable: true,
                         searchable: true
                     },
                     {
-                        data: "isRead",
+                        data: "Decision",
                         render: function (data, type, row) {
                             if (type === 'display') {
-                                var status = data ? 'Approved' : 'Reject';
+                                var status = data ? 'Approved' : 'Rejected';
                                 var badgeClass = data ? 'bg-success' : 'bg-danger';
                                 return '<span class="badge rounded-pill ' + badgeClass + ' text-white p-2 m-1">' + status + '</span>';
                             }
-                            return data ? 'Approved' : 'Reject';
+                            return data ? 'Approved' : 'Rejected';
                         },
-                        orderable: false, // Disable sorting for this column
-                        searchable: false, // Disable searching for this column
+                        orderable: false,
+                        searchable: false,
                     },
-
                     {
-                        data: "Id", // Use the "Id" property for the action buttons
+                        data: "Id",
                         render: function (data) {
                             return "<a class='text-danger me-2 btn btn-warning delete-btn' id='del' href='#' data-id='" + data + "'><i class='fa fa-trash'></i></a>";
                         },
-                        orderable: false, // Disable sorting for this column
-                        searchable: false // Disable searching for this column
-                    },
-
-
+                        orderable: false,
+                        searchable: false
+                    }
                 ],
                 pagingType: 'full_numbers',
                 language: {

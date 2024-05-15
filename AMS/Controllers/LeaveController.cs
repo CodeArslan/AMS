@@ -34,8 +34,12 @@ namespace AMS.Controllers
 
         public async Task<ActionResult> GetLeaveData()
         {
-            var leaveList = await _dbContext.receivedLeaveRequests.Include(l => l.Labour)
-                .Include(e => e.ApplicationUser).AsNoTracking().ToListAsync();
+            var leaveList = await _dbContext.LeaveResponses
+                   .Include(l => l.ReceivedLeaveRequests)
+                   .Include(l => l.ReceivedLeaveRequests.ApplicationUser)
+                   .Include(l => l.ReceivedLeaveRequests.Labour)
+                   .AsNoTracking()
+                   .ToListAsync(); 
             return Json(leaveList, JsonRequestBehavior.AllowGet);
         }
 
@@ -407,18 +411,41 @@ namespace AMS.Controllers
         }
         public ActionResult Delete(int id)
         {
-            var leaveInDb = _dbContext.receivedLeaveRequests.SingleOrDefault(c => c.Id == id);
-            if (leaveInDb == null)
+            var leaveResponse = _dbContext.LeaveResponses.SingleOrDefault(lr => lr.Id == id);
+            if (leaveResponse == null)
             {
-                return Json(new { success = false, message = "Leave Record Doesnot Found" });
+                return Json(new { success = false, message = "Leave Response Record Does Not Exist" });
             }
 
-            else
+            var leaveRequest = _dbContext.receivedLeaveRequests.FirstOrDefault(rlr => rlr.Id == leaveResponse.rlrId);
+            if (leaveRequest == null)
             {
-                _dbContext.receivedLeaveRequests.Remove(leaveInDb);
-                _dbContext.SaveChanges();
-                return Json(new { success = true, message = "Leave Record Successfully Deleted" });
+                return Json(new { success = false, message = "Associated Leave Request Record Not Found" });
             }
+            int leaveDays = (leaveResponse.ToDate.Value - leaveResponse.FromDate.Value).Days;
+            if(leaveResponse.ToDate.Value== leaveResponse.FromDate.Value)
+            {
+                leaveDays = 1;
+            }
+            var user = leaveRequest.employeeId != null ? _dbContext.Users.FirstOrDefault(u => u.Id.ToString() == leaveRequest.employeeId) :
+                                                              _dbContext.Users.FirstOrDefault(u => u.Id.ToString() == leaveRequest.labourId);
+
+            if (user != null)
+            {
+                // Update leave balance
+                user.leaveBalance += leaveDays;
+                _dbContext.SaveChanges();
+            }
+
+            // Remove leave response
+            _dbContext.LeaveResponses.Remove(leaveResponse);
+            _dbContext.SaveChanges();
+
+            // Remove leave request
+            _dbContext.receivedLeaveRequests.Remove(leaveRequest);
+            _dbContext.SaveChanges();
+
+            return Json(new { success = true, message = "Leave Record Successfully Deleted. Leave Balance Updated." });
         }
         public ActionResult LeaveDetails(LeaveResponseViewModel viewModel)
         {
@@ -453,6 +480,21 @@ namespace AMS.Controllers
                     };
 
                     _dbContext.LeaveResponses.Add(leaveResponse);
+                    _dbContext.SaveChanges();
+                    int leaveDays = (viewModel.LeaveResponse.ToDate.Value - viewModel.LeaveResponse.FromDate.Value).Days;
+                    if (viewModel.LeaveResponse.ToDate.Value == viewModel.LeaveResponse.FromDate.Value)
+                    {
+                        leaveDays = 1; 
+                    }
+                    if (employee != null)
+                    {
+                        employee.leaveBalance -= leaveDays;
+                    }
+                    else if (labour != null)
+                    {
+                        labour.leaveBalance -= leaveDays;
+                    }
+
                     _dbContext.SaveChanges();
                     return Json(new { success = true, message = "Leave added successfully" });
                 }
