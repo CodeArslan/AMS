@@ -62,10 +62,18 @@ namespace AMS.Controllers
             try
             {
                 var employees = _dbContext.Users
-                    .Where(e => departmentIds.Contains(e.DepartmentId))
+                    .Where(e => departmentIds.Contains(e.DepartmentId) && e.isLabour == false)
+                    .Select(e => new
+                    {
+                        e.Id,
+                        e.FirstName,
+                        e.LastName,
+                        e.Email,
+                        DepartmentName = _dbContext.Departments.Where(d => d.Id == e.DepartmentId).Select(d => d.deptName).FirstOrDefault()
+                    })
                     .ToList();
 
-                var departmentsWithEmployees = employees.Select(e => e.DepartmentId).Distinct();
+                var departmentsWithEmployees = employees.Select(e => e.DepartmentName).Distinct();
 
                 if (departmentsWithEmployees.Count() == departmentIds.Count())
                 {
@@ -73,7 +81,7 @@ namespace AMS.Controllers
                 }
                 else
                 {
-                    var departmentsWithoutEmployees = departmentIds.Except(departmentsWithEmployees);
+                    var departmentsWithoutEmployees = departmentIds.Except(_dbContext.Departments.Where(d => departmentsWithEmployees.Contains(d.deptName)).Select(d => d.Id));
 
                     // Fetch department names corresponding to department IDs
                     var departmentNames = _dbContext.Departments

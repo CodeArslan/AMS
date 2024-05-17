@@ -18,6 +18,10 @@
     margin-left: 5px; /* Adjust distance from the button */
     animation: blink-animation 1s infinite alternate;
 }
+    .disabled-dropdown {
+        pointer-events: none;
+        opacity: 0.6;
+    }
 
 @@keyframes blink-animation {
     from { opacity: 1; }
@@ -64,11 +68,11 @@
                                 <label class="d-block text-12 text-muted">Meeting Status</label>
                                 <div class="pe-0 mb-4">
                                     <label class="radio radio-reverse radio-danger">
-                                        <input type="radio" name="meetingStatus" value="Scheduled" onchange="setMeetingStatus()" /><span>Scheduled</span><span class="checkmark"></span>
+                                        <input type="radio" name="meetingStatus" value="Scheduled" onchange="setMeetingStatus()" checked/><span>Scheduled</span><span class="checkmark"></span>
                                     </label>
-                                    <label class="radio radio-reverse radio-warning">
+                                    @*<label class="radio radio-reverse radio-warning">
                                         <input type="radio" name="meetingStatus" value="In Progress" onchange="setMeetingStatus()" /><span>In Progress</span><span class="checkmark"></span>
-                                    </label>
+                                    </label>*@
                                     <label class="radio radio-reverse radio-success">
                                         <input type="radio" name="meetingStatus" value="Completed" onchange="setMeetingStatus()" /><span>Completed</span><span class="checkmark"></span>
                                     </label>
@@ -124,7 +128,7 @@
                                 <div class="form-group">
                                     @Html.Label("Department:")
                                     <div class="dropdownforDepartment">
-                                        <button class="btn btn-secondary dropdown-toggle" type="button" id="tableDropdownButton" data-bs-toggle="dropdown" aria-expanded="false" @*@(Model.Meeting.Id != 0 ? "disabled" : "")*@ style="width:329px">
+                                        <button class="btn btn-secondary dropdown-toggle @((Model.Meeting.Id != 0) ? "disabled-dropdown" : "")" type="button" id="tableDropdownButton" data-bs-toggle="dropdown" aria-expanded="false" style="width:329px">
                                             --Select Department--
                                         </button>
                                         <div class="dropdown-menu" style="width:270px" aria-labelledby="deptDropdownButton">
@@ -140,12 +144,11 @@
                                             }
                                         </div>
                                     </div>
-
                                 </div>
-
                             </div>
+
                             <div class="col-md-1">
-                                <br/>
+                                <br />
                                 <i class="far fa-info-circle" id="depInfoIcon" title="Please select departments to add attendees of selected departments. You can further modify the attendee list from the attendees tab." style="font-size: 24px;"></i>
 
                             </div>
@@ -216,6 +219,7 @@
     <script>
 
         function validateForm() {
+            debugger;
             showSpinner();
             
             var startTime = $('#startTime').val();
@@ -224,14 +228,7 @@
             // Convert start and end times to Date objects
             var startDate = new Date('2000-01-01 ' + startTime);
             var endDate = new Date('2000-01-01 ' + endTime);
-            if (employeeIds.length === 0) {
-                // Employee list is empty, display error message
-                $('#depInfoIcon').tooltip('show');
-                $('#errorMessage').text('Please select at least one attendee.');
-                $('#errorAlert').show();
-                hideSpinner();
-                return false; // Prevent form submission
-            }
+          
             // Compare start and end times
             if (endDate <= startDate) {
                 // End time is not greater than start time, display error message
@@ -272,13 +269,22 @@
             return true;
         }
     } else {
+        if (employeeIds.length === 0) {
+            // Employee list is empty, display error message
+            $('#depInfoIcon').tooltip('show');
+            $('#errorMessage').text('Please select at least one attendee.');
+            $('#errorAlert').show();
+            hideSpinner();
+            return false; // Prevent form submission
+        }
         // Get the selected date value
         var selectedDate = $('#meeting-date').val();
 
         // Create Date objects for comparison
         var currentDate = new Date();
         var selectedDateObj = new Date(selectedDate);
-
+        currentDate.setHours(0, 0, 0, 0);
+        selectedDateObj.setHours(0, 0, 0, 0);
         // Compare the selected date with the current date
         if (selectedDateObj < currentDate) {
             // Date is in the past, display error message
@@ -290,8 +296,8 @@
         }
     }
     return true; // Allow form submission for new meeting entries and valid updates
-}
-
+        }
+        setMeetingStatus();
           document.addEventListener('DOMContentLoaded', function () {
               var orderDateInput = document.getElementById('meeting-date');
 var orderDate = new Date('@Model.Meeting.Date.ToString("yyyy-MM-dd")');
@@ -363,7 +369,6 @@ orderDateInput.value = formattedDate;
                 $('.dropdown-item-unique .tick').each(function () {
                     selecteDeptId.push($(this).closest('.dropdown-item-unique').data('value'));
                 });
-                console.log(selecteDeptId);
                 fetchEmployeesByDepartmentIds(selecteDeptId);
             });
         });
@@ -383,8 +388,7 @@ orderDateInput.value = formattedDate;
                         employees.forEach(function (employee) {
                             html += '<div class="col-md-3">';
                             html += '<div class="labour-card" id="labour' + employee.Id + '" data-employee-id="' + employee.Id + '" data-employee-email="' + employee.Email + '">';
-                            html += '<span class="labour-name">' + employee.FirstName + ' ' + employee.LastName + '</span>';
-                            // Replace the button with a checkbox
+                            html += '<span class="labour-name">' + employee.FirstName + ' ' + employee.LastName + ' (' + employee.DepartmentName + ')</span>';                             // Replace the button with a checkbox
                             html += '<input type="checkbox" class="checkbox-employee" value="' + employee.Id + '" checked>';
                             html += '</div>';
                             html += '</div>';

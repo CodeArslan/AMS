@@ -38,7 +38,7 @@ namespace AMS.Controllers
                                                 .ToList();
 
                 // Add retrieved data to the viewModel
-                viewModel.Meeting = employeeMeeting.FirstOrDefault()?.Meeting;
+                viewModel.Meeting = employeeMeeting.Select(e=>e.Meeting).FirstOrDefault();
                 viewModel.EmployeeHasMeeting = employeeMeeting.FirstOrDefault();
                 viewModel.EmployeeIds = string.Join(",", employeeMeeting.Select(ehm => ehm.ApplicationUser.Id));
                 viewModel.User = employeeMeeting.Select(ehm => ehm.ApplicationUser).ToList();
@@ -99,39 +99,33 @@ namespace AMS.Controllers
                     }
 
                     _dbContext.SaveChanges();
+
                     // Send email to attendees about the new meeting
-                    foreach (string attendeeId in attendeeIds)
+                    var attendees = _dbContext.Users.Where(e => attendeeIds.Contains(e.Id)).ToList();
+                    MailMessage mail = new MailMessage();
+                    mail.From = new MailAddress(ConfigurationManager.AppSettings["Email"].ToString());
+                    foreach (var attendee in attendees)
                     {
-                        var attendee = _dbContext.Users.FirstOrDefault(e => e.Id == attendeeId);
-                        if (attendee != null)
-                        {
-                            try
-                            {
-                                string meetingDate = newMeeting.Date.ToString("dd MMM, yyyy");
+                        mail.To.Add(attendee.Email);
+                    }
 
-                                MailMessage mail = new MailMessage();
-                                mail.From = new MailAddress(ConfigurationManager.AppSettings["Email"].ToString());
-                                mail.To.Add(attendee.Email);
-                                mail.Subject = "New Meeting Details";
-                                mail.Body = $"Hello {attendee.FirstName},\n\nYou are invited to a new meeting.\n\nDate: {meetingDate}\nTime: {newMeeting.StartTime} - {newMeeting.EndTime}\nAgenda: {newMeeting.Agenda}\nLocation: {newMeeting.Location}\n\nBest regards,\nYour Organization";
+                    mail.Subject = "New Meeting Details";
+                    string meetingDate = newMeeting.Date.ToString("dd MMM, yyyy");
+                    mail.Body = $"Hello,\n\nYou are invited to a new meeting.\n\nDate: {meetingDate}\nTime: {newMeeting.StartTime} - {newMeeting.EndTime}\nAgenda: {newMeeting.Agenda}\nLocation: {newMeeting.Location}\n\nBest regards,\nCactus General Transport";
 
-                                SmtpClient smtp = new SmtpClient("smtp.gmail.com");
-                                smtp.Port = 587;
-                                smtp.UseDefaultCredentials = false;
-                                smtp.Credentials = new NetworkCredential(ConfigurationManager.AppSettings["Email"].ToString(), ConfigurationManager.AppSettings["Password"].ToString());
-                                smtp.EnableSsl = true;
+                    SmtpClient smtp = new SmtpClient("smtp.gmail.com");
+                    smtp.Port = 587;
+                    smtp.UseDefaultCredentials = false;
+                    smtp.Credentials = new NetworkCredential(ConfigurationManager.AppSettings["Email"].ToString(), ConfigurationManager.AppSettings["Password"].ToString());
+                    smtp.EnableSsl = true;
 
-                                smtp.Send(mail);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"Error sending email to {attendee.Email}: {ex.Message}");
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Employee with ID {attendeeId} not found.");
-                        }
+                    try
+                    {
+                        smtp.Send(mail);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error sending email: {ex.Message}");
                     }
 
                     return Json(new { success = true, message = "Meeting created successfully." });
@@ -161,43 +155,37 @@ namespace AMS.Controllers
                             _dbContext.SaveChanges();
 
                             // Send email to attendees with updated details
-                            foreach (string attendeeId in attendeeIds)
+                            var attendees = _dbContext.Users.Where(e => attendeeIds.Contains(e.Id)).ToList();
+                            MailMessage mail = new MailMessage();
+                            mail.From = new MailAddress(ConfigurationManager.AppSettings["Email"].ToString());
+                            foreach (var attendee in attendees)
                             {
-                                var attendee = _dbContext.Users.FirstOrDefault(e => e.Id == attendeeId);
-                                if (attendee != null)
-                                {
-                                    try
-                                    {
-                                        string prevMeetingDate = existingMeeting.Date.ToString("dd MMM, yyyy");
-                                        string newMeetingDate = viewModel.Meeting.Date.ToString("dd MMM, yyyy");
-                                        string newStartTime = viewModel.Meeting.StartTime.ToString("hh:mm tt");
-                                        string newEndTime = viewModel.Meeting.EndTime.ToString("hh:mm tt");
-                                        MailMessage mail = new MailMessage();
-                                        mail.From = new MailAddress(ConfigurationManager.AppSettings["Email"].ToString());
-                                        mail.To.Add(attendee.Email);
-                                        mail.Subject = "Updated Meeting Details";
-                                        mail.Body = $"Hello {attendee.FirstName},\n\nThe meeting details have been updated.\n\nPrevious Date: {prevMeetingDate}\nNew Date: {newMeetingDate}\nPrevious Time: {existingMeeting.StartTime} - {existingMeeting.EndTime}\nNew Time: {newStartTime} - {newEndTime}\nPrevious Agenda: {existingMeeting.Agenda}\nNew Agenda: {viewModel.Meeting.Agenda}\nPrevious Location: {existingMeeting.Location}\nNew Location: {viewModel.Meeting.Location}\n\nBest regards,\nYour Organization";
-
-                                        SmtpClient smtp = new SmtpClient("smtp.gmail.com");
-                                        smtp.Port = 587;
-                                        smtp.UseDefaultCredentials = false;
-                                        smtp.Credentials = new NetworkCredential(ConfigurationManager.AppSettings["Email"].ToString(), ConfigurationManager.AppSettings["Password"].ToString());
-                                        smtp.EnableSsl = true;
-
-                                        smtp.Send(mail);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Console.WriteLine($"Error sending email to {attendee.Email}: {ex.Message}");
-                                    }
-                                }
-                                else
-                                {
-                                    Console.WriteLine($"Employee with ID {attendeeId} not found.");
-                                }
+                                mail.To.Add(attendee.Email);
                             }
 
-                            return Json(new { success = true, message = "Meeting Updated successfully." });
+                            mail.Subject = "Updated Meeting Details";
+                            string prevMeetingDate = existingMeeting.Date.ToString("dd MMM, yyyy");
+                            string newMeetingDate = viewModel.Meeting.Date.ToString("dd MMM, yyyy");
+                            TimeSpan newStartTime = viewModel.Meeting.StartTime;
+                            TimeSpan newEndTime = viewModel.Meeting.EndTime;
+                            mail.Body = $"Hello,\n\nThe meeting details have been updated.\n\nPrevious Date: {prevMeetingDate}\nNew Date: {newMeetingDate}\nPrevious Time: {existingMeeting.StartTime} - {existingMeeting.EndTime}\nNew Time: {newStartTime} - {newEndTime}\nPrevious Agenda: {existingMeeting.Agenda}\nNew Agenda: {viewModel.Meeting.Agenda}\nPrevious Location: {existingMeeting.Location}\nNew Location: {viewModel.Meeting.Location}\n\nBest regards,\nCactus General Transport";
+
+                            SmtpClient smtp = new SmtpClient("smtp.gmail.com");
+                            smtp.Port = 587;
+                            smtp.UseDefaultCredentials = false;
+                            smtp.Credentials = new NetworkCredential(ConfigurationManager.AppSettings["Email"].ToString(), ConfigurationManager.AppSettings["Password"].ToString());
+                            smtp.EnableSsl = true;
+
+                            try
+                            {
+                                smtp.Send(mail);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error sending email: {ex.Message}");
+                            }
+
+                            return Json(new { success = true, message = "Meeting Details Updated successfully." });
                         }
                         else if (existingMeeting.Status != viewModel.Meeting.Status)
                         {
