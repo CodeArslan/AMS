@@ -225,8 +225,6 @@ namespace AMS.Controllers
             }
             catch (Exception)
             {
-                // Log the exception for debugging purposes
-                // logger.LogError(ex, "Error occurred while fetching assigned shift data.");
                 return Json(new { success = false, errorMessage = "An error occurred while fetching assigned shift data." });
             }
         }
@@ -257,8 +255,6 @@ namespace AMS.Controllers
             }
             catch (Exception)
             {
-                // Log the exception for debugging purposes
-                // logger.LogError(ex, "Error occurred while withdrawing labour from shift.");
                 return Json(new { success = false, errorMessage = "An error occurred while withdrawing labour from shift." });
             }
         }

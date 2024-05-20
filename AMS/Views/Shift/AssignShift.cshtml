@@ -317,6 +317,16 @@
                     selectedIds.push($(this).data('id'));
                 });
 
+                if (selectedIds.length === 0) {
+                    $('#errorMessageforUpdateShift').text('Please select atleast one labour to withdraw shift.');
+                    $('#errorAlertforUpdateShift').show();
+                    $('#successAlertforUpdateShift').hide();
+                    setTimeout(function () {
+                        $('#errorAlertforUpdateShift').fadeOut();
+                    }, 2000);
+                    return; 
+                }
+
                 // Prompt confirmation using bootbox
                 bootbox.confirm({
                     message: "Are you sure you want to withdraw?",
