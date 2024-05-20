@@ -42,6 +42,16 @@ namespace AMS.Controllers
                    .ToListAsync(); 
             return Json(leaveList, JsonRequestBehavior.AllowGet);
         }
+        public async Task<ActionResult> GetLeaveDataByUser()
+        {
+            var loggedInUser = User.Identity.GetUserId();
+            var leaveList = await _dbContext.LeaveResponses
+                   .Include(l => l.ReceivedLeaveRequests)
+                   .Include(l => l.ReceivedLeaveRequests.ApplicationUser)
+                   .Include(l => l.ReceivedLeaveRequests.Labour).Where(l=>l.ReceivedLeaveRequests.employeeId == loggedInUser||l.ReceivedLeaveRequests.labourId==loggedInUser)
+                   .AsNoTracking().ToListAsync();
+            return Json(leaveList, JsonRequestBehavior.AllowGet);
+        }
 
         // GET: Leave
         public ActionResult Index()
@@ -49,7 +59,7 @@ namespace AMS.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Employee")]
+        [Authorize(Roles = "Employee,HR,Labour")]
         public ActionResult EmployeeLeave()
         {
             return View();

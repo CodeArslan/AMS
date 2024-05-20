@@ -25,21 +25,26 @@ namespace AMS.Controllers
             isListening = false;
         }
         // GET: Attendance
+        [Authorize(Roles = "Admin")]
+
         public ActionResult Index()
         {
             return View();
         }
 
-        [Authorize(Roles = "Employee, HR")]
+        [Authorize(Roles = "Employee,HR,Labour")]
         public ActionResult EmployeeAttendance()
         {
             return View();
         }
+        [Authorize(Roles = "Admin")]
 
         public ActionResult AttendanceForLabours()
         {
             return View();
         }
+        [Authorize(Roles = "Admin")]
+
         public ActionResult AttendanceForCardHolders()
         {
             return View();
