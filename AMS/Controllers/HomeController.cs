@@ -10,7 +10,15 @@ namespace AMS.Controllers
     {
         public ActionResult Index()
         {
-            return View();
+            if (User.IsInRole("Admin"))
+            {
+                // If user is admin, redirect to admin dashboard
+                return RedirectToAction("Dashboard", "Home");
+            }
+            else
+            {
+                return RedirectToAction("EmployeeAttendance", "Attendance");
+            }
         }
 
         public ActionResult About()
@@ -24,6 +32,10 @@ namespace AMS.Controllers
         {
             ViewBag.Message = "Your contact page.";
 
+            return View();
+        }
+        public ActionResult Dashboard()
+        {
             return View();
         }
     }

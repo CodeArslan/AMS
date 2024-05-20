@@ -1,0 +1,887 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    #calendar {
+        --dark-text: #f8fbff;
+        --light-body: #f3f8fe;
+        --light-main: #fdfdfd;
+        --light-second: #c3c2c8;
+        --light-hover: #f0f0f0;
+        --light-text: #151426;
+        --light-btn: #9796f0;
+        --blue: #0000ff;
+        --white: #fff;
+        --shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+        --font-family: consolas;
+    }
+
+        #calendar * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        #calendar .calendar {
+            height: 600px;
+            width: max-content;
+            background-color: white;
+            border-radius: 25px;
+            overflow: hidden;
+            padding: 30px 50px 0px 50px;
+            box-shadow: var(--shadow);
+        }
+
+        #calendar .calendar-header {
+            background: #663399;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            color: var(--white);
+            padding: 10px;
+        }
+
+        #calendar .calendar-body {
+            padding: 10px;
+        }
+
+        #calendar .calendar-week-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            font-weight: 600;
+            cursor: pointer;
+            color: rgb(104, 104, 104);
+        }
+
+            #calendar .calendar-week-days div:hover {
+                color: black;
+                transform: scale(1.2);
+                transition: all 0.2s ease-in-out;
+            }
+
+            #calendar .calendar-week-days div {
+                display: grid;
+                place-items: center;
+                color: var(--bg-second);
+                height: 50px;
+            }
+
+        #calendar .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            color: var(--color-txt);
+        }
+
+            #calendar .calendar-days div {
+                width: 37px;
+                height: 33px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 5px;
+                position: relative;
+                cursor: pointer;
+                animation: to-top 1s forwards;
+            }
+
+        #calendar .month-picker {
+            padding: 5px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+            #calendar .month-picker:hover {
+                background-color: var(--color-hover);
+                color: var(--color-txt);
+            }
+
+        #calendar .year-picker {
+            display: flex;
+            align-items: center;
+        }
+
+        #calendar .year-change {
+            height: 30px;
+            width: 30px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            margin: 0px 10px;
+            cursor: pointer;
+        }
+
+            #calendar .year-change:hover {
+                background-color: var(--light-btn);
+                transition: all 0.2s ease-in-out;
+                transform: scale(1.12);
+            }
+
+                #calendar .year-change:hover pre {
+                    color: var(--bg-body);
+                }
+
+        #calendar .calendar-footer {
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        #calendar #year:hover {
+            cursor: pointer;
+            transform: scale(1.2);
+            transition: all 0.2s ease-in-out;
+        }
+
+        #calendar .calendar-days div span {
+            position: absolute;
+        }
+
+        #calendar .calendar-days div:hover {
+            transition: width 0.2s ease-in-out, height 0.2s ease-in-out;
+            background-color: #fbc7d4;
+            border-radius: 20%;
+            color: var(--dark-text);
+        }
+
+        #calendar .calendar-days div.current-date {
+            color: var(--dark-text);
+            background-color: var(--light-btn);
+            border-radius: 20%;
+        }
+
+        #calendar .month-list {
+            position: relative;
+            left: 0;
+            top: -50px;
+            background-color: #ebebeb;
+            color: var(--light-text);
+            display: grid;
+            grid-template-columns: repeat(3, auto);
+            gap: 5px;
+            border-radius: 20px;
+        }
+
+            #calendar .month-list > div {
+                display: grid;
+                place-content: center;
+                margin: 5px 10px;
+                transition: all 0.2s ease-in-out;
+            }
+
+                #calendar .month-list > div > div {
+                    border-radius: 15px;
+                    padding: 10px;
+                    cursor: pointer;
+                }
+
+                    #calendar .month-list > div > div:hover {
+                        background-color: var(--light-btn);
+                        color: var(--dark-text);
+                        transform: scale(0.9);
+                        transition: all 0.2s ease-in-out;
+                    }
+
+            #calendar .month-list.show {
+                visibility: visible;
+                pointer-events: visible;
+                transition: 0.6s ease-in-out;
+                animation: to-left 0.71s forwards;
+            }
+
+            #calendar .month-list.hideonce {
+                visibility: hidden;
+            }
+
+            #calendar .month-list.hide {
+                animation: to-right 1s forwards;
+                visibility: hidden;
+                pointer-events: none;
+            }
+
+        #calendar .date-time-formate {
+            width: max-content;
+            height: max-content;
+            font-family: Dubai Light, Century Gothic;
+            position: relative;
+            display: inline;
+            top: 140px;
+            justify-content: center;
+        }
+
+        #calendar .day-text-formate {
+            font-family: Microsoft JhengHei UI;
+            font-size: 1.4rem;
+            padding-right: 5%;
+            border-right: 3px solid #9796f0;
+            position: absolute;
+            left: -1rem;
+        }
+
+        #calendar .date-time-value {
+            display: block;
+            height: max-content;
+            width: max-content;
+            position: relative;
+            left: 40%;
+            top: -18px;
+            text-align: center;
+        }
+
+        #calendar .time-formate {
+            font-size: 1.5rem;
+        }
+
+            #calendar .time-formate.hideTime {
+                animation: hidetime 1.5s forwards;
+            }
+
+        #calendar .day-text-formate.hidetime {
+            animation: hidetime 1.5s forwards;
+        }
+
+        #calendar .date-formate.hideTime {
+            animation: hidetime 1.5s forwards;
+        }
+
+        #calendar .day-text-formate.showtime {
+            animation: showtime 1s forwards;
+        }
+
+        #calendar .time-formate.showtime {
+            animation: showtime 1s forwards;
+        }
+
+        #calendar .date-formate.showtime {
+            animation: showtime 1s forwards;
+        }
+
+    @@keyframes to-top {
+        0% {
+            transform: translateY(0);
+            opacity: 0;
+        }
+
+        100% {
+            transform: translateY(100%);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes to-left {
+        0% {
+            transform: translateX(230%);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes to-right {
+        10% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateX(-150%);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes showtime {
+        0% {
+            transform: translateX(250%);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateX(0%);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes hidetime {
+        0% {
+            transform: translateX(0%);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateX(-370%);
+            opacity: 1;
+        }
+    }
+
+    @@media (max-width: 375px) {
+        #calendar .month-list > div {
+            margin: 5px 0px;
+        }
+    }
+</style>
+<div class="main-content">
+    <div class="breadcrumb">
+        <ul>
+            <li><a href="#">Dashboard</a></li>
+        </ul>
+    </div>
+    <div class="separator-breadcrumb border-top"></div>
+    <div class="row">
+        <!-- ICON BG-->
+        <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                <div class="card-body text-center">
+                    <i class="fa fa-user"></i>
+                    <div class="content">
+                        <p class="text-muted mt-2 mb-0">Employees</p>
+                        <p class="text-primary text-24 line-height-1 mb-2" id="employeeTotal"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                <div class="card-body text-center">
+                    <i class="fa fa-money-bill"></i>
+                    <div class="content">
+                        <p class="text-muted mt-2 mb-0" style="width:100px">Pending Payroll</p>
+                        <p class="text-primary text-24 line-height-1 mb-2" id="pendingPayroll"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                <div class="card-body text-center">
+                    <i class="fa fa-bed-alt"></i>
+                    <div class="content">
+                        <p class="text-muted mt-2 mb-0" style="width:140px">Employees on Leave</p>
+                        <p class="text-primary text-24 line-height-1 mb-2" id="employeeOnLeaveCount"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                    <div class="card-body text-center">
+                        <i class="i-Money-2"></i>
+                        <div class="content">
+                            <p class="text-muted mt-2 mb-0">Expense</p>
+                            <p class="text-primary text-24 line-height-1 mb-2">$1200</p>
+                        </div>
+                    </div>
+                </div>
+            </div>*@
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card o-hidden mb-4" style="height:100%">
+                <div class="card-header d-flex align-items-center border-0">
+                    <h3 class="w-50 float-start card-title m-0">Live Attendance</h3>
+                </div>
+                <div>
+                    <div class="table-responsive">
+                        <table class="table text-center" id="empAttendanceTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Employee Name</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Time In</th>
+                                    <th scope="col">Time Out</th>
+                                    <th scope="col">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-md-4">
+            <div class="col-md-4">
+                <div id="calendar">
+                    <div class="calendar">
+                        <div class="calendar-header">
+                            <span class="month-picker" id="month-picker">May</span>
+                            <div class="year-picker" id="year-picker">
+                                <span class="year-change" id="pre-year">
+                                    <pre><</pre>
+                                </span>
+                                <span id="year">2020</span>
+                                <span class="year-change" id="next-year">
+                                    <pre>></pre>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="calendar-body">
+                            <div class="calendar-week-days">
+                                <div>Sun</div>
+                                <div>Mon</div>
+                                <div>Tue</div>
+                                <div>Wed</div>
+                                <div>Thu</div>
+                                <div>Fri</div>
+                                <div>Sat</div>
+                            </div>
+                            <div class="calendar-days"></div>
+                        </div>
+                        <div class="calendar-footer"></div>
+                        <div class="date-time-formate">
+                            <div class="day-text-formate">TODAY</div>
+                            <div class="date-time-value">
+                                <div class="time-formate">02:51:20</div>
+                                <div class="date-formate">23 - July - 2022</div>
+                            </div>
+                        </div>
+                        <div class="month-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-lg-8 col-md-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="card-title">This Year Payroll</div>
+                    <div id="echartBarEmployee" style="height: 300px"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-sm-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="card-title">Employees by Gender</div>
+                    <div id="echartPieGender" style="height: 300px"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section scripts
+{
+    <script>
+        const isLeapYear = (year) => {
+            return (
+                (year % 4 === 0 && year % 100 !== 0 && year % 400 !== 0) ||
+                (year % 100 === 0 && year % 400 === 0)
+            );
+        };
+        const getFebDays = (year) => {
+            return isLeapYear(year) ? 29 : 28;
+        };
+        let calendar = document.querySelector('.calendar');
+        const month_names = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
+        ];
+        let month_picker = document.querySelector('#month-picker');
+        const dayTextFormate = document.querySelector('.day-text-formate');
+        const timeFormate = document.querySelector('.time-formate');
+        const dateFormate = document.querySelector('.date-formate');
+
+        month_picker.onclick = () => {
+            month_list.classList.remove('hideonce');
+            month_list.classList.remove('hide');
+            month_list.classList.add('show');
+            dayTextFormate.classList.remove('showtime');
+            dayTextFormate.classList.add('hidetime');
+            timeFormate.classList.remove('showtime');
+            timeFormate.classList.add('hideTime');
+            dateFormate.classList.remove('showtime');
+            dateFormate.classList.add('hideTime');
+        };
+
+        const generateCalendar = (month, year) => {
+            let calendar_days = document.querySelector('.calendar-days');
+            calendar_days.innerHTML = '';
+            let calendar_header_year = document.querySelector('#year');
+            let days_of_month = [
+                31,
+                getFebDays(year),
+                31,
+                30,
+                31,
+                30,
+                31,
+                31,
+                30,
+                31,
+                30,
+                31,
+            ];
+
+            let currentDate = new Date();
+
+            month_picker.innerHTML = month_names[month];
+
+            calendar_header_year.innerHTML = year;
+
+            let first_day = new Date(year, month);
+
+
+            for (let i = 0; i <= days_of_month[month] + first_day.getDay() - 1; i++) {
+
+                let day = document.createElement('div');
+
+                if (i >= first_day.getDay()) {
+                    day.innerHTML = i - first_day.getDay() + 1;
+
+                    if (i - first_day.getDay() + 1 === currentDate.getDate() &&
+                        year === currentDate.getFullYear() &&
+                        month === currentDate.getMonth()
+                    ) {
+                        day.classList.add('current-date');
+                    }
+                }
+                calendar_days.appendChild(day);
+            }
+        };
+
+        let month_list = calendar.querySelector('.month-list');
+        month_names.forEach((e, index) => {
+            let month = document.createElement('div');
+            month.innerHTML = `<div>${e}</div>`;
+
+            month_list.append(month);
+            month.onclick = () => {
+                currentMonth.value = index;
+                generateCalendar(currentMonth.value, currentYear.value);
+                month_list.classList.replace('show', 'hide');
+                dayTextFormate.classList.remove('hideTime');
+                dayTextFormate.classList.add('showtime');
+                timeFormate.classList.remove('hideTime');
+                timeFormate.classList.add('showtime');
+                dateFormate.classList.remove('hideTime');
+                dateFormate.classList.add('showtime');
+            };
+        });
+
+        (function () {
+            month_list.classList.add('hideonce');
+        })();
+        document.querySelector('#pre-year').onclick = () => {
+            --currentYear.value;
+            generateCalendar(currentMonth.value, currentYear.value);
+        };
+        document.querySelector('#next-year').onclick = () => {
+            ++currentYear.value;
+            generateCalendar(currentMonth.value, currentYear.value);
+        };
+
+        let currentDate = new Date();
+        let currentMonth = { value: currentDate.getMonth() };
+        let currentYear = { value: currentDate.getFullYear() };
+        generateCalendar(currentMonth.value, currentYear.value);
+
+        const todayShowTime = document.querySelector('.time-formate');
+        const todayShowDate = document.querySelector('.date-formate');
+
+        const currshowDate = new Date();
+        const showCurrentDateOption = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long',
+        };
+        const currentDateFormate = new Intl.DateTimeFormat(
+            'en-US',
+            showCurrentDateOption
+        ).format(currshowDate);
+        todayShowDate.textContent = currentDateFormate;
+        setInterval(() => {
+            const timer = new Date();
+            const option = {
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+            };
+            const formateTimer = new Intl.DateTimeFormat('en-us', option).format(timer);
+            let time = `${`${timer.getHours()}`.padStart(
+                2,
+                '0'
+            )}:${`${timer.getMinutes()}`.padStart(
+                2,
+                '0'
+            )}: ${`${timer.getSeconds()}`.padStart(2, '0')}`;
+            todayShowTime.textContent = formateTimer;
+        }, 1000);
+
+
+        $(document).ready(function () {
+            $.ajax({
+                url: '/Employee/GetEmployeesOnLeaveCount',
+                type: 'GET',
+                success: function (data) {
+                    $('#employeeOnLeaveCount').text(data.employeeOnLeaveCount);
+                },
+                error: function (error) {
+                    console.log('Error:', error);
+                }
+            });
+            $.ajax({
+                url: '/Employee/EmployeeCounts', 
+                type: 'GET',
+                success: function (data) {
+                    $('#employeeTotal').text(data.employeeCount);
+                },
+                error: function (error) {
+                    console.log('Error:', error);
+                }
+            });
+            $.ajax({
+                url: '/Employee/PayrollCountThisMonth',
+                type: 'GET',
+                success: function (data) {
+                    $('#pendingPayroll').text(data.totalPayment);
+                },
+                error: function (error) {
+                    console.log('Error:', error);
+                }
+            });
+            var empAttendanceTable = $('#empAttendanceTable').DataTable({
+                "paging": false,
+                "ajax": {
+                    "url": '/Attendance/GetEmployeeAttendanceData',
+                    "type": "GET",
+                    "datatype": "json",
+                    "dataSrc": "",
+                    "contentType": 'application/json; charset=utf-8',
+                    "beforeSend": function (xhr) {
+                        hideSpinner();
+                    }
+                },
+                "columns": [
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            // Check if Labour object is present
+                            if (data.Labour) {
+                                return data.Labour.FirstName + " " + data.Labour.LastName;
+                            } else {
+                                return data.ApplicationUser.FirstName + " " + data.ApplicationUser.LastName;
+                            }
+                        }
+                    },
+                    {
+                        "data": "date",
+                        "render": function (data, type, row) {
+                            if (data) {
+                                // Parse the date using Moment.js
+                                var parsedDate = moment(parseInt(data.substr(6)));
+                                // Format the date as "20 Mar, 2024"
+                                return parsedDate.format("DD MMM, YYYY");
+                            } else {
+                                return ""; // Return empty string if data is null or empty
+                            }
+                        }
+                    },
+                    {
+                        "data": "timeIn",
+                        "render": function (data) {
+                            if (data === "00:00:00") {
+                                return "--:--";
+                            } else {
+                                return moment(data, 'HH:mm:ss').format('h:mm A');
+                            }
+                        }
+                    },
+                    {
+                        "data": "timeOut",
+                        "render": function (data) {
+                            if (data === '00:00:05') {
+                                return "--:--";
+                            } else if (data) {
+                                return moment(data, 'HH:mm:ss').format('h:mm A');
+                            } else {
+                                return "--:--";
+                            }
+                        }
+                    },
+                    { "data": "totalWorkedTime" }
+                ]
+            });
+
+            // Reload table data every 5 seconds
+            setInterval(function () {
+                empAttendanceTable.ajax.reload();
+            }, 500);
+            var w = document.getElementById("echartBarEmployee");
+
+            if (w) {
+                var e = echarts.init(w);
+
+                // Fetch data from the controller
+                $.ajax({
+                    url: '/Payroll/getPayrollGraphData',
+                    type: 'GET',
+                    success: function (response) {
+                        // Assuming response has properties officeData and labourData
+                        var officeData = response.officeData;
+                        var labourData = response.labourData;
+
+                        e.setOption({
+                            legend: {
+                                borderRadius: 0,
+                                orient: "horizontal",
+                                x: "right",
+                                data: ["Office", "Labour"]
+                            },
+                            grid: {
+                                left: "8px",
+                                right: "8px",
+                                bottom: "0",
+                                containLabel: true
+                            },
+                            tooltip: {
+                                show: true,
+                                backgroundColor: "rgba(0, 0, 0, .8)"
+                            },
+                            xAxis: [{
+                                type: "category",
+                                data: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"],
+                                axisTick: {
+                                    alignWithLabel: true
+                                },
+                                splitLine: {
+                                    show: false
+                                },
+                                axisLine: {
+                                    show: true
+                                }
+                            }],
+                            yAxis: [{
+                                type: "value",
+                                axisLabel: {
+                                    formatter: "${value}"
+                                },
+                                axisLine: {
+                                    show: false
+                                },
+                                splitLine: {
+                                    show: true,
+                                    interval: "auto"
+                                }
+                            }],
+                            series: [{
+                                name: "Office",
+                                data: officeData,
+                                label: {
+                                    show: false,
+                                    color: "#0168c1"
+                                },
+                                type: "bar",
+                                barGap: 0,
+                                color: "#bcbbdd",
+                                smooth: true,
+                                itemStyle: {
+                                    emphasis: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowOffsetY: -2,
+                                        shadowColor: "rgba(0, 0, 0, 0.3)"
+                                    }
+                                }
+                            }, {
+                                name: "Labour",
+                                data: labourData,
+                                label: {
+                                    show: false,
+                                    color: "#639"
+                                },
+                                type: "bar",
+                                color: "#7569b3",
+                                smooth: true,
+                                itemStyle: {
+                                    emphasis: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowOffsetY: -2,
+                                        shadowColor: "rgba(0, 0, 0, 0.3)"
+                                    }
+                                }
+                            }]
+                        });
+                    },
+                    error: function (error) {
+                        console.log("Error fetching payroll data:", error);
+                    }
+                });
+
+                $(window).on("resize", function () {
+                    setTimeout(function () {
+                        e.resize();
+                    }, 500);
+                });
+            }
+            var pie = document.getElementById("echartPieGender");
+
+            if (pie) {
+                var t = echarts.init(pie);
+
+                // Fetch data from the controller
+                $.ajax({
+                    url: '/Employee/getEmployeeGraph',
+                    type: 'GET',
+                    success: function (response) {
+                        // Assuming response is an array of objects with 'value' and 'name' properties
+                        var pieData = response;
+
+                        t.setOption({
+                            color: ["#62549c", "#7566b5", "#7d6cbb", "#8877bd", "#9181bd", "#6957af"],
+                            tooltip: {
+                                show: true,
+                                backgroundColor: "rgba(0, 0, 0, .8)"
+                            },
+                            series: [{
+                                name: "Employees by Gender",
+                                type: "pie",
+                                radius: "60%",
+                                center: ["50%", "50%"],
+                                data: pieData,
+                                itemStyle: {
+                                    emphasis: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: "rgba(0, 0, 0, 0.5)"
+                                    }
+                                }
+                            }]
+                        });
+                    },
+                    error: function (error) {
+                        console.log("Error fetching employee data:", error);
+                    }
+                });
+
+                $(window).on("resize", function () {
+                    setTimeout(function () {
+                        t.resize();
+                    }, 500);
+                });
+            }
+        });
+
+    </script>
+}

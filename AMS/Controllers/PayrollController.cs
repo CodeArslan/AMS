@@ -147,6 +147,31 @@ namespace AMS.Controllers
             return Json(new { success = false, message = "An Error Occured While Approving. Please Try Again Later" });
 
         }
+        public ActionResult getPayrollGraphData()
+        {
+            var payroll = _dbContext.Payroll
+                .GroupBy(p => p.Month)
+                .Select(g => new
+                {
+                    Month = g.Key,
+                    Office = g.Where(p => p.employeeId != null).Sum(p => p.TotalSalary),
+                    Labour = g.Where(p => p.labourId != null).Sum(p => p.TotalSalary)
+                })
+                .ToList();
+
+            var months = new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec" };
+
+            var officeData = new decimal[12];
+            var labourData = new decimal[12];
+
+            foreach (var item in payroll)
+            {
+                officeData[item.Month - 1] = item.Office;
+                labourData[item.Month - 1] = item.Labour;
+            }
+
+            return Json(new { officeData, labourData }, JsonRequestBehavior.AllowGet);
+        }
     }
 
 }    

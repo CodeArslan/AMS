@@ -30,7 +30,7 @@ namespace AMS.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Employee")]
+        [Authorize(Roles = "Employee, HR")]
         public ActionResult EmployeeAttendance()
         {
             return View();

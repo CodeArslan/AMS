@@ -32,6 +32,7 @@ namespace AMS.Controllers
             };
             return View(viewModel);
         }
+         
         public async Task<ActionResult> GetEmployeeData()
         {
             var empList = await _dbContext.Users.Where(e=>e.isLabour==false)
@@ -106,11 +107,45 @@ namespace AMS.Controllers
                 return Json(new { success = false, error = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
+        public ActionResult getEmployeeGraph()
+        {
+            var employeeData = _dbContext.Users
+                .Where(e => e.isActive) // Assuming there's an IsActive property indicating the employee's active status
+                .GroupBy(e => e.Gender)
+                .Select(g => new
+                {
+                    Gender = g.Key,
+                    TotalEmployees = g.Count()
+                })
+                .ToList();
 
+            var pieData = employeeData.Select(e => new { value = e.TotalEmployees, name = e.Gender }).ToList();
 
+            return Json(pieData, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult EmployeeCounts()
+        {
+            var count = _dbContext.Users.Where(u => u.isActive == true).Count();
+            return Json(new { employeeCount = count }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult PayrollCountThisMonth()
+        {
+            int month = DateTime.Now.Month;
 
+            var totalPayment = _dbContext.Payroll.Where(p => p.Month == month).Sum(p => p.TotalSalary);
 
+            return Json(new {  totalPayment = totalPayment }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetEmployeesOnLeaveCount()
+        {
+            DateTime today = DateTime.Today;
 
+            var count = _dbContext.receivedLeaveRequests
+                                 .Where(l => l.Date == today && l.Decision=="Approved")
+                                 .Count();
+
+            return Json(new { employeeOnLeaveCount = count }, JsonRequestBehavior.AllowGet);
+        }
 
     }
 }
