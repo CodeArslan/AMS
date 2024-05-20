@@ -19,13 +19,13 @@
         <div class="auth-content">
             <div class="card o-hidden">
                 <div class="card-header bg-primary" style="border:1px solid black">
-                    <h3 class="text-25 text-white" style="text-align:center">Sign In Form</h3>
+                    <h3 class="text-25 text-white" style="text-align:center">Sign In</h3>
                 </div>
                 <div class="row">
                     <div class="col-md-12  center-block">
                         <div class="p-8">
                             <div class="auth-logo text-center mb-4">
-                                <img src="~/dist-assets/images/ams-logo.png" alt="">
+                                <img src="~/dist-assets/images/faces/ams-logo.png" />
                             </div>
                             @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
                             {

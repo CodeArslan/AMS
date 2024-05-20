@@ -154,7 +154,7 @@
 
                         </ul>
                     }
-                    else if (User.IsInRole("Employee,HR,Labour"))
+                    else if (User.IsInRole("Employee")|| User.IsInRole("Labour"))
                     {
                         <!-- HR aur Employee ke liye sirf Attendance button -->
                 <ul class="navigation-left">
@@ -171,7 +171,7 @@
                     </li>
                     <li class="nav-item no-open" data-item="">
                         <a class="nav-item-hold" href="/Leave/EmployeeLeave">
-                            <i class="fa fa-bed-alt fa-lg"></i><span class="nav-text">Leave Requests</span>
+                            <i class="fa fa-bed-alt fa-lg"></i><span class="nav-text">Leave</span>
                         </a>
                     </li>
                     <li class="nav-item no-open" data-item="">
@@ -187,7 +187,7 @@
                     else if (User.IsInRole("HR"))
                     {
                 <ul class="navigation-left">
-                    <li class="nav-item" data-item="attendance">
+                    <li class="nav-item" href="/Attendance/EmployeeAttendance">
                         <a class="nav-item-hold" href="#">
                             <i class="fa fa-clock fa-lg"></i><span class="nav-text">Attendance</span>
                         </a>
@@ -234,10 +234,20 @@
                                     <i class="fa fa-shipping-fast"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Shift</span>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="/Meeting/Index">
+
+                            @*<li class="nav-item">
+                                <a>
                                     <i class="fas fa-table"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Meeting</span>
                                 </a>
+                            </li>*@
+                            <li class="nav-item dropdown-sidemenu">
+                                <a>
+                                    <i class="fa fa-calendar"></i><span class="item-name" style="margin-left:15px;font-size:15px;">Meeting</span><i class="dd-arrow fa fa-chevron-down"></i>
+                                </a>
+                                <ul class="submenu">
+                                    <li><a href="/Meeting/Index">New Meeting</a></li>
+                                    <li><a href="/Meeting/MeetingList">Meeting List</a></li>
+                                </ul>
                             </li>
                             <li class="nav-item">
                                 <a href="/Labour/Index">
@@ -258,7 +268,7 @@
                     }
 
                     <!-- Submenu Dashboards for HR and Employee-->
-                    @if (User.IsInRole("HR") || User.IsInRole("Employee") || User.IsInRole("Admin") || User.IsInRole("HR"))
+                    @if (User.IsInRole("HR") || User.IsInRole("Employee") || User.IsInRole("Admin") || User.IsInRole("Labour"))
                     {
                         <ul class="childNav" data-parent="attendance">
                             <li class="nav-item">
