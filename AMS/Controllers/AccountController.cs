@@ -238,8 +238,9 @@ namespace AMS.Controllers
                     if (existingUser != null)
                     {
                         // Update user properties
-                        existingUser.UserName = model.FirstName+existingUser.employeeNumber.Replace("Cactus-EM-", "");
+                        //existingUser.UserName = model.FirstName+existingUser.employeeNumber.Replace("Cactus-EM-", "");
                         existingUser.Email = model.Email;
+                        existingUser.UserName = model.Email;
                         existingUser.CNIC = model.CNIC;
                         existingUser.DepartmentId = model.DepartmentId;
                         existingUser.perHour = model.perHour;
@@ -295,7 +296,7 @@ namespace AMS.Controllers
                     // Now assign this newEmployeeNumber to the employee being registered
                     var user = new ApplicationUser
                     {
-                        UserName = model.FirstName+uniqueNumber,
+                        UserName = model.Email,
                         Email = model.Email,
                         CNIC = model.CNIC,
                         DepartmentId = model.DepartmentId,

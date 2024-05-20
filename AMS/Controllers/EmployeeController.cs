@@ -132,7 +132,9 @@ namespace AMS.Controllers
         {
             int month = DateTime.Now.Month;
 
-            var totalPayment = _dbContext.Payroll.Where(p => p.Month == month).Sum(p => p.TotalSalary);
+            var totalPayment = _dbContext.Payroll
+                                         .Where(p => p.Month == month)
+                                         .Sum(p => (decimal?)p.TotalSalary) ?? 0;
 
             return Json(new {  totalPayment = totalPayment }, JsonRequestBehavior.AllowGet);
         }

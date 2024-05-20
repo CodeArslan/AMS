@@ -387,7 +387,7 @@
                 </div>
                 <div>
                     <div class="table-responsive">
-                        <table class="table text-center" id="empAttendanceTable">
+                        <table class="table" id="empAttendanceTable">
                             <thead>
                                 <tr>
                                     <th scope="col">Employee Name</th>
@@ -666,7 +666,7 @@
                     "url": '/Attendance/GetEmployeeAttendanceData',
                     "type": "GET",
                     "datatype": "json",
-                    "dataSrc": "",
+                    "dataSrc":"",
                     "contentType": 'application/json; charset=utf-8',
                     "beforeSend": function (xhr) {
                         hideSpinner();
@@ -705,7 +705,8 @@
                             } else {
                                 return moment(data, 'HH:mm:ss').format('h:mm A');
                             }
-                        }
+                        },
+                        width: "50px",
                     },
                     {
                         "data": "timeOut",
@@ -717,7 +718,9 @@
                             } else {
                                 return "--:--";
                             }
-                        }
+                        },
+                        width: "60px",
+
                     },
                     { "data": "totalWorkedTime" }
                 ]

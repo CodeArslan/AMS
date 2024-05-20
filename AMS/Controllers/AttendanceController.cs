@@ -292,11 +292,13 @@ namespace AMS.Controllers
                 .ToList();
 
             // Initialize variables for total hours worked and total salary
-            double totalHoursWorked = 0;
+            double totalNormalHoursWorked = 0;
+            double totalOvertimeHoursWorked = 0;
             decimal totalSalary = 0;
 
-            // Assuming hourly rate is $10 for simplicity
+            // Assuming hourly rate is retrieved from the database
             decimal hourlyRate = _dbContext.Users.Where(e => e.Id == employeeId).Select(e => e.perHour).FirstOrDefault();
+            decimal overtimeRate = hourlyRate * 1.5m; // 50% extra for overtime
 
             // Calculate total hours worked
             foreach (var attendance in attendances)
@@ -313,18 +315,27 @@ namespace AMS.Controllers
                     workedTime = attendance.timeOut - attendance.timeIn;
                 }
 
-                // Add total hours worked
-                totalHoursWorked += workedTime.TotalHours;
+                // Calculate normal and overtime hours
+                double hoursWorked = workedTime.TotalHours - 1;
+                if (hoursWorked > 8)
+                {
+                    totalNormalHoursWorked += 8;
+                    totalOvertimeHoursWorked += hoursWorked - 8;
+                }
+                else
+                {
+                    totalNormalHoursWorked += hoursWorked;
+                }
             }
 
             // Calculate total salary based on total hours worked
-            totalSalary = (decimal)totalHoursWorked * hourlyRate;
+            totalSalary = (decimal)totalNormalHoursWorked * hourlyRate + (decimal)totalOvertimeHoursWorked * overtimeRate;
 
             // Format totalSalary to two decimal places
             totalSalary = Math.Round(totalSalary, 2);
 
             // Format totalHoursWorked to two decimal places
-            totalHoursWorked = Math.Round(totalHoursWorked, 2);
+            double totalHoursWorked = Math.Round(totalNormalHoursWorked + totalOvertimeHoursWorked, 2);
 
             // Check if there's already a payroll entry for the current month, year, and employee
             var existingPayroll = _dbContext.Payroll
@@ -367,11 +378,13 @@ namespace AMS.Controllers
                 .ToList();
 
             // Initialize variables for total hours worked and total salary
-            double totalHoursWorked = 0;
+            double totalNormalHoursWorked = 0;
+            double totalOvertimeHoursWorked = 0;
             decimal totalSalary = 0;
 
-            // Assuming hourly rate is $10 for simplicity
+            // Assuming hourly rate is retrieved from the database
             decimal hourlyRate = _dbContext.Users.Where(e => e.Id == labourId).Select(e => e.perHour).FirstOrDefault();
+            decimal overtimeRate = hourlyRate * 1.5m; // 50% extra for overtime
 
             // Calculate total hours worked
             foreach (var attendance in attendances)
@@ -388,18 +401,27 @@ namespace AMS.Controllers
                     workedTime = attendance.timeOut - attendance.timeIn;
                 }
 
-                // Add total hours worked
-                totalHoursWorked += workedTime.TotalHours;
+                // Calculate normal and overtime hours
+                double hoursWorked = workedTime.TotalHours - 1;
+                if (hoursWorked > 8)
+                {
+                    totalNormalHoursWorked += 8;
+                    totalOvertimeHoursWorked += hoursWorked - 8;
+                }
+                else
+                {
+                    totalNormalHoursWorked += hoursWorked;
+                }
             }
 
             // Calculate total salary based on total hours worked
-            totalSalary = (decimal)totalHoursWorked * hourlyRate;
+            totalSalary = (decimal)totalNormalHoursWorked * hourlyRate + (decimal)totalOvertimeHoursWorked * overtimeRate;
 
             // Format totalSalary to two decimal places
             totalSalary = Math.Round(totalSalary, 2);
 
             // Format totalHoursWorked to two decimal places
-            totalHoursWorked = Math.Round(totalHoursWorked, 2);
+            double totalHoursWorked = Math.Round(totalNormalHoursWorked + totalOvertimeHoursWorked, 2);
 
             // Check if there's already a payroll entry for the current month, year, and employee
             var existingPayroll = _dbContext.Payroll
@@ -455,11 +477,19 @@ namespace AMS.Controllers
                         existingAttendance.timeIn = attendance.timeIn;
                         existingAttendance.timeOut = attendance.timeOut;
                         existingAttendance.status = "Present";
-                        // Calculate total worked hours
-                        TimeSpan workedHours = existingAttendance.timeOut - existingAttendance.timeIn;
+                        // Calculate the time difference between timeOut and timeIn
+                        TimeSpan timeDifference = existingAttendance.timeOut - existingAttendance.timeIn;
+
+                        // Check if timeOut is earlier than timeIn, indicating it spans across two days
+                        if (timeDifference.TotalMinutes < 0)
+                        {
+                            // Adjust timeOut to be on the next day
+                            timeDifference = TimeSpan.FromDays(1) + timeDifference;
+                        }
+
                         // Calculate total worked hours and minutes
-                        int totalWorkedHours = (int)workedHours.TotalHours;
-                        int totalWorkedMinutes = workedHours.Minutes;
+                        int totalWorkedHours = (int)timeDifference.TotalHours;
+                        int totalWorkedMinutes = timeDifference.Minutes;
 
                         // Format the total worked hours and minutes
                         string formattedTotalWorkedTime = $"{totalWorkedHours} Hours {totalWorkedMinutes} Minutes";
@@ -472,13 +502,25 @@ namespace AMS.Controllers
                     }
                     else
                     {
-                        TimeSpan workedHours = attendance.timeOut - attendance.timeIn;
+                        // Calculate the time difference between timeOut and timeIn
+                        TimeSpan timeDifference = existingAttendance.timeOut - existingAttendance.timeIn;
+
+                        // Check if timeOut is earlier than timeIn, indicating it spans across two days
+                        if (timeDifference.TotalMinutes < 0)
+                        {
+                            // Adjust timeOut to be on the next day
+                            timeDifference = TimeSpan.FromDays(1) + timeDifference;
+                        }
+
                         // Calculate total worked hours and minutes
-                        int totalWorkedHours = (int)workedHours.TotalHours;
-                        int totalWorkedMinutes = workedHours.Minutes;
+                        int totalWorkedHours = (int)timeDifference.TotalHours;
+                        int totalWorkedMinutes = timeDifference.Minutes;
 
                         // Format the total worked hours and minutes
                         string formattedTotalWorkedTime = $"{totalWorkedHours} Hours {totalWorkedMinutes} Minutes";
+
+
+
                         // Employee is checking in for the first time today, mark time in
                         Attendance attendance1 = new Attendance
                         {
@@ -516,21 +558,18 @@ namespace AMS.Controllers
                         existingAttendance.timeIn = attendance.timeIn;
                         existingAttendance.timeOut = attendance.timeOut;
                         existingAttendance.status = "Present";
-                        // Calculate total worked hours
-                        TimeSpan workedHours;
-                        if (attendance.timeOut < attendance.timeIn)
+                        TimeSpan timeDifference = existingAttendance.timeOut - existingAttendance.timeIn;
+
+                        // Check if timeOut is earlier than timeIn, indicating it spans across two days
+                        if (timeDifference.TotalMinutes < 0)
                         {
-                            // Handle the case where time spans across two different days
-                            workedHours = TimeSpan.FromHours(24) - (attendance.timeIn - attendance.timeOut);
-                        }
-                        else
-                        {
-                            workedHours = attendance.timeOut - attendance.timeIn;
+                            // Adjust timeOut to be on the next day
+                            timeDifference = TimeSpan.FromDays(1) + timeDifference;
                         }
 
                         // Calculate total worked hours and minutes
-                        int totalWorkedHours = (int)workedHours.TotalHours;
-                        int totalWorkedMinutes = workedHours.Minutes;
+                        int totalWorkedHours = (int)timeDifference.TotalHours;
+                        int totalWorkedMinutes = timeDifference.Minutes;
 
                         // Format the total worked hours and minutes
                         string formattedTotalWorkedTime = $"{totalWorkedHours} Hours {totalWorkedMinutes} Minutes";
@@ -542,20 +581,18 @@ namespace AMS.Controllers
                     }
                     else
                     {
-                        TimeSpan workedHours;
-                        if (attendance.timeOut < attendance.timeIn)
+                        TimeSpan timeDifference = existingAttendance.timeOut - existingAttendance.timeIn;
+
+                        // Check if timeOut is earlier than timeIn, indicating it spans across two days
+                        if (timeDifference.TotalMinutes < 0)
                         {
-                            // Handle the case where time spans across two different days
-                            workedHours = TimeSpan.FromHours(24) - (attendance.timeIn - attendance.timeOut);
-                        }
-                        else
-                        {
-                            workedHours = attendance.timeOut - attendance.timeIn;
+                            // Adjust timeOut to be on the next day
+                            timeDifference = TimeSpan.FromDays(1) + timeDifference;
                         }
 
                         // Calculate total worked hours and minutes
-                        int totalWorkedHours = (int)workedHours.TotalHours;
-                        int totalWorkedMinutes = workedHours.Minutes;
+                        int totalWorkedHours = (int)timeDifference.TotalHours;
+                        int totalWorkedMinutes = timeDifference.Minutes;
 
                         // Format the total worked hours and minutes
                         string formattedTotalWorkedTime = $"{totalWorkedHours} Hours {totalWorkedMinutes} Minutes";

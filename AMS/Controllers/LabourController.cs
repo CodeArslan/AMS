@@ -117,7 +117,7 @@ namespace AMS.Controllers
                     var existingUser = await UserManager.FindByIdAsync(model.Id);
                     if (existingUser != null)
                     {
-                        existingUser.UserName = model.FirstName+existingUser.employeeNumber.Replace("Cactus-LA-", "");
+                        existingUser.UserName = model.Email;
                         existingUser.Email = model.Email;
                         existingUser.CNIC = model.CNIC;
                         existingUser.DepartmentId = model.DepartmentId;
@@ -175,7 +175,7 @@ namespace AMS.Controllers
                     // Now assign this newEmployeeNumber to the employee being registered
                     var user = new ApplicationUser
                     {
-                        UserName = model.FirstName+uniqueNumber,
+                        UserName = model.Email,
                         Email = model.Email,
                         CNIC = model.CNIC,
                         DepartmentId = model.DepartmentId,

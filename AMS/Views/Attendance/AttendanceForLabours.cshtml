@@ -422,6 +422,13 @@
                         // Check if timeIn is greater than or equal to timeOut
                         var timeInValue = new Date('1970-01-01T' + timeIn + ':00Z'); // Assuming seconds are always zero
                         var timeOutValue = new Date('1970-01-02T' + timeOut + ':00Z'); // Assuming next day to handle timeOut as 00:00
+                  
+
+                        // Check if timeOut is in the AM (after midnight)
+                        if (timeOutValue.getHours() < 12) {
+                            // If so, add a day to the date
+                            timeOutValue.setDate(timeOutValue.getDate() + 1);
+                        }
 
                         if (timeInValue >= timeOutValue) {
                             // Display error message below the timeIn input field

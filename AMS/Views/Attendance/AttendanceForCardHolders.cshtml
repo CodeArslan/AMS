@@ -557,8 +557,18 @@
                             return false; // Exit the loop if error occurred
                         }
 
+                        // Convert time strings to Date objects
+                        var timeInDate = new Date('2000-01-01T' + timeIn); // Assuming date is irrelevant, just using it for time comparison
+                        var timeOutDate = new Date('2000-01-01T' + timeOut);
+
+                        // Check if timeOut is in the AM (after midnight)
+                        if (timeOutDate.getHours() < 12) {
+                            // If so, add a day to the date
+                            timeOutDate.setDate(timeOutDate.getDate() + 1);
+                        }
+
                         // Check if timeIn is earlier than timeOut
-                        if (timeIn >= timeOut) {
+                        if (timeInDate >= timeOutDate) {
                             errorOccurred = true;
                             $('#errorMessage').text('Time In should be earlier than Time Out.');
                             $('#errorAlert').fadeIn();
@@ -566,6 +576,7 @@
 
                             return false; // Exit the loop if error occurred
                         }
+
 
                         // Add the data to the array
                         dataToUpload.push({ employeeId: id, timeIn: timeIn, timeOut: timeOut, date: date });
@@ -584,6 +595,7 @@
                     contentType: 'application/json',
                     data: JSON.stringify(dataToUpload),
                     success: function (response) {
+                        fetchEmployeeByCard();
                         fetchEmployeeAttendance();
                         $('#successMessage').text(response.message);
                         $('#successAlert').fadeIn();

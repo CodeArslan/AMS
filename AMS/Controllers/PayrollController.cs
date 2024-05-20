@@ -150,14 +150,15 @@ namespace AMS.Controllers
         public ActionResult getPayrollGraphData()
         {
             var payroll = _dbContext.Payroll
-                .GroupBy(p => p.Month)
-                .Select(g => new
-                {
-                    Month = g.Key,
-                    Office = g.Where(p => p.employeeId != null).Sum(p => p.TotalSalary),
-                    Labour = g.Where(p => p.labourId != null).Sum(p => p.TotalSalary)
-                })
-                .ToList();
+      .GroupBy(p => p.Month)
+      .Select(g => new
+      {
+          Month = g.Key,
+          Office = g.Where(p => p.employeeId != null).Sum(p => (decimal?)p.TotalSalary) ?? 0,
+          Labour = g.Where(p => p.labourId != null).Sum(p => (decimal?)p.TotalSalary) ?? 0
+      })
+      .ToList();
+
 
             var months = new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec" };
 

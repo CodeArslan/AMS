@@ -154,7 +154,7 @@
 
                         </ul>
                     }
-                    else if (User.IsInRole("Employee"))
+                    else if (User.IsInRole("Employee,HR,Labour"))
                     {
                         <!-- HR aur Employee ke liye sirf Attendance button -->
                 <ul class="navigation-left">
@@ -258,7 +258,7 @@
                     }
 
                     <!-- Submenu Dashboards for HR and Employee-->
-                    @if (User.IsInRole("HR") || User.IsInRole("Employee") || User.IsInRole("Admin"))
+                    @if (User.IsInRole("HR") || User.IsInRole("Employee") || User.IsInRole("Admin") || User.IsInRole("HR"))
                     {
                         <ul class="childNav" data-parent="attendance">
                             <li class="nav-item">
@@ -347,7 +347,7 @@
                         <div class="row">
                             <label for="emailReset" class="col-md-2 col-form-label">Email</label>
                             <div class="col-md-10">
-                                <input type="text" class="form-control disableEmail" id="emailReset" name="Email" />
+                                <input type="text" class="form-control disableEmail" id="emailReset" name="Email" autocomplete="new-email" />
                             </div>
                         </div>
                         <div class="row mt-2">
