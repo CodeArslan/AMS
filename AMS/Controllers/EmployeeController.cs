@@ -35,7 +35,7 @@ namespace AMS.Controllers
          
         public async Task<ActionResult> GetEmployeeData()
         {
-            var empList = await _dbContext.Users.Where(e=>e.isLabour==false)
+            var empList = await _dbContext.Users.Where(e=>e.isLabour==false && e.isDeleted==false)
                 .Include(u => u.Department)
                 .Include(u => u.Card) 
                 .AsNoTracking()
@@ -50,7 +50,7 @@ namespace AMS.Controllers
             }
             else
             {
-                _dbContext.Users.Remove(userinDb);
+                userinDb.isDeleted = true;
                 _dbContext.SaveChanges();
                 return Json(new { success = true, message = "Employee Successfully Deleted" });
 

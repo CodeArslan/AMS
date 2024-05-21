@@ -122,6 +122,7 @@ namespace AMS.Models
         public string employeeNumber { get; set; }
         public bool isPasswordChanged { get; set; }
         public bool? isLabour { get; set; }
+        public bool? isDeleted { get; set; }
         public List<Shift> Shift { get; set; }
         [ForeignKey("Shift")]
         [Display(Name = "Shift")]

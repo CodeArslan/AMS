@@ -55,6 +55,7 @@ namespace AMS.Models
         [ForeignKey("Shift")]
         [Display(Name = "Shift")]
         public int? shiftId { get; set; }
+        public bool? isDeleted { get; set; }
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
             

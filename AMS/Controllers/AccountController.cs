@@ -312,6 +312,7 @@ namespace AMS.Controllers
                         Gender = model.Gender,
                         Role = model.Role,
                         isLabour=false,
+                        isDeleted=false,
                         employeeNumber = newEmployeeNumber // Assign the new employee number here
                     };
                     var result = await UserManager.CreateAsync(user, model.Password);

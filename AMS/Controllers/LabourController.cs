@@ -63,7 +63,7 @@ namespace AMS.Controllers
         }
         public async Task<ActionResult> GetLabourData()
         {
-            var labourList = await _dbContext.Users.Where(l=>l.isLabour==true).Include(l=>l.Department).AsNoTracking().ToListAsync();
+            var labourList = await _dbContext.Users.Where(l=>l.isLabour==true&&l.isDeleted==false).Include(l=>l.Department).AsNoTracking().ToListAsync();
             return Json(labourList, JsonRequestBehavior.AllowGet);
         }
         public ActionResult GetLabourById(string id)
@@ -191,6 +191,7 @@ namespace AMS.Controllers
                         Gender = model.Gender,
                         Role = model.Role,
                         isLabour=true,
+                        isDeleted=false,
                         employeeNumber = newEmployeeNumber // Assign the new employee number here
                     };
                     var result = await UserManager.CreateAsync(user, model.Password);
@@ -275,7 +276,7 @@ namespace AMS.Controllers
 
             try
             {
-                _dbContext.Users.Remove(labourInDb);
+                labourInDb.isDeleted = true;
                 _dbContext.SaveChanges();
                 return Json(new { success = true, message = "Labour Successfully Deleted" });
             }
