@@ -503,7 +503,7 @@ namespace AMS.Controllers
                     else
                     {
                         // Calculate the time difference between timeOut and timeIn
-                        TimeSpan timeDifference = existingAttendance.timeOut - existingAttendance.timeIn;
+                        TimeSpan timeDifference = attendance.timeOut - attendance.timeIn;
 
                         // Check if timeOut is earlier than timeIn, indicating it spans across two days
                         if (timeDifference.TotalMinutes < 0)
