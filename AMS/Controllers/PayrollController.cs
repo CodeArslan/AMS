@@ -26,7 +26,7 @@ namespace AMS.Controllers
         {
             return View();
         }
-        [Authorize(Roles = "Employee,Labour")]
+        [Authorize(Roles = "Employee,Labour,HR,Admin")]
         public ActionResult EmployeePayroll()
         {
             return View();

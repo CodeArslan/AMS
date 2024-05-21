@@ -9,6 +9,8 @@ using System.Web.Mvc;
 
 namespace AMS.Controllers
 {
+    [Authorize(Roles = "Admin")]
+
     public class DepartmentController : Controller
     {
         // GET: Department

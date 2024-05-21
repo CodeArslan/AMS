@@ -12,6 +12,8 @@ using System.Web.Mvc;
 
 namespace AMS.Controllers
 {
+    [Authorize(Roles = "Admin")]
+
     public class LabourController : Controller
     {
         private ApplicationSignInManager _signInManager;
@@ -51,6 +53,7 @@ namespace AMS.Controllers
                 _userManager = value;
             }
         }
+
         public ActionResult Index()
         {
             var shiftList = _dbContext.Shifts.ToList();

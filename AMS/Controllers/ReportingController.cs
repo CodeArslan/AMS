@@ -10,6 +10,7 @@ using System.Web.Mvc;
 
 namespace AMS.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ReportingController : Controller
     {
         // GET: Reporting

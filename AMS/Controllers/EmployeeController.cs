@@ -14,6 +14,8 @@ using System.Web.Services.Description;
 
 namespace AMS.Controllers
 {
+    [Authorize(Roles = "Admin")]
+
     public class EmployeeController : Controller
     {
         // GET: Employee

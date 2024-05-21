@@ -11,6 +11,8 @@ using System.Web.Mvc;
 using System.Data.Entity;
 namespace AMS.Controllers
 {
+    [Authorize(Roles = "Admin")]
+
     public class MeetingController : Controller
     {
         // GET: Meeting

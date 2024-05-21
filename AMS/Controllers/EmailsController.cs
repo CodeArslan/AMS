@@ -10,6 +10,8 @@ using System.Configuration;
 
 namespace AMS.Controllers
 {
+    [Authorize(Roles = "Admin")]
+
     public class EmailsController : Controller
     {
 

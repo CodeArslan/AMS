@@ -1,5 +1,6 @@
 ﻿using AMS.Models;
 using AMS.ViewModels;
+using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -20,7 +21,13 @@ namespace AMS.Controllers
             _dbContext = new ApplicationDbContext();
         }
         // GET: Shift
+        [Authorize(Roles = "Admin")]
         public ActionResult Index()
+        {
+            return View();
+        }
+        [Authorize(Roles = "Employee,HR,Labour")]
+        public ActionResult EmployeeShift()
         {
             return View();
         }
@@ -199,6 +206,49 @@ namespace AMS.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Error occurred: " + ex.Message });
+            }
+        }
+        public async Task<ActionResult> GetAssignedShiftDataByUser()
+        {
+            try
+            {
+                var loggedInUser = User.Identity.GetUserId();
+
+                var assignedShiftData = await _dbContext.Users
+                    .Where(u => u.Id == loggedInUser && u.shiftId != null)
+                    .Join(_dbContext.Shifts,
+                        labour => labour.shiftId,
+                        shift => shift.Id,
+                        (labour, shift) => new
+                        {
+                            LabourName = labour.FirstName + " " + labour.LastName,
+                            ShiftName = shift.clientName,
+                            Location = shift.location,
+                            ShiftType = shift.shiftType,
+                            StartTime = shift.startTime,
+                            EndTime = shift.endTime,
+                            Id = labour.Id
+                        })
+                    .ToListAsync();
+
+                // Convert DateTime to string format
+                var formattedShiftData = assignedShiftData.Select(x => new
+                {
+                    x.LabourName,
+                    x.ShiftName,
+                    x.Location,
+                    x.ShiftType,
+                    StartTime = x.StartTime.ToString(@"hh\:mm\:ss"),
+                    EndTime = x.EndTime.ToString(@"hh\:mm\:ss"),
+                    x.Id
+                });
+
+                // Return the JSON result
+                return Json(formattedShiftData, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, errorMessage = "An error occurred while fetching assigned shift data." });
             }
         }
         public async Task<ActionResult> GetAssignedShiftData(int? shiftId)

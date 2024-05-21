@@ -54,12 +54,14 @@ namespace AMS.Controllers
         }
 
         // GET: Leave
+        [Authorize(Roles = "Admin")]
+
         public ActionResult Index()
         {
             return View();
         }
 
-        [Authorize(Roles = "Employee,HR,Labour")]
+        [Authorize(Roles = "Employee,HR,Labour,Admin")]
         public ActionResult EmployeeLeave()
         {
             return View();

@@ -9,6 +9,8 @@ using System.Web.Mvc;
 
 namespace AMS.Controllers
 {
+    [Authorize(Roles = "Admin")]
+
     public class CardController : Controller
     {
         private ApplicationDbContext _dbContext;

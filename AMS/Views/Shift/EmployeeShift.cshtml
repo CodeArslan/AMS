@@ -1,0 +1,116 @@
+﻿
+@{
+    ViewBag.Title = "EmployeeShift";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="breadcrumb">
+            <ul>
+                <li><a href="/Leave/EmployeeLeave">Employee Leave</a></li>
+            </ul>
+        </div>
+        <div class="separator-breadcrumb border-top"></div>
+    </div>
+    <div class="col-md-12 mb-3">
+
+
+        <div class="card text-start">
+
+            <div class="card-header">
+                <h4 class="text-25 text-muted">Assigned shift</h4>
+            </div>
+            <div class="alert alert-dismissible fade show alert-card alert-success" role="alert" id="successAlert" style="display:none">
+                <strong class="text-capitalize">Success!</strong> <span id="successMessage"></span>
+                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="alert alert-dismissible fade show alert-card alert-danger" role="alert" id="errorAlert" style="display:none">
+                <strong class="text-capitalize">Error!</strong> <span id="errorMessage"></span>
+                <button class="btn btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped" id="assignedShifttoLabour">
+                        <thead class="bg-light">
+                            <tr>
+                                <th scope="col">Labour Name</th>
+                                <th scope="col">Client Name</th>
+                                <th scope="col">Location</th>
+                                <th scope="col">Time In</th>
+                                <th scope="col">Time Out</th>
+                                <th scope="col">Type</th>
+                            </tr>
+                        </thead>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+@section scripts
+{
+    <script>
+
+        $(document).ready(function () {
+            var activeShiftTable = $('#assignedShifttoLabour').DataTable({
+                destroy: true,
+                ajax: {
+                    url: '/Shift/GetAssignedShiftDataByUser', 
+                    dataSrc: ''
+                },
+                columns: [
+                    { data: 'LabourName' },
+                    { data: 'ShiftName' },
+                    { data: 'Location' },
+                    {
+                        data: "StartTime",
+                        render: function (data) {
+                            return moment(data, 'HH:mm:ss').format('h:mm A');
+                        }
+                    },
+                    {
+                        data: "EndTime",
+                        render: function (data) {
+                            return moment(data, 'HH:mm:ss').format('h:mm A');
+                        }
+                    },
+                    { data: 'ShiftType' },
+
+                ],
+                pagingType: 'full_numbers',
+                language: {
+                    paginate: {
+                        first: 'First',
+                        previous: '&lsaquo;',
+                        next: '&rsaquo;',
+                        last: 'Last'
+                    },
+                    searchPlaceholder: 'Min 3 Characters'
+                },
+                autoWidth: false,
+                columnDefs: [
+                    { width: '100px', targets: '_all' }
+                ],
+                drawCallback: function () {
+                    // Override DataTables styles with Bootstrap styles after each draw
+                    $('.dataTables_paginate .paginate_button').removeClass('paginate_button').addClass('page-item');
+                    $('.dataTables_paginate .paginate_button a').removeClass('paginate_button').addClass('page-link');
+                    $('.dataTables_paginate .paginate_button.current').removeClass('paginate_button').addClass('active');
+                    $('.dataTables_paginate .paginate_button.disabled').removeClass('paginate_button').addClass('disabled');
+                }
+            });
+
+        });
+    </script>
+
+}
