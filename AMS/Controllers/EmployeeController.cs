@@ -125,7 +125,7 @@ namespace AMS.Controllers
         }
         public ActionResult EmployeeCounts()
         {
-            var count = _dbContext.Users.Where(u => u.isActive == true).Count();
+            var count = _dbContext.Users.Where(u => u.isActive == true&&u.isDeleted==false).Count();
             return Json(new { employeeCount = count }, JsonRequestBehavior.AllowGet);
         }
         public ActionResult PayrollCountThisMonth()

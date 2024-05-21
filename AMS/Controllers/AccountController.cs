@@ -84,7 +84,11 @@ namespace AMS.Controllers
                 ModelState.AddModelError("", "Invalid login attempt.");
                 return View(model);
             }
-
+            if (user.isDeleted == true)
+            {
+                ModelState.AddModelError("", "This account has been deleted.");
+                return View(model);
+            }
             if (!await UserManager.IsEmailConfirmedAsync(user.Id))
             {
                 string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
