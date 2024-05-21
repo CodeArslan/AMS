@@ -145,11 +145,12 @@ namespace AMS.Controllers
             DateTime today = DateTime.Today;
 
             var count = _dbContext.receivedLeaveRequests
-                                 .Where(l => l.Date == today && l.Decision=="Approved")
-                                 .Count();
-
+                       .Where(l => DbFunctions.TruncateTime(l.Date) == today && l.Decision == "Approved")
+                       .Distinct()
+                       .Count();
             return Json(new { employeeOnLeaveCount = count }, JsonRequestBehavior.AllowGet);
         }
+
 
     }
 }

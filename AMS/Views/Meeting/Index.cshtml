@@ -9,25 +9,44 @@
         opacity: 0;
         pointer-events: none;
     }
+
     .green-light {
-    width: 10px; /* Adjust size as needed */
-    height: 10px; /* Adjust size as needed */
-    background-color: green;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 5px; /* Adjust distance from the button */
-    animation: blink-animation 1s infinite alternate;
-}
+        width: 10px; /* Adjust size as needed */
+        height: 10px; /* Adjust size as needed */
+        background-color: green;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 5px; /* Adjust distance from the button */
+        animation: blink-animation 1s infinite alternate;
+    }
+
     .disabled-dropdown {
         pointer-events: none;
         opacity: 0.6;
     }
 
-@@keyframes blink-animation {
-    from { opacity: 1; }
-    to { opacity: 0; }
-}
+    @@keyframes blink-animation {
+        from {
+            opacity: 1;
+        }
+
+        to {
+            opacity: 0;
+        }
+    }
 </style>
+<div class="main-content">
+    <div class="breadcrumb">
+        <ul>
+            <li><a href="/Meeting/Index">New Meeting</a></li>
+        </ul>
+    </div>
+    <div class="separator-breadcrumb border-top"></div>
+</div>
+
+<p>
+    <a class="btn btn-primary m-1" href="/Meeting/MeetingList">Meeting List</a>
+</p>
 <div class="row">
     <div class="col-md-12">
 
@@ -54,7 +73,7 @@
                 </div>
                 <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
 
-                    @using (Ajax.BeginForm("Create", "Meeting", null, new AjaxOptions { HttpMethod = "POST", OnSuccess = "handleMeetingCreation", OnFailure= "handleMeetingFailure", OnBegin= "validateForm" }))
+                    @using (Ajax.BeginForm("Create", "Meeting", null, new AjaxOptions { HttpMethod = "POST", OnSuccess = "handleMeetingCreation", OnFailure = "handleMeetingFailure", OnBegin = "validateForm" }))
                     {
                         <div class="d-sm-flex mb-5" data-view="print">
                             <span class="m-auto"></span>
@@ -68,11 +87,11 @@
                                 <label class="d-block text-12 text-muted">Meeting Status</label>
                                 <div class="pe-0 mb-4">
                                     <label class="radio radio-reverse radio-danger">
-                                        <input type="radio" name="meetingStatus" value="Scheduled" onchange="setMeetingStatus()" checked/><span>Scheduled</span><span class="checkmark"></span>
+                                        <input type="radio" name="meetingStatus" value="Scheduled" onchange="setMeetingStatus()" checked /><span>Scheduled</span><span class="checkmark"></span>
                                     </label>
                                     @*<label class="radio radio-reverse radio-warning">
-                                        <input type="radio" name="meetingStatus" value="In Progress" onchange="setMeetingStatus()" /><span>In Progress</span><span class="checkmark"></span>
-                                    </label>*@
+                                            <input type="radio" name="meetingStatus" value="In Progress" onchange="setMeetingStatus()" /><span>In Progress</span><span class="checkmark"></span>
+                                        </label>*@
                                     <label class="radio radio-reverse radio-success">
                                         <input type="radio" name="meetingStatus" value="Completed" onchange="setMeetingStatus()" /><span>Completed</span><span class="checkmark"></span>
                                     </label>
@@ -88,30 +107,31 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     @Html.LabelFor(model => model.Meeting.Date)
-                                    @Html.TextBoxFor(model => model.Meeting.Date, new { @class = "form-control", type = "date",@id="meeting-date" })
+                                    @Html.TextBoxFor(model => model.Meeting.Date, new { @class = "form-control", type = "date", @id = "meeting-date" })
                                     @Html.ValidationMessageFor(model => model.Meeting.Date, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     @Html.LabelFor(model => model.Meeting.StartTime)
-                                    @Html.TextBoxFor(model => model.Meeting.StartTime, new { @class = "form-control", type = "time",@id="startTime" })
+                                    @Html.TextBoxFor(model => model.Meeting.StartTime, new { @class = "form-control", type = "time", min = "09:00", max = "18:00", @id = "startTime" })
                                     @Html.ValidationMessageFor(model => model.Meeting.StartTime, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     @Html.LabelFor(model => model.Meeting.EndTime)
-                                    @Html.TextBoxFor(model => model.Meeting.EndTime, new { @class = "form-control", type = "time", @id="endTime" })
+                                    @Html.TextBoxFor(model => model.Meeting.EndTime, new { @class = "form-control", type = "time", min = "09:00", max = "18:00", @id = "endTime" })
                                     @Html.ValidationMessageFor(model => model.Meeting.EndTime, "", new { @class = "text-danger" })
                                 </div>
                             </div>
+
                         </div>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     @Html.LabelFor(model => model.Meeting.Agenda)
-                                    @Html.TextBoxFor(model => model.Meeting.Agenda, new { @class = "form-control" })
+                                    @Html.TextBoxFor(model => model.Meeting.Agenda, new { @class = "form-control", autocomplete = "off" })
                                     @Html.ValidationMessageFor(model => model.Meeting.Agenda, "", new { @class = "text-danger" })
                                 </div>
                             </div>
@@ -119,7 +139,7 @@
                                 <div class="form-group">
                                     @Html.LabelFor(model => model.Meeting.Location)
                                     @Html.TextBoxFor(model => model.Meeting.Location, new { @class = "form-control" })
-                                    @Html.ValidationMessageFor(model => model.Meeting.Location, "", new { @class = "text-danger" })
+                                    @Html.ValidationMessageFor(model => model.Meeting.Location, "", new { @class = "text-danger", autocomplete = "off" })
                                     @Html.HiddenFor(model => model.EmployeeIds, new { id = "employeeIds" })
                                     @Html.HiddenFor(model => model.Meeting.Id, new { id = "employeeIds" })
                                 </div>
@@ -164,10 +184,10 @@
 
                     }
                     @*<div class="d-flex mb-5">
-            <span class="m-auto">
-            </span>
+                            <span class="m-auto">
+                            </span>
 
-        </div>*@
+                        </div>*@
                     <br />
                     <br />
                     <div class="row" id="attendeesContainer">
@@ -185,34 +205,34 @@
                         }
                     </div>
                 </div>
+            </div>
         </div>
     </div>
 </div>
-    </div>
 
 @*<div class="row">
-   
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="text-primary">Meeting Details</h4>
-            </div>
-            <div class="card-body">
-             
-            </div>
-        </div>
 
-    </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="text-primary">Attendees</h4>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="text-primary">Meeting Details</h4>
+                </div>
+                <div class="card-body">
+
+                </div>
             </div>
-            <div class="card-body" id="attendeesContainer">
+
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="text-primary">Attendees</h4>
+                </div>
+                <div class="card-body" id="attendeesContainer">
+                </div>
             </div>
         </div>
-    </div>
-</div>*@
+    </div>*@
 
 @section scripts
 {
@@ -221,14 +241,14 @@
         function validateForm() {
             debugger;
             showSpinner();
-            
+
             var startTime = $('#startTime').val();
             var endTime = $('#endTime').val();
 
             // Convert start and end times to Date objects
             var startDate = new Date('2000-01-01 ' + startTime);
             var endDate = new Date('2000-01-01 ' + endTime);
-          
+
             // Compare start and end times
             if (endDate <= startDate) {
                 // End time is not greater than start time, display error message
@@ -309,14 +329,14 @@ orderDateInput.value = formattedDate;
             $('#meetingStatusInput').val(selectedStatus);
         }
         $(document).ready(function () {
-          
+
             $("#infoIcon").tooltip({
                 show: {
                     effect: "slideDown",
                     delay: 250
                 }
             });
-            
+
             $("#depInfoIcon").tooltip({
                 show: {
                     effect: "slideDown",
@@ -324,7 +344,7 @@ orderDateInput.value = formattedDate;
                 }
             });
             if (@Model.Meeting.Id!= 0) {
-              
+
                     // Get the pre-populated date from the input field
                     var prePopulatedDate = $('#meeting-date').val();
 

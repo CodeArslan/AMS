@@ -350,9 +350,12 @@
                                 success: function (response) {
                                     if (response.success) {
                                         // If withdraw operation is successful, show success message
+                                        $('#assignedLabourRow').children().not('.separator-breadcrumb').remove();
+
                                         $('#successMessageforUpdateShift').text('Labour withdrawn successfully.');
                                         $('#successAlertforUpdateShift').show();
                                         $('#errorAlertforUpdateShift').hide();
+
                                         setTimeout(hideAlertsForWithdraw, 2000);
                                         GetLabourList();
                                         // Reload the DataTable

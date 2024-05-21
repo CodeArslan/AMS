@@ -20,6 +20,23 @@ namespace AMS.Controllers
         public MeetingController()
         {
             _dbContext = new ApplicationDbContext();
+            UpdateMeetingStatus();
+        }
+        public void UpdateMeetingStatus()
+        {
+            DateTime today = DateTime.Today;
+
+            // Fetch meetings that have a date earlier than today and are not already marked as "Completed"
+            var pastMeetings = _dbContext.Meetings
+                             .Where(m => DbFunctions.TruncateTime(m.Date) < today && m.Status != "Completed")
+                             .ToList();
+
+            foreach (var meeting in pastMeetings)
+            {
+                meeting.Status = "Completed";
+            }
+
+            _dbContext.SaveChanges();
         }
         public ActionResult Index(int? id)
         {

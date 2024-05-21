@@ -316,7 +316,11 @@ namespace AMS.Controllers
                 }
 
                 // Calculate normal and overtime hours
-                double hoursWorked = workedTime.TotalHours - 1;
+                double hoursWorked = workedTime.TotalHours;
+                if (hoursWorked > 5) // Subtract 1 hour if worked more than 5 hours
+                {
+                    hoursWorked -= 1;
+                }
                 if (hoursWorked > 8)
                 {
                     totalNormalHoursWorked += 8;
@@ -402,7 +406,11 @@ namespace AMS.Controllers
                 }
 
                 // Calculate normal and overtime hours
-                double hoursWorked = workedTime.TotalHours - 1;
+                double hoursWorked = workedTime.TotalHours;
+                if (hoursWorked > 5) // Subtract 1 hour if worked more than 5 hours
+                {
+                    hoursWorked -= 1;
+                }
                 if (hoursWorked > 8)
                 {
                     totalNormalHoursWorked += 8;
@@ -487,6 +495,10 @@ namespace AMS.Controllers
                             timeDifference = TimeSpan.FromDays(1) + timeDifference;
                         }
 
+                        if (timeDifference.TotalHours > 5)
+                        {
+                            timeDifference = timeDifference - TimeSpan.FromHours(1);
+                        }
                         // Calculate total worked hours and minutes
                         int totalWorkedHours = (int)timeDifference.TotalHours;
                         int totalWorkedMinutes = timeDifference.Minutes;
@@ -512,6 +524,10 @@ namespace AMS.Controllers
                             timeDifference = TimeSpan.FromDays(1) + timeDifference;
                         }
 
+                        if (timeDifference.TotalHours > 5)
+                        {
+                            timeDifference = timeDifference - TimeSpan.FromHours(1);
+                        }
                         // Calculate total worked hours and minutes
                         int totalWorkedHours = (int)timeDifference.TotalHours;
                         int totalWorkedMinutes = timeDifference.Minutes;

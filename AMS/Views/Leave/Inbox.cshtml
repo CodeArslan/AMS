@@ -416,6 +416,9 @@
 
         
         function handleSuccessforLeave(data) {
+            $('.chat-content').empty();
+            $('#btnApprove').addClass('disabled');
+            $('#btnReject').addClass('disabled');
             $("#responseModal").modal('hide');
             triggerReloadButton();
             $('#successMessage').text("Leave Email Sent Succesfully !!");
