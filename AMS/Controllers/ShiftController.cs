@@ -151,14 +151,14 @@ namespace AMS.Controllers
 
         public ActionResult AssignShift()
         {
-            var shiftList = _dbContext.Shifts.ToList();
+            var shiftList = _dbContext.Shifts.Where(s=>s.isActive==true).ToList();
             var viewModel=new LabourShiftViewModel { Shifts = shiftList };
             return View(viewModel);
         }
         public ActionResult GetLabourList()
         {
            
-            var labourList=_dbContext.Users.Where(l=>l.isLabour==true && l.isActive==true && l.shiftId==null).Select(a => new {
+            var labourList=_dbContext.Users.Where(l=>l.isLabour==true && l.isActive==true && l.shiftId==null&&l.isDeleted==false).Select(a => new {
                 FullName = a.FirstName + " " + a.LastName,
                 Id = a.Id
             }).ToList();

@@ -336,9 +336,16 @@
                     },
                     {
                         data: "isActive",
-                        render: function (data) {
-                            return data ? 'Yes' : 'No';
-                        }
+                        render: function (data, type, row) {
+                            if (type === 'display') {
+                                var status = data ? 'Active' : 'In-Active';
+                                var badgeClass = data ? 'bg-success' : 'bg-danger';
+                                return '<span class="badge rounded-pill ' + badgeClass + ' text-white p-2 m-1">' + status + '</span>';
+                            }
+                            return data ? 'Active' : 'In-Active';
+                        },
+                        orderable: false, // Disable sorting for this column
+                        searchable: false, // Disable searching for this column
                     },
                     {
                         data: "Id", // Use the "Id" property for the action buttons

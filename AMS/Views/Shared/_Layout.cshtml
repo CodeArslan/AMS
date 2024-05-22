@@ -144,9 +144,9 @@
                                 </a>
                             </li>
                             <li class="nav-item no-open" data-item="">
-                                <form id="logoutForm" action="/Account/LogOff" method="post">
+                                <form id="logoutFormTwo" action="/Account/LogOff" method="post">
                                     @Html.AntiForgeryToken()
-                                    <a class="nav-item-hold" href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit()">
+                                    <a class="nav-item-hold" href="javascript:void(0)" onclick="document.getElementById('logoutFormTwo').submit()">
                                         <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
                                     </a>
                                 </form>
@@ -183,9 +183,9 @@
                         </li>
                     }
                     <li class="nav-item no-open" data-item="">
-                        <form id="logoutForm" action="/Account/LogOff" method="post">
+                        <form id="logoutFormThree" action="/Account/LogOff" method="post">
                             @Html.AntiForgeryToken()
-                            <a class="nav-item-hold" href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit()">
+                            <a class="nav-item-hold" href="javascript:void(0)" onclick="document.getElementById('logoutFormThree').submit()">
                                 <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
                             </a>
                         </form>
@@ -212,9 +212,9 @@
                         </a>
                     </li>
                     <li class="nav-item no-open" data-item="">
-                        <form id="logoutForm" action="/Account/LogOff" method="post">
+                        <form id="logoutFormFour" action="/Account/LogOff" method="post">
                             @Html.AntiForgeryToken()
-                            <a class="nav-item-hold" href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit()">
+                            <a class="nav-item-hold" href="javascript:void(0)" onclick="document.getElementById('logoutFormFour').submit()">
                                 <i class="fas fa-sign-out-alt fa-lg"></i><span class="nav-text">LogOut</span>
                             </a>
                         </form>
@@ -436,9 +436,7 @@
                     $('#exampleModalCenter').modal({
                         backdrop: 'static', // Is se modal background click hone par band nahi hoga
                         keyboard: false // Is se modal keyboard events se bhi band nahi hoga
-                    });                }  else {
-                    console.log('Password has already been changed.');
-                }
+                    });                }  
             },
             error: function () {
                 console.log('Error occurred while fetching password reset data.');

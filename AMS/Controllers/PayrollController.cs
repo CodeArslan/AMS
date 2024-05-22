@@ -67,8 +67,10 @@ namespace AMS.Controllers
         {
             var loggedInUser = User.Identity.GetUserId();
             IQueryable<Payroll> payrollQuery = _dbContext.Payroll
-                                                .Include(c => c.ApplicationUser)
-                                                .Include(c => c.Labour).Where(e => e.employeeId == loggedInUser);
+     .Include(c => c.ApplicationUser)
+     .Include(c => c.Labour)
+     .Where(e => e.employeeId == loggedInUser || e.labourId == loggedInUser);
+
 
             if (!year.HasValue && !month.HasValue)
             {

@@ -387,7 +387,7 @@
                 </div>
                 <div>
                     <div class="table-responsive">
-                        <table class="table" id="empAttendanceTable">
+                        <table class="table" id="attendanceTable">
                             <thead>
                                 <tr>
                                     <th scope="col">Employee Name</th>
@@ -660,14 +660,13 @@
                     console.log('Error:', error);
                 }
             });
-            var empAttendanceTable = $('#empAttendanceTable').DataTable({
+             $('#attendanceTable').DataTable({
                 "paging": false,
                 "ajax": {
                     "url": '/Attendance/GetEmployeeAttendanceData',
                     "type": "GET",
                     "datatype": "json",
                     "dataSrc":"",
-                    "contentType": 'application/json; charset=utf-8',
                     "beforeSend": function (xhr) {
                         hideSpinner();
                     }

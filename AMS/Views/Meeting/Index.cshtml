@@ -2,7 +2,7 @@
 @{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
-
+    var isCompleted = Model.Meeting.Status == "Completed";
 }
 <style>
     .fadeProp {
@@ -78,7 +78,7 @@
                         <div class="d-sm-flex mb-5" data-view="print">
                             <span class="m-auto"></span>
                             <div class="form-group">
-                                <input type="submit" value="Create" class="btn btn-primary" />
+                                <input type="submit" value="Save" class="btn btn-primary" id="saveButton"/>
                             </div>
                         </div>
                         <div class="row justify-content-between">
@@ -239,7 +239,6 @@
     <script>
 
         function validateForm() {
-            debugger;
             showSpinner();
 
             var startTime = $('#startTime').val();
@@ -471,6 +470,13 @@ orderDateInput.value = formattedDate;
             setInterval(hideAlerts, 2000);
 
         }
+         $(document).ready(function() {
+            var isCompleted = '@isCompleted'.toLowerCase() === 'true';
+
+            if (isCompleted) {
+                $('#saveButton').prop('disabled', true);
+            }
+        });
 
     </script>
 }
