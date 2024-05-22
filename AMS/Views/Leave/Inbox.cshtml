@@ -416,18 +416,28 @@
 
         
         function handleSuccessforLeave(data) {
-            $('.chat-content').empty();
-            $('#btnApprove').addClass('disabled');
-            $('#btnReject').addClass('disabled');
-            $("#responseModal").modal('hide');
-            triggerReloadButton();
-            $('#successMessage').text("Leave Email Sent Succesfully !!");
-            $('#successAlert').show();
-            setTimeout(hideAlerts, 2000);
+            hideSpinner();
+            if (data.success) {
+                $('.chat-content').empty();
+                $('#btnApprove').addClass('disabled');
+                $('#btnReject').addClass('disabled');
+                $("#responseModal").modal('hide');
+                triggerReloadButton();
+                $('#successMessage').text("Leave Email Sent Successfully !!");
+                $('#successAlert').show();
+                setTimeout(hideAlerts, 2000);
+            } else {
 
+                $("#responseModal").modal('hide');
+
+                $('#errorMessage').text(data.message);
+                $('#errorAlert').show();
+                setTimeout(hideAlerts, 2000);
+            }
         }
 
         function handleFailureforLeave(xhr, status, error) {
+            hideSpinner();
             // Display error message
             $('#errorMessage').text("An Error Occurred While Sending Leave Email. Please Try Again");
             $('#errorAlert').show();

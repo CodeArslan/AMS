@@ -294,52 +294,64 @@ namespace AMS.Controllers
                     {
                         var fromDate = response.FromDate;
                         var toDate = response.ToDate;
-
-                       
                         var message = response.Message;
                         var decision = response.Decision;
                         var Email = _dbContext.receivedLeaveRequests.Where(e => e.Id == response.rlrId).FirstOrDefault();
-                        var leaveBalance = 0;
-                        if(fromDate!= null&&toDate!=null) {
+
+                        if (fromDate != null && toDate != null)
+                        {
                             var days = (toDate.Value - fromDate.Value).Days;
                             if (toDate.Value == fromDate.Value)
                             {
-                                days = 1; // Sirf 1 count karein
+                                days = 1; // Count as 1 day if the dates are the same
                             }
-                            var employee = _dbContext.Users.Where(l => l.Email == Email.From &&l.isLabour==false).FirstOrDefault();
-                            var labour=_dbContext.Users.Where(l=>l.Email==Email.From&&l.isLabour==true).FirstOrDefault();
-                            if(employee!=null)
+
+                            var employee = _dbContext.Users.Where(l => l.Email == Email.From && l.isLabour == false).FirstOrDefault();
+                            var labour = _dbContext.Users.Where(l => l.Email == Email.From && l.isLabour == true).FirstOrDefault();
+
+                            if (employee != null || labour != null)
                             {
-                                leaveBalance = employee.leaveBalance;
-                                employee.leaveBalance = employee.leaveBalance - days;
-                                Email.employeeId = employee.Id;
+                                // Check if there is already a leave request for the same date span
+                                bool leaveExists = _dbContext.LeaveResponses
+                                    .Any(lr => lr.FromDate <= toDate && lr.ToDate >= fromDate && lr.ReceivedLeaveRequests.From == Email.From);
+
+                                if (leaveExists)
+                                {
+                                    return Json(new { success = false, message = "Leave for this date span already exists." });
+                                }
+
+                                var leaveBalance = (employee != null) ? employee.leaveBalance : labour.leaveBalance;
+
+                                if (employee != null)
+                                {
+                                    employee.leaveBalance -= days;
+                                    Email.employeeId = employee.Id;
+                                }
+                                else
+                                {
+                                    labour.leaveBalance -= days;
+                                    Email.labourId = labour.Id;
+                                }
+
                                 Email.Reason = response.ReceivedLeaveRequests.Reason;
                                 _dbContext.SaveChanges();
-                            }
-                            else
-                            {
-                                leaveBalance = labour.leaveBalance;
-                                labour.leaveBalance = labour.leaveBalance - days;
-                                Email.labourId = labour.Id;
-                                Email.Reason = response.ReceivedLeaveRequests.Reason;
+
+                                sendLeaveEmail(fromDate, toDate, message, Email.From, decision, leaveBalance);
+                                Email.Decision = response.Decision;
+                                Email.isRead = true;
+                                response.ReceivedLeaveRequests = null;
+                                _dbContext.LeaveResponses.Add(response);
                                 _dbContext.SaveChanges();
+
+                                return Json(new { success = true, message = "Leave Sent Successfully." });
                             }
-                           
                         }
-                        sendLeaveEmail(fromDate, toDate, message, Email.From,decision, leaveBalance);
-                        Email.Decision = response.Decision;
-                        Email.isRead = true;
-                        response.ReceivedLeaveRequests = null;
-                        _dbContext.LeaveResponses.Add(response);
-                        _dbContext.SaveChanges();
-                        return Json(new { success = true, message = "Leave Sent Successfully." });
                     }
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return Json(new { success = false, message = "An error occurred while processing your request." });
-
             }
 
             return View(response);
@@ -463,11 +475,23 @@ namespace AMS.Controllers
         {
             try
             {
-                var employee = _dbContext.Users.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From&&u.isLabour==false);
-                var labour = _dbContext.Users.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From && u.isLabour==true);
+                var employee = _dbContext.Users.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From && u.isLabour == false);
+                var labour = _dbContext.Users.FirstOrDefault(u => u.Email == viewModel.ReceivedLeaveRequests.From && u.isLabour == true);
 
                 if (employee != null || labour != null)
                 {
+                    var fromDate = viewModel.LeaveResponse.FromDate;
+                    var toDate = viewModel.LeaveResponse.ToDate;
+
+                    // Check if there is already a leave request for the same date span
+                    bool leaveExists = _dbContext.LeaveResponses
+                        .Any(lr => lr.FromDate <= toDate && lr.ToDate >= fromDate && lr.ReceivedLeaveRequests.From == viewModel.ReceivedLeaveRequests.From);
+
+                    if (leaveExists)
+                    {
+                        return Json(new { success = false, message = "Leave for this date span already exists." });
+                    }
+
                     var receivedleaveRequests = new ReceivedLeaveRequests()
                     {
                         From = viewModel.ReceivedLeaveRequests.From,
@@ -496,7 +520,7 @@ namespace AMS.Controllers
                     int leaveDays = (viewModel.LeaveResponse.ToDate.Value - viewModel.LeaveResponse.FromDate.Value).Days;
                     if (viewModel.LeaveResponse.ToDate.Value == viewModel.LeaveResponse.FromDate.Value)
                     {
-                        leaveDays = 1; 
+                        leaveDays = 1;
                     }
                     if (employee != null)
                     {
@@ -518,9 +542,8 @@ namespace AMS.Controllers
             }
             catch
             {
-                return Json(new { success = false, message = "An error occured while processing your request. Please try again!" });
+                return Json(new { success = false, message = "An error occurred while processing your request. Please try again!" });
             }
-
         }
 
     }
